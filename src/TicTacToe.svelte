@@ -1,40 +1,64 @@
 <script>
-    let board = [
-        [' ', ' ', ' '],
-        [' ', ' ', ' '],
-        [' ', ' ', ' '],
-    ]
+    const gameName = "Tic Tac Toe";
 
+    const emptyBoard = [
+        [' ', ' ', ' '],
+        [' ', ' ', ' '],
+        [' ', ' ', ' '],
+    ];
+
+    let userFirst = false;  // true if user plays first, otherwise false
+
+    let board;
+    clearBoard();
+
+
+    function clearBoard() {
+        board = [...emptyBoard];
+    }
+
+    function markCell(rowIndex, cellIndex) {
+        let markChar = userFirst ? 'X' : 'O';
+        board[rowIndex][cellIndex] = markChar;
+    }
+
+    /*
     function testBoard() {
         console.log(board);
     }
 
     testBoard();
+    */
 </script>
 
 <style>
-    .row {
-        background-color: black;
+    table, tr, td {
+        border: 1px solid black;
+        border-collapse: collapse;
     }
 
-    .cell {
-        background-color: gray;
-        color: blue;
-        margin: 1px 5px;
+    td {
+        height: 3em;
+        width: 3em;
+        vertical-align: center;
     }
+
+    table.center {
+        margin-left: auto;
+        margin-right: auto;
+    }
+
 </style>
 
+<h1>{ gameName }</h1>
 
-
-
-<!--
-{#each board as row}
-    <p class="row">
-        {#each row as cell}            
-            <span class="cell">{@html cell === ' ' ? '&nbsp;' : cell }</span>
-        {/each}
-    </p>
-{/each}
-*/
--->
+<table class="center">
+    {#each board as row, rowIndex}
+        <tr>
+            {#each row as cell, cellIndex}
+                <td on:click={ markCell(rowIndex, cellIndex) }> { cell } </td>
+            {/each}
+        </tr>
+    {/each}
+</table>
 
