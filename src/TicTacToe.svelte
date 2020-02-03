@@ -4,6 +4,10 @@
     let language = 'en';
     // let language = 'ru';
 
+    let movesCount = 0;
+
+    let gameBegan = false;
+
     const emptyBoard = [
         [' ', ' ', ' '],
         [' ', ' ', ' '],
@@ -36,6 +40,12 @@
             en: 'The game is on!',
             ru: 'Игра началась!',
         },
+        'user_won':
+        {
+            en: "Congratulations, you've won!",
+            ru: "Поздравляю, вы победили!",
+        },
+
     
     };
 
@@ -50,20 +60,65 @@
     let userFirst = null;  // true if user plays first, otherwise false
 
     let board;
+    // board = clearBoard();
     clearBoard();
 
-    function clearBoard() {        
+    let markChar = ' ';
+
+    $: markChar = userFirst ? 'X' : 'O';
+
+    function restartGame() {        
         board = JSON.parse(JSON.stringify(emptyBoard));
         console.log("board =", board);
         userFirst = null;
+        movesCount = 0;
+        markChar = ' ';
+        // return board;
     }
 
     function markCell(rowIndex, cellIndex) {
-        console.log("rowIndex, cellIndex =", rowIndex, cellIndex);
-        let markChar = userFirst ? 'X' : 'O';
+        // console.log("rowIndex, cellIndex =", rowIndex, cellIndex);
+        console.log("userFirst =", userFirst);
+        if (userFirst === null) { 
+            alert("???");
+            return;
+        }
+
+        // let markChar = userFirst ? 'X' : 'O';
         if (board[rowIndex][cellIndex] === ' ') {
             board[rowIndex][cellIndex] = markChar;  
+            checkThree(rowIndex, cellIndex);
+            makeMove();
         }
+    }
+
+    function checkThree(rowIndex, cellIndex) {
+        /*
+        if (rowIndex === 1 && cellIndex === 1) {
+            // central cell
+            if (   (board[1][0] === board[1][1] && board[1][2] === board[1][1]) 
+                || (board[0][1] === board[1][1] && board[2][1] === board[1][1]) 
+                || (board[0][0] === board[1][1] && board[2][2] === board[1][1]) 
+                || (board[2][0] === board[1][1] && board[0][2] === board[1][1])
+                ) 
+                {
+                    // the user has won
+                    alert(uiStrings["user_won"][language]);
+                    return;
+                }
+        } else if (
+
+            )
+        }
+        */
+
+    }
+
+
+    function makeMove() {
+        
+
+        movesCount++;
     }
 
     /*
@@ -73,7 +128,9 @@
 
     testBoard();
     */
+
 </script>
+
 
 <style>
     table, tr, td {
@@ -94,7 +151,7 @@
         text-align: center;
     }
 
-    table.margin-after {
+    .margin-after {
         margin-bottom: 1em;
     }
 
@@ -113,9 +170,6 @@
         max-width: 30%;
     }
 
-    div-inline {
-        display: inline;
-    }
 
 </style>
 
@@ -136,7 +190,7 @@
 </table>
 
 {#if userFirst === null}
-    <fieldset>
+    <fieldset class='margin-after'>
         <label>Who plays first?</label>
         
         <div class="div-inline">
@@ -158,7 +212,7 @@
 {/if}
 
 <div class="center">
-    <button class="cool-button" on:click={clearBoard}>
+    <button class="cool-button" on:click={restartGame}>
         { uiStrings['start_new_game']['en'] }
     </button>
 
