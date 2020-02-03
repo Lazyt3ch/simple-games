@@ -59,24 +59,24 @@
 //    let userFirst = false;  // true if user plays first, otherwise false
     let userFirst = null;  // true if user plays first, otherwise false
 
-    let board;
+    let board = null;
     // board = clearBoard();
-    clearBoard();
+    restartGame();
 
-    let markChar = ' ';
-
-    $: markChar = userFirst ? 'X' : 'O';
+    $: markChar = gameBegan ? (userFirst ? 'X' : 'O') : ' ';
 
     function restartGame() {        
         board = JSON.parse(JSON.stringify(emptyBoard));
-        console.log("board =", board);
+        // console.log("board =", board);
         userFirst = null;
         movesCount = 0;
-        markChar = ' ';
+        gameBegan = true;
         // return board;
     }
+    
 
     function markCell(rowIndex, cellIndex) {
+        console.log("FUNCTION:  markCell");
         // console.log("rowIndex, cellIndex =", rowIndex, cellIndex);
         console.log("userFirst =", userFirst);
         if (userFirst === null) { 
