@@ -5,18 +5,20 @@
 </script>
 
 <main>
-	<h1>Hello {name}!</h1>
-
-	<TicTacToe></TicTacToe>
+	
 </main>
 
+<TicTacToe> </TicTacToe>
+
 <style>
+	/*
 	main {
 		text-align: center;
 		padding: 1em;
 		max-width: 240px;
 		margin: 0 auto;
 	}
+	*/
 
 	h1 {
 		color: #ff3e00;
