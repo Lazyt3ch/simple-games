@@ -14,11 +14,13 @@
 
     let highlighted = false;
 
+
     const emptyBoard = [
         [' ', ' ', ' '],
         [' ', ' ', ' '],
         [' ', ' ', ' '],
     ];
+
 
 
 //    let whoPlaysFirst = false;  // true if user plays first, otherwise false
@@ -31,7 +33,9 @@
     let markerChar;
 
     $: {
+        gameBegan = (whoPlaysFirst === null ? false : true);
         markerChar = gameBegan ? (whoPlaysFirst === 'user' ? 'X' : 'O') : ' ';
+        console.log("gameBegan, markerChar =", gameBegan, markerChar);
     }
 
     function restartGame() {        
@@ -47,10 +51,8 @@
 
     function markCell(rowIndex, cellIndex) {
         console.log("FUNCTION:  markCell");
-        // console.log("rowIndex, cellIndex =", rowIndex, cellIndex);
         console.log("whoPlaysFirst =", whoPlaysFirst);
         if (whoPlaysFirst === null) { 
-            // alert("???");
             highlighted = true;
             setTimeout(() => highlighted = false, 2000);            
             return;
@@ -59,6 +61,7 @@
         // let markerChar = whoPlaysFirst ? 'X' : 'O';
         if (board[rowIndex][cellIndex] === ' ') {
             console.log("Trying to mark the cell...")
+            console.log("markerChar =", markerChar);
             board[rowIndex][cellIndex] = markerChar;  
             checkThree(rowIndex, cellIndex);
             makeMove();
@@ -94,13 +97,6 @@
         movesCount++;
     }
 
-    /*
-    function testBoard() {
-        console.log(board);
-    }
-
-    testBoard();
-    */
 
 </script>
 
@@ -148,6 +144,13 @@
         color: blue;
     }
 
+    button:disabled {
+        /* background-color: lightgray;
+        color: gray; */
+        background-color: #cccccc;
+        color: #666666;        
+    }
+
 
 </style>
 
@@ -168,7 +171,7 @@
 </table>
 
 <div class="center margin-after">
-    <button class="cool-button" on:click={restartGame}>
+    <button class="cool-button" on:click={restartGame} disabled={whoPlaysFirst===null}>
         { uiStrings['start_new_game']['en'] }
     </button>
 
@@ -179,13 +182,14 @@
 
 {#if whoPlaysFirst !== null}
     <h2 class="center" transition:fade="{{delay: 200, duration: 500}}"> 
-        { uiStrings['game_on'][language] } 
+        <!-- { uiStrings['game_on'][language] } { uiStrings['make_your_move'][language] } -->
+        { uiStrings['make_your_move'][language] }
     </h2>
 {/if}
 
 {#if whoPlaysFirst === null}
 <!-- {#if !gameBegan} -->
-    <fieldset id='who-plays-first' transition:fade="{{delay: 200, duration: 500}}"
+    <fieldset id='who-plays-first' transition:fade="{{delay: 300, duration: 800}}"
         class="margin-after {highlighted? 'highlighted': ''}">
         <label> { uiStrings['who_plays_first'][language] } </label>
         
