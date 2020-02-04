@@ -8,12 +8,18 @@
     let language = 'en';
     // let language = 'ru';
 
-    let movesCount = 0;
+    let moveCount = 0;
 
     let gameBegan = false;
 
     let highlighted = false;
 
+
+    const emptyBoardNumeric = [
+        [0, 0, 0],
+        [0, 0, 0],
+        [0, 0, 0],
+    ];
 
     const emptyBoard = [
         [' ', ' ', ' '],
@@ -27,29 +33,43 @@
     let whoPlaysFirst = null;  // true if user plays first, otherwise false
 
     let board = null;
+    let boardNumeric = null;
     // board = clearBoard();
-    restartGame();
 
-    let markerChar;
+    let userChar, oppoChar;
+    let userNum, oppoNum;
+
+    let isWin = false;
+    let winnerThree = null;
 
     $: {
         gameBegan = (whoPlaysFirst === null ? false : true);
-        markerChar = gameBegan ? (whoPlaysFirst === 'user' ? 'X' : 'O') : ' ';
-        console.log("gameBegan, markerChar =", gameBegan, markerChar);
+        userChar = gameBegan ? (whoPlaysFirst === 'user' ? 'X' : 'O') : ' ';
+        userNum = gameBegan ? (whoPlaysFirst === 'user' ? 1 : -1) : 0;
+        oppoChar = gameBegan ? (whoPlaysFirst === 'opponent' ? 'X' : 'O') : ' ';
+        oppoNum = gameBegan ? (whoPlaysFirst === 'opponent' ? 1 : -1) : 0;
+        console.log("gameBegan, userChar =", gameBegan, userChar);
+    }
+
+    function random012() {
+        return Math.floor(Math.random() * Math.floor(3));
     }
 
     function restartGame() {        
         board = JSON.parse(JSON.stringify(emptyBoard));
+        boardNumeric = JSON.parse(JSON.stringify(emptyBoardNumeric));
         // console.log("board =", board);
         whoPlaysFirst = null;
-        movesCount = 0;
+        moveCount = 0;
         gameBegan = false;
+        isWin = false;
+        winnerThree = null;
+
         // return board;
-    }
-    
+    }  
     
 
-    function markCell(rowIndex, cellIndex) {
+    function markCell(rowIndex, colIndex) {
         console.log("FUNCTION:  markCell");
         console.log("whoPlaysFirst =", whoPlaysFirst);
         if (whoPlaysFirst === null) { 
@@ -58,44 +78,95 @@
             return;
         }
 
-        // let markerChar = whoPlaysFirst ? 'X' : 'O';
-        if (board[rowIndex][cellIndex] === ' ') {
+        // let userChar = whoPlaysFirst ? 'X' : 'O';
+        if (board[rowIndex][colIndex] === ' ') {
             console.log("Trying to mark the cell...")
-            console.log("markerChar =", markerChar);
-            board[rowIndex][cellIndex] = markerChar;  
-            checkThree(rowIndex, cellIndex);
-            makeMove();
+            console.log("userChar =", userChar);
+            board[rowIndex][colIndex] = userChar;  
+            boardNumeric[rowIndex][colIndex] = userNum;  
+
+            isWin = checkThree() || false;
+            console.log("isWin, winnerThree =", isWin, winnerThree);
+            if (isWin) {
+                alert(uiStrings['user_won'][language]);
+                whoPlaysFirst = null;
+                return;
+            }
+
+            moveCount++;
+            oppoMove();
+
+            if (moveCount === 9) {
+                alert(uiStrings['score_draw'][language]);
+            }
         }
     }
 
-    function checkThree(rowIndex, cellIndex) {
-        /*
-        if (rowIndex === 1 && cellIndex === 1) {
-            // central cell
-            if (   (board[1][0] === board[1][1] && board[1][2] === board[1][1]) 
-                || (board[0][1] === board[1][1] && board[2][1] === board[1][1]) 
-                || (board[0][0] === board[1][1] && board[2][2] === board[1][1]) 
-                || (board[2][0] === board[1][1] && board[0][2] === board[1][1])
-                ) 
-                {
-                    // the user has won
-                    alert(uiStrings["user_won"][language]);
+    function checkThree(rowIndex, colIndex) {
+        // Checking each row
+        for (let row = 0; row < 3; row++) {
+            let theSum = 0;
+            for (let col = 0; col < 3; col++) {
+                theSum += boardNumeric[row][col]
+            }
+            if (Math.abs(theSum) === 3) {
+                winnerThree = [[row, 0], [row, 1], [row, 2]];
+                // isWin = true
+                return true; // isWin         
+            }
+        }
+
+        // Checking each column 
+        for (let col = 0; col < 3; col++) {
+            let theSum = 0;
+            for (let row = 0; row < 3; row++) {
+                theSum += boardNumeric[row][col]
+            }
+            if (Math.abs(theSum) === 3) {
+                winnerThree = [[0, col], [1, col], [2, col]];
+                return true; // isWin           
+            }
+        }
+
+        // Checking diagonal one
+        if (Math.abs(boardNumeric[0][0] + boardNumeric[1][1] + boardNumeric[2][2]) === 3) {
+            winnerThree = [[0, 0], [1, 1], [2, 2]];
+            return true; // isWin
+        }
+
+        // Checking diagonal two
+        if (Math.abs(boardNumeric[0][2] + boardNumeric[1][1] + boardNumeric[2][0]) === 3) {
+            winnerThree = [[0, 2], [1, 1], [2, 0]];
+            return true; // isWin
+        }
+    }
+
+
+    function oppoMove() {
+        while (true) {
+            let rowIndex = random012();
+            let colIndex = random012();
+            if (boardNumeric[rowIndex][colIndex] === 0) {
+                boardNumeric[rowIndex][colIndex] = oppoNum;
+                board[rowIndex][colIndex] = oppoChar;
+                moveCount++;
+                checkThree();
+
+                isWin = checkThree(rowIndex, colIndex) || false;
+                console.log("isWin, winnerThree =", isWin, winnerThree);
+                if (isWin) {
+                    alert(uiStrings['opponent_won'][language]);
+                    whoPlaysFirst = null;
                     return;
                 }
-        } else if (
-
-            )
+                return;
+            }
         }
-        */
 
-    }
-
-
-    function makeMove() {
         
-
-        movesCount++;
     }
+
+    restartGame();
 
 
 </script>
@@ -157,6 +228,7 @@
 
 <h1 class="center">{ gameName }</h1>
 
+<!-- The Tic Tac Toe Table -->
 <table class="center margin-after">
     {#each board as row, rowIndex}
         <tr>

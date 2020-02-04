@@ -39,7 +39,12 @@ export const uiStrings = {
         en: "Congratulations, you've won!",
         ru: "Поздравляю, вы победили!",
     },
-
+    'score_draw':
+    {
+        en: "Nobody won this time.",
+        ru: "Вы сыграли вничью.",
+    },
+    
 
 
 };
