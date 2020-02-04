@@ -1,4 +1,8 @@
-<script>
+<script>    
+    import { fade } from 'svelte/transition';
+    
+    import { uiStrings } from './ui/TicTacToe.js';
+
     const gameName = "Tic Tac Toe";
 
     let language = 'en';
@@ -8,85 +12,54 @@
 
     let gameBegan = false;
 
+    let highlighted = false;
+
     const emptyBoard = [
         [' ', ' ', ' '],
         [' ', ' ', ' '],
         [' ', ' ', ' '],
     ];
 
-    const uiStrings = {
-        'start_new_game': 
-        {   
-            en: 'Start a new game',
-            ru: 'Начать новую игру',
-        },
-        'stop_game': 
-        {   
-            en: 'Stop the game',
-            ru: 'Остановить игру',
-        },
-        'user_begins':
-        {   
-            en: 'Me',
-            ru: 'Я',        
-        },
-        'opponent_begins':
-        {
-            en: 'My opponent',
-            ru: 'Противник',
-        },
-        'game_on':
-        {
-            en: 'The game is on!',
-            ru: 'Игра началась!',
-        },
-        'user_won':
-        {
-            en: "Congratulations, you've won!",
-            ru: "Поздравляю, вы победили!",
-        },
 
-    
-    };
-
-    /*
-    console.log("uiStrings =", uiStrings);
-    console.log('start_new_game =', uiStrings['start_new_game']);
-    console.log(uiStrings['start_new_game']['en']);
-    console.log(uiStrings['start_new_game']['ru']);
-    */
-
-//    let userFirst = false;  // true if user plays first, otherwise false
-    let userFirst = null;  // true if user plays first, otherwise false
+//    let whoPlaysFirst = false;  // true if user plays first, otherwise false
+    let whoPlaysFirst = null;  // true if user plays first, otherwise false
 
     let board = null;
     // board = clearBoard();
     restartGame();
 
-    $: markChar = gameBegan ? (userFirst ? 'X' : 'O') : ' ';
+    let markerChar;
+
+    $: {
+        markerChar = gameBegan ? (whoPlaysFirst === 'user' ? 'X' : 'O') : ' ';
+    }
 
     function restartGame() {        
         board = JSON.parse(JSON.stringify(emptyBoard));
         // console.log("board =", board);
-        userFirst = null;
+        whoPlaysFirst = null;
         movesCount = 0;
-        gameBegan = true;
+        gameBegan = false;
         // return board;
     }
+    
     
 
     function markCell(rowIndex, cellIndex) {
         console.log("FUNCTION:  markCell");
         // console.log("rowIndex, cellIndex =", rowIndex, cellIndex);
-        console.log("userFirst =", userFirst);
-        if (userFirst === null) { 
-            alert("???");
+        console.log("whoPlaysFirst =", whoPlaysFirst);
+        if (whoPlaysFirst === null) { 
+            // alert("???");
+            highlighted = true;
+            setTimeout(() => highlighted = false, 2000);            
             return;
         }
 
-        // let markChar = userFirst ? 'X' : 'O';
+        // let markerChar = whoPlaysFirst ? 'X' : 'O';
         if (board[rowIndex][cellIndex] === ' ') {
-            board[rowIndex][cellIndex] = markChar;  
+            console.log("Trying to mark the cell...")
+            board[rowIndex][cellIndex] = markerChar;  
             checkThree(rowIndex, cellIndex);
             makeMove();
         }
@@ -167,7 +140,12 @@
     fieldset {
         margin-left: auto;
         margin-right: auto;
-        max-width: 30%;
+        max-width: 40%;
+    }
+
+    .highlighted {
+        background: yellow;
+        color: blue;
     }
 
 
@@ -189,29 +167,7 @@
     {/each}
 </table>
 
-{#if userFirst === null}
-    <fieldset class='margin-after'>
-        <label>Who plays first?</label>
-        
-        <div class="div-inline">
-            <label for="user-begins">
-                <input type='radio' bind:group={userFirst} 
-                    id='user-begins' name="who-begins" value='user'>
-                { uiStrings['user_begins'][language] } 
-            </label>
-
-            <label for="opponent-begins">
-                <input type='radio' bind:group={userFirst} 
-                    id='opponent-begins' name="who-begins" value='opponent'>
-                { uiStrings['opponent_begins'][language] } 
-            </label>
-        </div>
-    </fieldset>
-{:else}
-    <h2 class="center"> { uiStrings['game_on'][language] } </h2>
-{/if}
-
-<div class="center">
+<div class="center margin-after">
     <button class="cool-button" on:click={restartGame}>
         { uiStrings['start_new_game']['en'] }
     </button>
@@ -220,3 +176,37 @@
         { uiStrings['stop_game']['en'] }
     </button>
 </div>
+
+{#if whoPlaysFirst !== null}
+    <h2 class="center" transition:fade="{{delay: 200, duration: 500}}"> 
+        { uiStrings['game_on'][language] } 
+    </h2>
+{/if}
+
+{#if whoPlaysFirst === null}
+<!-- {#if !gameBegan} -->
+    <fieldset id='who-plays-first' transition:fade="{{delay: 200, duration: 500}}"
+        class="margin-after {highlighted? 'highlighted': ''}">
+        <label> { uiStrings['who_plays_first'][language] } </label>
+        
+        <div class="div-inline">
+            <label for="user-begins">
+                <input type='radio' bind:group={whoPlaysFirst} 
+                    id='user-begins' name="who-begins" value='user'>
+                { uiStrings['user_begins'][language] } 
+            </label>
+
+            <label for="opponent-begins">
+                <input type='radio' bind:group={whoPlaysFirst} 
+                    id='opponent-begins' name="who-begins" value='opponent'>
+                { uiStrings['opponent_begins'][language] } 
+            </label>
+        </div>
+    </fieldset>
+{/if}
+
+
+
+
+
+

@@ -1,14 +1,16 @@
 <script>
 	import TicTacToe from './TicTacToe.svelte';
 
-	export let name;
+	export let name = "there";
 </script>
 
 <main>
-	
+	<p>Hello {name}</p>
+
+	<TicTacToe> </TicTacToe>
+
 </main>
 
-<TicTacToe> </TicTacToe>
 
 <style>
 	/*
