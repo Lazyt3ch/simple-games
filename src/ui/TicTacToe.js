@@ -1,9 +1,19 @@
 export const uiStrings = {
+    'start_game': 
+    {   
+        en: 'Start the game',
+        ru: 'Начать игру',
+    },
+    'restart_game': 
+    {   
+        en: 'Restart the game',
+        ru: 'Начать игру заново',
+    },        
     'start_new_game': 
     {   
         en: 'Start a new game',
         ru: 'Начать новую игру',
-    },
+    },    
     'stop_game': 
     {   
         en: 'Stop the game',

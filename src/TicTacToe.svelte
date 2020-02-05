@@ -5,8 +5,8 @@
 
     const gameName = "Tic Tac Toe";
 
-    let language = 'en';
-    // let language = 'ru';
+    // let language = 'en';
+    let language = 'ru';
 
     let moveCount = 0;
 
@@ -46,7 +46,7 @@
     let userNum, oppoNum;
 
     let isWin = false;
-    let winnerThree = null;
+    let winnerCells = null;
 
     $: {
         gameBegan = (whoPlaysFirst === null ? false : true);
@@ -64,9 +64,22 @@
         }
     }
 
-    function showAlert(message) {
-        alert(`Gotcha! ${message}`);
+    $: {
+        if (isWin) {
+            winnerCells = winnerCells;
+            console.log("isWin, winnerCells =", isWin, winnerCells);
+            // winnerCells = winnerCells;
+            // board = board;
+        }
     }
+
+    function isWinnerCell(rowIndex, colIndex) {
+        let result = winnerCells !== null 
+            && winnerCells.some(cell => (cell[0] === rowIndex && cell[1] === colIndex));
+        console.log("FUNCTION isWinnerCell:  row, col, result =", rowIndex, colIndex, result);
+        return result;
+    }
+
 
     function random012() {
         return Math.floor(Math.random() * Math.floor(3));
@@ -80,8 +93,11 @@
         // whoPlaysFirst = null;
         moveCount = 0;
         gameBegan = false;
+        winnerCells = null;
+
         isWin = false;
-        winnerThree = null;
+        board = board; // for reactivity
+        winnerCells = winnerCells; // for reactivity
 
         /*
         if (whoPlaysFirst !== null) {
@@ -118,20 +134,24 @@
             boardNumeric[rowIndex][colIndex] = userNum;  
 
             isWin = checkThree() || false;
-            console.log("isWin, winnerThree =", isWin, winnerThree);
+            console.log("isWin, winnerCells =", isWin, winnerCells);
             if (isWin) {                
                 // alert(uiStrings['user_won'][language]);
                 infoText = uiStrings['user_won'][language];
                 whoPlaysFirst = null;
+
+                board = board; // for reactivity
+                winnerCells = winnerCells; // for reactivity
                 return;
             }
 
             moveCount++;
 
-            setTimeout(oppoMove, 200);
+            setTimeout(oppoMove, 1000);
 
             if (moveCount === 9) {
-                alert(uiStrings['score_draw'][language]);
+                // alert(uiStrings['score_draw'][language]);
+                infoText = uiStrings['score_draw'][language];
             }
         }
     }
@@ -144,7 +164,7 @@
                 theSum += boardNumeric[row][col]
             }
             if (Math.abs(theSum) === 3) {
-                winnerThree = [[row, 0], [row, 1], [row, 2]];
+                winnerCells = [[row, 0], [row, 1], [row, 2]];
                 // isWin = true
                 return true; // isWin         
             }
@@ -157,20 +177,20 @@
                 theSum += boardNumeric[row][col]
             }
             if (Math.abs(theSum) === 3) {
-                winnerThree = [[0, col], [1, col], [2, col]];
+                winnerCells = [[0, col], [1, col], [2, col]];
                 return true; // isWin           
             }
         }
 
         // Checking diagonal one
         if (Math.abs(boardNumeric[0][0] + boardNumeric[1][1] + boardNumeric[2][2]) === 3) {
-            winnerThree = [[0, 0], [1, 1], [2, 2]];
+            winnerCells = [[0, 0], [1, 1], [2, 2]];
             return true; // isWin
         }
 
         // Checking diagonal two
         if (Math.abs(boardNumeric[0][2] + boardNumeric[1][1] + boardNumeric[2][0]) === 3) {
-            winnerThree = [[0, 2], [1, 1], [2, 0]];
+            winnerCells = [[0, 2], [1, 1], [2, 0]];
             return true; // isWin
         }
     }
@@ -179,7 +199,7 @@
     function oppoMove() {
         infoText = uiStrings["opponent_move"][language];
         while (true) {
-            setTimeout(function() {}, 500); // pause
+            setTimeout(function() {}, 4000); // pause
             let rowIndex = random012();
             let colIndex = random012();
             if (boardNumeric[rowIndex][colIndex] === 0) {
@@ -189,7 +209,7 @@
                 checkThree();
 
                 isWin = checkThree(rowIndex, colIndex) || false;
-                console.log("isWin, winnerThree =", isWin, winnerThree);
+                console.log("isWin, winnerCells =", isWin, winnerCells);
                 if (isWin) {
                     // alert(uiStrings['opponent_won'][language]);
                     infoText = uiStrings['opponent_won'][language];
@@ -221,6 +241,12 @@
         width: 2em;
         vertical-align: center;
         font-size: 3em;
+    }
+
+    .winner {
+        background-color: greenyellow;
+        color: blue;
+        font-weight: bolder;
     }
 
     .center {
@@ -269,10 +295,11 @@
 <table class="center margin-after">
     {#each board as row, rowIndex}
         <tr>
-            {#each row as cell, cellIndex}
-                <td on:click|preventDefault={
-                    () => markCell(rowIndex, cellIndex) 
-                    }> { cell } 
+            {#each row as cell, colIndex}
+                <td on:click={ () => markCell(rowIndex, colIndex) }
+                    class:winner={ () => isWinnerCell(rowIndex, colIndex) }
+                >
+                    { cell } 
                 </td>
             {/each}
         </tr>
@@ -280,24 +307,17 @@
 </table>
 
 <div class="center margin-after">
-    <button class="cool-button" on:click={restartGame} disabled={whoPlaysFirst===null}>
-        { uiStrings['start_new_game']['en'] }
+    <button class="cool-button" on:click={restartGame} disabled={whoPlaysFirst === null}>
+        { uiStrings['start_game'][language] }
     </button>
 
-    <button class="cool-button">
-        { uiStrings['stop_game']['en'] }
+    <button class="cool-button" on:click={restartGame} disabled={whoPlaysFirst === null}>
+        { uiStrings['restart_game'][language] }
     </button>
 </div>
 
-<!--
-{#if whoPlaysFirst !== null}
-    <h2 class="center" transition:fade="{{delay: 200, duration: 500}}"> 
-        { uiStrings['make_your_move'][language] }
-    </h2>
-{/if}
--->
-
 <h2 class="center"> 
+    <!-- Do not remove &nbsp; -->
     { infoText } &nbsp;
 </h2>
 
