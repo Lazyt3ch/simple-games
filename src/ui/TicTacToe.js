@@ -9,10 +9,15 @@ export const uiStrings = {
         en: 'Stop the game',
         ru: 'Остановить игру',
     },
+    'lets_play':
+    {
+        en: "Let's play!",
+        ru: 'Ну что, сыграем?',
+    },    
     'who_plays_first':
     {
-        en: "Let's play! Who makes the first move?",
-        ru: 'Давайте сыграем! Кто сделает первый ход?',
+        en: "Who makes the first move?",
+        ru: 'Кто сделает первый ход?',
     },
     'user_begins':
     {   
@@ -34,12 +39,21 @@ export const uiStrings = {
         en: 'Make your move!',
         ru: 'Делайте ход!',
     },    
+    'opponent_move':
+    {
+        en: "Wait for the opponent's move...",
+        ru: 'Подождите, пока противник сделает ход...',
+    },       
     'user_won':
     {
         en: "Congratulations, you've won!",
         ru: "Поздравляю, вы победили!",
     },
-    'score_draw':
+    'opponent_won':
+    {
+        en: "Your opponent won this time!",
+        ru: "На этот раз победил противник!",
+    },    'score_draw':
     {
         en: "Nobody won this time.",
         ru: "Вы сыграли вничью.",

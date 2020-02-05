@@ -14,6 +14,12 @@
 
     let highlighted = false;
 
+    let infoText = uiStrings["lets_play"][language];
+    // uiStrings['make_your_move'][language]
+    // <!-- { uiStrings['game_on'][language] } { uiStrings['make_your_move'][language] } -->
+
+    const X = "X", O = "O", E = " ";
+
 
     const emptyBoardNumeric = [
         [0, 0, 0],
@@ -22,9 +28,9 @@
     ];
 
     const emptyBoard = [
-        [' ', ' ', ' '],
-        [' ', ' ', ' '],
-        [' ', ' ', ' '],
+        [E, E, E],
+        [E, E, E],
+        [E, E, E],
     ];
 
 
@@ -44,26 +50,52 @@
 
     $: {
         gameBegan = (whoPlaysFirst === null ? false : true);
-        userChar = gameBegan ? (whoPlaysFirst === 'user' ? 'X' : 'O') : ' ';
+        userChar = gameBegan ? (whoPlaysFirst === 'user' ? X : O) : ' ';
         userNum = gameBegan ? (whoPlaysFirst === 'user' ? 1 : -1) : 0;
-        oppoChar = gameBegan ? (whoPlaysFirst === 'opponent' ? 'X' : 'O') : ' ';
+        oppoChar = gameBegan ? (whoPlaysFirst === 'opponent' ? X : O) : ' ';
         oppoNum = gameBegan ? (whoPlaysFirst === 'opponent' ? 1 : -1) : 0;
         console.log("gameBegan, userChar =", gameBegan, userChar);
+    }
+
+    $: {
+        if (whoPlaysFirst !== null) {
+            // showAlert(whoPlaysFirst);
+
+        }
+    }
+
+    function showAlert(message) {
+        alert(`Gotcha! ${message}`);
     }
 
     function random012() {
         return Math.floor(Math.random() * Math.floor(3));
     }
 
+
     function restartGame() {        
         board = JSON.parse(JSON.stringify(emptyBoard));
         boardNumeric = JSON.parse(JSON.stringify(emptyBoardNumeric));
         // console.log("board =", board);
-        whoPlaysFirst = null;
+        // whoPlaysFirst = null;
         moveCount = 0;
         gameBegan = false;
         isWin = false;
         winnerThree = null;
+
+        /*
+        if (whoPlaysFirst !== null) {
+            whoPlaysFirst = null;
+        }
+        */
+        
+        if (whoPlaysFirst === "opponent") {
+            oppoMove();
+        } else if (whoPlaysFirst === "user") {
+            infoText = uiStrings['make_your_move'][language];
+        } else {
+            infoText = uiStrings['lets_play'][language];
+        }
 
         // return board;
     }  
@@ -79,7 +111,7 @@
         }
 
         // let userChar = whoPlaysFirst ? 'X' : 'O';
-        if (board[rowIndex][colIndex] === ' ') {
+        if (board[rowIndex][colIndex] === E) {
             console.log("Trying to mark the cell...")
             console.log("userChar =", userChar);
             board[rowIndex][colIndex] = userChar;  
@@ -87,14 +119,16 @@
 
             isWin = checkThree() || false;
             console.log("isWin, winnerThree =", isWin, winnerThree);
-            if (isWin) {
-                alert(uiStrings['user_won'][language]);
+            if (isWin) {                
+                // alert(uiStrings['user_won'][language]);
+                infoText = uiStrings['user_won'][language];
                 whoPlaysFirst = null;
                 return;
             }
 
             moveCount++;
-            oppoMove();
+
+            setTimeout(oppoMove, 200);
 
             if (moveCount === 9) {
                 alert(uiStrings['score_draw'][language]);
@@ -143,7 +177,9 @@
 
 
     function oppoMove() {
+        infoText = uiStrings["opponent_move"][language];
         while (true) {
+            setTimeout(function() {}, 500); // pause
             let rowIndex = random012();
             let colIndex = random012();
             if (boardNumeric[rowIndex][colIndex] === 0) {
@@ -155,10 +191,12 @@
                 isWin = checkThree(rowIndex, colIndex) || false;
                 console.log("isWin, winnerThree =", isWin, winnerThree);
                 if (isWin) {
-                    alert(uiStrings['opponent_won'][language]);
+                    // alert(uiStrings['opponent_won'][language]);
+                    infoText = uiStrings['opponent_won'][language];
                     whoPlaysFirst = null;
                     return;
                 }
+                infoText = uiStrings["make_your_move"][language];
                 return;
             }
         }
@@ -201,7 +239,6 @@
         font-weight: bold;
         margin-left: 1em;
         margin-right: 1em;
-
     }
 
     fieldset {
@@ -252,12 +289,17 @@
     </button>
 </div>
 
+<!--
 {#if whoPlaysFirst !== null}
     <h2 class="center" transition:fade="{{delay: 200, duration: 500}}"> 
-        <!-- { uiStrings['game_on'][language] } { uiStrings['make_your_move'][language] } -->
         { uiStrings['make_your_move'][language] }
     </h2>
 {/if}
+-->
+
+<h2 class="center"> 
+    { infoText } &nbsp;
+</h2>
 
 {#if whoPlaysFirst === null}
 <!-- {#if !gameBegan} -->
