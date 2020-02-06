@@ -3,11 +3,8 @@
     
     import { languages, uiStrings } from './ui/TicTacToe.js';
 
-    // const gameName = "Tic Tac Toe";
-
-    // let language = 'en';
     let language = languages[0].short;
-    console.log("language, languages =", language, languages);
+    // console.log("language, languages =", language, languages);
 
     let moveCount = 0;
 
@@ -19,13 +16,15 @@
 
     let oppoTurn = false;
 
-    let infoText = uiStrings["lets_play"][language];
-    // uiStrings['make_your_move'][language]
-    // <!-- { uiStrings['game_on'][language] } { uiStrings['make_your_move'][language] } -->
+    let info = 'lets_play';
+    let infoText;
+
+    // let userMoveAllowed = false;
+
+    $: infoText = uiStrings[info][language];
 
     const X = "x", O = "o", E = " ";
     const XW = "X", OW = "O"; // winner cells
-
 
     const emptyBoardNumeric = [
         [0, 0, 0],
@@ -41,12 +40,10 @@
 
 
 
-//    let whoPlaysFirst = false;  // true if user plays first, otherwise false
     let whoPlaysFirst = null;  // true if user plays first, otherwise false
 
     let board = null;
     let boardNumeric = null;
-    // board = clearBoard();
 
     let userChar, oppoChar;
     let userNum, oppoNum;
@@ -60,33 +57,32 @@
         userNum = gameBegan ? (whoPlaysFirst === 'user' ? 1 : -1) : 0;
         oppoChar = gameBegan ? (whoPlaysFirst === 'opponent' ? X : O) : ' ';
         oppoNum = gameBegan ? (whoPlaysFirst === 'opponent' ? 1 : -1) : 0;
-        console.log("gameBegan, userChar =", gameBegan, userChar);
+        // console.log("gameBegan, userChar =", gameBegan, userChar);
     }
 
     $: { 
-        console.log(language);
+        language = language;
+        // infoText = infoText;
     }
 
     $: {
         if (whoPlaysFirst !== null) {
             // showAlert(whoPlaysFirst);
-
         }
     }
 
     $: {
         if (isWin) {
+            oppoTurn = true;
             winnerCells = winnerCells;
-            console.log("isWin, winnerCells =", isWin, winnerCells);
-            // winnerCells = winnerCells;
-            // board = board;
+            // console.log("isWin, winnerCells =", isWin, winnerCells);
         }
     }
 
     function isWinnerCell(rowIndex, colIndex) {
         let result = winnerCells !== null 
             && winnerCells.some(cell => (cell[0] === rowIndex && cell[1] === colIndex));
-        console.log("FUNCTION isWinnerCell:  row, col, result =", rowIndex, colIndex, result);
+        // console.log("FUNCTION isWinnerCell:  row, col, result =", rowIndex, colIndex, result);
         return result;
     }
 
@@ -102,6 +98,12 @@
 
         if (whoPlaysFirst === "opponent") {
             oppoTurn = true;
+            // infoText = uiStrings["opponent_move"][language];
+            info = "opponent_move";
+        } else {
+            // infoText = uiStrings["user_move"][language];
+            info = "user_move";
+            oppoTurn = false;
         }
 
         setTimeout(function() {
@@ -111,17 +113,20 @@
             gameBegan = false;
             winnerCells = null;
 
-            isWin = false;
             board = board; // for reactivity
             winnerCells = winnerCells; // for reactivity
 
             if (whoPlaysFirst === "opponent") {
                 oppoMove();
             } else if (whoPlaysFirst === "user") {
-                infoText = uiStrings['make_your_move'][language];
+                // infoText = uiStrings['user_move'][language];
+                info = 'user_move';
             } else {
-                infoText = uiStrings['lets_play'][language];
+                // infoText = uiStrings['lets_play'][language];
+                info = 'lets_play';
             }
+
+            isWin = false;
 
         }, 1500);
 
@@ -130,9 +135,11 @@
 
     function markCell(rowIndex, colIndex) {
         if (oppoTurn) return;
+        
+        if (moveCount === 0 && whoPlaysFirst === "opponent") return;
 
-        console.log("FUNCTION:  markCell");
-        console.log("whoPlaysFirst =", whoPlaysFirst);
+        // console.log("FUNCTION:  markCell");
+        // console.log("whoPlaysFirst =", whoPlaysFirst);
         if (whoPlaysFirst === null) { 
             highlighted = true;
             setTimeout(() => highlighted = false, 2000);            
@@ -141,16 +148,20 @@
 
         // let userChar = whoPlaysFirst ? 'X' : 'O';
         if (board[rowIndex][colIndex] === E) {
-            console.log("Trying to mark the cell...")
-            console.log("userChar =", userChar);
+            // console.log("Trying to mark the cell...")
+            // console.log("userChar =", userChar);
             board[rowIndex][colIndex] = userChar;  
             boardNumeric[rowIndex][colIndex] = userNum;  
+            // infoText = uiStrings["opponent_move"][language];
+            info = 'opponent_move';
 
             isWin = checkThree() || false;
-            console.log("isWin, winnerCells =", isWin, winnerCells);
+            // console.log("isWin, winnerCells =", isWin, winnerCells);
             if (isWin) {                
                 // alert(uiStrings['user_won'][language]);
-                infoText = uiStrings['user_won'][language];
+                // infoText = uiStrings['user_won'][language];
+                info = 'user_won';
+                oppoTurn = true;
                 whoPlaysFirst = null;
 
                 board = board; // for reactivity
@@ -166,7 +177,8 @@
 
             if (moveCount === 9) {
                 // alert(uiStrings['score_draw'][language]);
-                infoText = uiStrings['score_draw'][language];
+                // infoText = uiStrings['score_draw'][language];
+                info = 'score_draw';
             }
         }
     }
@@ -176,10 +188,24 @@
 
         let cellContent;
 
-        for (let i = 0; i < 3; i++) {
-            cellContent = board[(winnerCells[i][0])][(winnerCells[i][1])];
-            board[(winnerCells[i][0])][(winnerCells[i][1])] = cellContent.toUpperCase();
+        oppoTurn = true;
+        let repeats = 5;
+
+        for (let h = 0; h < repeats; h++) {
+            // console.log("h =", h);
+            (function(h) {
+                 setTimeout(function() {
+                    for (let i = 0; i < 3; i++) {
+                        cellContent = board[(winnerCells[i][0])][(winnerCells[i][1])];
+                        cellContent = (h % 2 === 0 ? cellContent.toUpperCase() : cellContent.toLowerCase());
+                        board[(winnerCells[i][0])][(winnerCells[i][1])] = cellContent;
+                    }
+                    if (h === repeats - 1) oppoTurn = false;
+                 }, h * 500);
+            }(h));
         }
+
+        
     }
 
     function checkThree(rowIndex, colIndex) {
@@ -241,7 +267,8 @@
     function oppoMove() {
         oppoTurn = true; // To prevent the user from making a move out of turn
 
-        infoText = uiStrings["opponent_move"][language];
+        // infoText = uiStrings["opponent_move"][language];
+        info = 'opponent_move';
         while (true) {
             setTimeout(function() {}, 4000); // pause
             let rowIndex = random012();
@@ -255,12 +282,15 @@
                 isWin = checkThree(rowIndex, colIndex) || false;
                 console.log("isWin, winnerCells =", isWin, winnerCells);
                 if (isWin) {
+                    oppoTurn = true;
                     // alert(uiStrings['opponent_won'][language]);
-                    infoText = uiStrings['opponent_won'][language];
+                    // infoText = uiStrings['opponent_won'][language];
+                    info = 'opponent_won';
                     whoPlaysFirst = null;
                     return;
                 }
-                infoText = uiStrings["make_your_move"][language];
+                // infoText = uiStrings["user_move"][language];
+                info = 'user_move';
                 oppoTurn = false;
                 return;
             }
@@ -311,6 +341,10 @@
         margin-bottom: 1em;
     }
 
+    .limited-width {
+        max-width: 20em;
+    }
+
     button.cool-button {
         background-color: aqua;
         color: blue;
@@ -331,13 +365,9 @@
     }
 
     button:disabled {
-        /* background-color: lightgray;
-        color: gray; */
         background-color: #cccccc;
         color: #666666;        
     }
-
-
 </style>
 
 
@@ -354,7 +384,7 @@
     </select>
 </label>
 
-<!-- The Tic Tac Toe Table -->
+<!-- Table -->
 <table class="center margin-after">
     {#each board as row, rowIndex}
         <tr>
@@ -369,6 +399,7 @@
     {/each}
 </table>
 
+<!-- Buttons -->
 <div class="center margin-after">
     <button class="cool-button" on:click={restartGame} disabled={whoPlaysFirst === null}>
         { uiStrings['start_game'][language] }
@@ -379,15 +410,19 @@
     </button>
 </div>
 
+<!-- Info Text -->
 <h2 class="center"> 
     <!-- Do not remove &nbsp; -->
     { infoText } &nbsp;
 </h2>
 
+<!-- Who Plays First radio buttons etc -->
 {#if whoPlaysFirst === null}
 <!-- {#if !gameBegan} -->
     <fieldset id='who-plays-first' transition:fade="{{delay: 300, duration: 800}}"
-        class="margin-after {highlighted? 'highlighted': ''}">
+        class="limited-width margin-after {highlighted? 'highlighted': ''}"
+        on:change={() => oppoTurn = true}    
+    >
         <label> { uiStrings['who_plays_first'][language] } </label>
         
         <div class="div-inline">
@@ -405,5 +440,3 @@
         </div>
     </fieldset>
 {/if}
-
-

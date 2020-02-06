@@ -54,7 +54,7 @@ export const uiStrings = {
         en: 'The game is on!',
         ru: 'Игра началась!',
     },
-    'make_your_move':
+    'user_move':
     {
         en: 'Make your move!',
         ru: 'Делайте ход!',
