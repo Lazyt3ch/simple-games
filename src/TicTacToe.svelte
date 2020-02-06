@@ -17,11 +17,14 @@
 
     let selectedLang;
 
+    let oppoTurn = false;
+
     let infoText = uiStrings["lets_play"][language];
     // uiStrings['make_your_move'][language]
     // <!-- { uiStrings['game_on'][language] } { uiStrings['make_your_move'][language] } -->
 
     const X = "x", O = "o", E = " ";
+    const XW = "X", OW = "O"; // winner cells
 
 
     const emptyBoardNumeric = [
@@ -97,6 +100,10 @@
         board = JSON.parse(JSON.stringify(emptyBoard));
         boardNumeric = JSON.parse(JSON.stringify(emptyBoardNumeric));
 
+        if (whoPlaysFirst === "opponent") {
+            oppoTurn = true;
+        }
+
         setTimeout(function() {
             // console.log("board =", board);
             // whoPlaysFirst = null;
@@ -122,6 +129,8 @@
     
 
     function markCell(rowIndex, colIndex) {
+        if (oppoTurn) return;
+
         console.log("FUNCTION:  markCell");
         console.log("whoPlaysFirst =", whoPlaysFirst);
         if (whoPlaysFirst === null) { 
@@ -153,6 +162,8 @@
 
             setTimeout(oppoMove, 1000);
 
+            // oppoMove();
+
             if (moveCount === 9) {
                 // alert(uiStrings['score_draw'][language]);
                 infoText = uiStrings['score_draw'][language];
@@ -164,6 +175,7 @@
         if (winnerCells === null || winnerCells.length !== 3) return;
 
         let cellContent;
+
         for (let i = 0; i < 3; i++) {
             cellContent = board[(winnerCells[i][0])][(winnerCells[i][1])];
             board[(winnerCells[i][0])][(winnerCells[i][1])] = cellContent.toUpperCase();
@@ -181,9 +193,8 @@
                 winnerCells = [[row, 0], [row, 1], [row, 2]];
                 
                 // Tentative
-                board[(winnerCells[0][0])][(winnerCells[0][0])] = "W";
-                board[(winnerCells[1][0])][(winnerCells[1][0])] = "W";
-                board[(winnerCells[2][0])][(winnerCells[2][0])] = "W";
+                markWinnerCells(winnerCells);
+
                 // isWin = true
                 return true; // isWin         
             }
@@ -199,9 +210,7 @@
                 winnerCells = [[0, col], [1, col], [2, col]];
 
                 // Tentative
-                board[(winnerCells[0][0])][(winnerCells[0][0])] = "W";
-                board[(winnerCells[1][0])][(winnerCells[1][0])] = "W";
-                board[(winnerCells[2][0])][(winnerCells[2][0])] = "W";
+                markWinnerCells(winnerCells);
 
                 return true; // isWin           
             }
@@ -212,9 +221,7 @@
             winnerCells = [[0, 0], [1, 1], [2, 2]];
 
             // Tentative
-            board[(winnerCells[0][0])][(winnerCells[0][0])] = "W";
-            board[(winnerCells[1][0])][(winnerCells[1][0])] = "W";
-            board[(winnerCells[2][0])][(winnerCells[2][0])] = "W";
+            markWinnerCells(winnerCells);
 
             return true; // isWin
         }
@@ -224,9 +231,7 @@
             winnerCells = [[0, 2], [1, 1], [2, 0]];
 
             // Tentative
-            board[(winnerCells[0][0])][(winnerCells[0][0])] = "W";
-            board[(winnerCells[1][0])][(winnerCells[1][0])] = "W";
-            board[(winnerCells[2][0])][(winnerCells[2][0])] = "W";
+            markWinnerCells(winnerCells);
 
             return true; // isWin
         }
@@ -234,6 +239,8 @@
 
 
     function oppoMove() {
+        oppoTurn = true; // To prevent the user from making a move out of turn
+
         infoText = uiStrings["opponent_move"][language];
         while (true) {
             setTimeout(function() {}, 4000); // pause
@@ -254,6 +261,7 @@
                     return;
                 }
                 infoText = uiStrings["make_your_move"][language];
+                oppoTurn = false;
                 return;
             }
         }
@@ -282,7 +290,7 @@
 
     .winner {
         font-weight: 200;
-        background-color: greenyellow;
+        background-color: yellow;
         color: blue;
         font-weight: bolder;
     }
@@ -352,7 +360,7 @@
         <tr>
             {#each row as cell, colIndex}
                 <td on:click={ () => markCell(rowIndex, colIndex) }
-                    class:winner={ () => isWinnerCell(rowIndex, colIndex) }
+                    class={cell === XW || cell === OW ? 'winner' : ''}
                 >
                     { cell } 
                 </td>
@@ -397,9 +405,5 @@
         </div>
     </fieldset>
 {/if}
-
-
-
-
 
 
