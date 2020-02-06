@@ -1,4 +1,14 @@
+export const languages = [
+    { short: "en", full: "English" },
+    { short: "ru", full: "русский" },
+]
+
 export const uiStrings = {
+    'game_name':
+    {
+        en: 'Tic Tac Toe',
+        ru: 'Крестики-нолики',
+    },
     'start_game': 
     {   
         en: 'Start the game',

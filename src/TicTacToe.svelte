@@ -1,12 +1,13 @@
 <script>    
     import { fade } from 'svelte/transition';
     
-    import { uiStrings } from './ui/TicTacToe.js';
+    import { languages, uiStrings } from './ui/TicTacToe.js';
 
-    const gameName = "Tic Tac Toe";
+    // const gameName = "Tic Tac Toe";
 
     // let language = 'en';
-    let language = 'ru';
+    let language = languages[0].short;
+    console.log("language, languages =", language, languages);
 
     let moveCount = 0;
 
@@ -14,11 +15,13 @@
 
     let highlighted = false;
 
+    let selectedLang;
+
     let infoText = uiStrings["lets_play"][language];
     // uiStrings['make_your_move'][language]
     // <!-- { uiStrings['game_on'][language] } { uiStrings['make_your_move'][language] } -->
 
-    const X = "X", O = "O", E = " ";
+    const X = "x", O = "o", E = " ";
 
 
     const emptyBoardNumeric = [
@@ -57,6 +60,10 @@
         console.log("gameBegan, userChar =", gameBegan, userChar);
     }
 
+    $: { 
+        console.log(language);
+    }
+
     $: {
         if (whoPlaysFirst !== null) {
             // showAlert(whoPlaysFirst);
@@ -89,31 +96,28 @@
     function restartGame() {        
         board = JSON.parse(JSON.stringify(emptyBoard));
         boardNumeric = JSON.parse(JSON.stringify(emptyBoardNumeric));
-        // console.log("board =", board);
-        // whoPlaysFirst = null;
-        moveCount = 0;
-        gameBegan = false;
-        winnerCells = null;
 
-        isWin = false;
-        board = board; // for reactivity
-        winnerCells = winnerCells; // for reactivity
+        setTimeout(function() {
+            // console.log("board =", board);
+            // whoPlaysFirst = null;
+            moveCount = 0;
+            gameBegan = false;
+            winnerCells = null;
 
-        /*
-        if (whoPlaysFirst !== null) {
-            whoPlaysFirst = null;
-        }
-        */
-        
-        if (whoPlaysFirst === "opponent") {
-            oppoMove();
-        } else if (whoPlaysFirst === "user") {
-            infoText = uiStrings['make_your_move'][language];
-        } else {
-            infoText = uiStrings['lets_play'][language];
-        }
+            isWin = false;
+            board = board; // for reactivity
+            winnerCells = winnerCells; // for reactivity
 
-        // return board;
+            if (whoPlaysFirst === "opponent") {
+                oppoMove();
+            } else if (whoPlaysFirst === "user") {
+                infoText = uiStrings['make_your_move'][language];
+            } else {
+                infoText = uiStrings['lets_play'][language];
+            }
+
+        }, 1500);
+
     }  
     
 
@@ -156,6 +160,16 @@
         }
     }
 
+    function markWinnerCells(winnerCells) {
+        if (winnerCells === null || winnerCells.length !== 3) return;
+
+        let cellContent;
+        for (let i = 0; i < 3; i++) {
+            cellContent = board[(winnerCells[i][0])][(winnerCells[i][1])];
+            board[(winnerCells[i][0])][(winnerCells[i][1])] = cellContent.toUpperCase();
+        }
+    }
+
     function checkThree(rowIndex, colIndex) {
         // Checking each row
         for (let row = 0; row < 3; row++) {
@@ -165,6 +179,11 @@
             }
             if (Math.abs(theSum) === 3) {
                 winnerCells = [[row, 0], [row, 1], [row, 2]];
+                
+                // Tentative
+                board[(winnerCells[0][0])][(winnerCells[0][0])] = "W";
+                board[(winnerCells[1][0])][(winnerCells[1][0])] = "W";
+                board[(winnerCells[2][0])][(winnerCells[2][0])] = "W";
                 // isWin = true
                 return true; // isWin         
             }
@@ -178,6 +197,12 @@
             }
             if (Math.abs(theSum) === 3) {
                 winnerCells = [[0, col], [1, col], [2, col]];
+
+                // Tentative
+                board[(winnerCells[0][0])][(winnerCells[0][0])] = "W";
+                board[(winnerCells[1][0])][(winnerCells[1][0])] = "W";
+                board[(winnerCells[2][0])][(winnerCells[2][0])] = "W";
+
                 return true; // isWin           
             }
         }
@@ -185,12 +210,24 @@
         // Checking diagonal one
         if (Math.abs(boardNumeric[0][0] + boardNumeric[1][1] + boardNumeric[2][2]) === 3) {
             winnerCells = [[0, 0], [1, 1], [2, 2]];
+
+            // Tentative
+            board[(winnerCells[0][0])][(winnerCells[0][0])] = "W";
+            board[(winnerCells[1][0])][(winnerCells[1][0])] = "W";
+            board[(winnerCells[2][0])][(winnerCells[2][0])] = "W";
+
             return true; // isWin
         }
 
         // Checking diagonal two
         if (Math.abs(boardNumeric[0][2] + boardNumeric[1][1] + boardNumeric[2][0]) === 3) {
             winnerCells = [[0, 2], [1, 1], [2, 0]];
+
+            // Tentative
+            board[(winnerCells[0][0])][(winnerCells[0][0])] = "W";
+            board[(winnerCells[1][0])][(winnerCells[1][0])] = "W";
+            board[(winnerCells[2][0])][(winnerCells[2][0])] = "W";
+
             return true; // isWin
         }
     }
@@ -244,6 +281,7 @@
     }
 
     .winner {
+        font-weight: 200;
         background-color: greenyellow;
         color: blue;
         font-weight: bolder;
@@ -253,6 +291,12 @@
         margin-left: auto;
         margin-right: auto;
         text-align: center;
+    }
+
+    .rightish {
+        margin-left: 70%;
+        margin-right: auto;
+        text-align: left;
     }
 
     .margin-after {
@@ -289,7 +333,18 @@
 </style>
 
 
-<h1 class="center">{ gameName }</h1>
+<h1 class="center">{ uiStrings['game_name'][language] }</h1>
+
+<label for="language-select" class="rightish">
+    &nbsp;
+    <select name="language" id="language-select" 
+        bind:value={selectedLang} on:change={() => language = selectedLang}
+    >
+        {#each languages as lang}
+            <option value="{lang.short}"> { lang.full } </option>
+        {/each}
+    </select>
+</label>
 
 <!-- The Tic Tac Toe Table -->
 <table class="center margin-after">
