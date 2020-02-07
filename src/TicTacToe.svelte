@@ -4,7 +4,6 @@
     import { languages, uiStrings } from './ui/TicTacToe.js';
 
     let language = languages[0].short;
-    // console.log("language, languages =", language, languages);
 
     let moveCount = 0;
 
@@ -23,41 +22,26 @@
 
     $: infoText = uiStrings[info][language];
 
-    // const X = "x", O = "o", E = " ";
-    // const XW = "X", OW = "O"; // winner cells
-
-    // const num2char = (num) => num === 0 ? ' ' : num === 1 ? 'x' : 'o';
-    // const num2char = (num) => num === 0 ? ' ' : num > 0 ? 'x' : 'o';
-    
+  
     // &#x25CB;  // white circle in Unicode // use instead of 'o'
     // &times;  //                          // use instead of 'x'
     // &#x20DD;  // U+25EF = large circle in Unicode // use instead of 'o'
-
     // &#x274C;  // U+274C = cross in Unicode // use instead of 'x'
+
     // &#x2573;  // BOX DRAWINGS LIGHT DIAGONAL CROSS in Unicode // use instead of 'x'
     // &#x25EF;  // U+25EF = large circle in Unicode // use instead of 'o'
     const num2char = (num) => num === 0 ? ' ' : num > 0 ? '&#x2573;' : '&#x25EF;';
 
-    const emptyBoardNumeric = [
-        [0, 0, 0],
-        [0, 0, 0],
-        [0, 0, 0],
-    ];
-
-    /*
     const emptyBoard = [
-        [E, E, E],
-        [E, E, E],
-        [E, E, E],
+        [0, 0, 0],
+        [0, 0, 0],
+        [0, 0, 0],
     ];
-    */
 
     let whoPlaysFirst = null;  // true if user plays first, otherwise false
 
-    // let board = null;
-    let boardNumeric = null;
+    let board = null;
 
-    // let userChar, oppoChar;
     let userNum, oppoNum;
 
     let isWin = false;
@@ -65,11 +49,8 @@
 
     $: {
         gameBegan = (whoPlaysFirst === null ? false : true);
-        // userChar = gameBegan ? (whoPlaysFirst === 'user' ? X : O) : ' ';
         userNum = gameBegan ? (whoPlaysFirst === 'user' ? 1 : -1) : 0;
-        // oppoChar = gameBegan ? (whoPlaysFirst === 'opponent' ? X : O) : ' ';
         oppoNum = gameBegan ? (whoPlaysFirst === 'opponent' ? 1 : -1) : 0;
-        // console.log("gameBegan, userChar =", gameBegan, userChar);
     }
 
     $: {
@@ -80,7 +61,6 @@
 
     $: { 
         language = language;
-        // infoText = infoText;
     }
 
     $: {
@@ -100,7 +80,6 @@
     function isWinnerCell(rowIndex, colIndex) {
         let result = winnerCells !== null 
             && winnerCells.some(cell => (cell[0] === rowIndex && cell[1] === colIndex));
-        // console.log("FUNCTION isWinnerCell:  row, col, result =", rowIndex, colIndex, result);
         return result;
     }
 
@@ -111,35 +90,27 @@
 
 
     function restartGame() {        
-        // board = JSON.parse(JSON.stringify(emptyBoard));
-        boardNumeric = JSON.parse(JSON.stringify(emptyBoardNumeric));
+        board = JSON.parse(JSON.stringify(emptyBoard));
 
         if (whoPlaysFirst === "opponent") {
             oppoTurn = true;
-            // infoText = uiStrings["opponent_move"][language];
             info = "opponent_move";
         } else {
-            // infoText = uiStrings["user_move"][language];
             info = "user_move";
             oppoTurn = false;
         }
         
-        // console.log("board =", board);
-        // whoPlaysFirst = null;
         moveCount = 0;
         gameBegan = false;
         winnerCells = null;
 
-        // board = board; // for reactivity
-        winnerCells = winnerCells; // for reactivity
+        // winnerCells = winnerCells; // for reactivity
 
         if (whoPlaysFirst === "opponent") {
             oppoMove();
         } else if (whoPlaysFirst === "user") {
-            // infoText = uiStrings['user_move'][language];
             info = 'user_move';
         } else {
-            // infoText = uiStrings['lets_play'][language];
             info = 'lets_play';
         }
 
@@ -159,39 +130,24 @@
             return;
         }
 
-        // let userChar = whoPlaysFirst ? 'X' : 'O';
-        if (boardNumeric[rowIndex][colIndex] === 0) {
-            // console.log("Trying to mark the cell...")
-            // console.log("userChar =", userChar);
-            // board[rowIndex][colIndex] = userChar;  
-            boardNumeric[rowIndex][colIndex] = userNum;  
-            // infoText = uiStrings["opponent_move"][language];
+        if (board[rowIndex][colIndex] === 0) {
+            board[rowIndex][colIndex] = userNum;  
             moveCount++;   
             console.log("moveCount =", moveCount);
             oppoTurn = moveCount < 9 ? true : false;
             info = 'opponent_move';
 
             isWin = checkThree(3) || false;
-            // console.log("isWin, winnerCells =", isWin, winnerCells);
             if (isWin) {                
-                // alert(uiStrings['user_won'][language]);
-                // infoText = uiStrings['user_won'][language];
                 info = 'user_won';
                 oppoTurn = true;
                 whoPlaysFirst = null;
 
-                // board = board; // for reactivity
-                winnerCells = winnerCells; // for reactivity
+                // winnerCells = winnerCells; // for reactivity
                 return;
             }
 
-            // moveCount++;            
-
-            // oppoMove();
-
             if (moveCount === 9) {
-                // alert(uiStrings['score_draw'][language]);
-                // infoText = uiStrings['score_draw'][language];
                 info = 'score_draw';
                 whoPlaysFirst = null;
             } else {
@@ -203,7 +159,6 @@
     function markWinnerCells(winnerCells) {
         if (winnerCells === null || winnerCells.length !== 3) return;
 
-        // let char;
         let num;
 
         oppoTurn = true;
@@ -214,12 +169,9 @@
             (function(h) {
                  setTimeout(function() {
                     for (let i = 0; i < 3; i++){
-                        // char = board[(winnerCells[i][0])][(winnerCells[i][1])];
-                        // char = (h % 2 === 0 ? char.toUpperCase() : char.toLowerCase());
-                        num = boardNumeric[(winnerCells[i][0])][(winnerCells[i][1])];
+                        num = board[(winnerCells[i][0])][(winnerCells[i][1])];
                         num = (h % 2 === 0 ? num * 2 : num / 2);
-                        // board[(winnerCells[i][0])][(winnerCells[i][1])] = char;
-                        boardNumeric[(winnerCells[i][0])][(winnerCells[i][1])] = num;
+                        board[(winnerCells[i][0])][(winnerCells[i][1])] = num;
                     }
                     // if (h === repeats - 1) oppoTurn = false;
                  }, h * 500);
@@ -227,20 +179,65 @@
         }        
     }
 
-    function checkThree(either2or3) {
+    function checkCells() {
+        let threeNumbers = [0, 0, 0];
 
         // Checking each row
         for (let row = 0; row < 3; row++) {
-            let theSum = 0;
+            threeNumbers = [board[row][0], board[row][1], board[row][2]]
+            checkNumbers()
+        }
+
+
+    }
+
+    function checkNumbers() {
+
+        
+    }
+
+
+
+    function checkThreeNumbers(either2or3) {
+
+
+    }
+
+
+
+    function checkThree(either2or3) {
+        let threeNumbers;
+        let minNum = 0;
+        let maxNum = 0;
+        let theSum;
+        let absSum;
+        let val;
+
+        // Checking each row
+        for (let row = 0; row < 3; row++) {
+            theSum = 0; 
+            minNum = 0;
+            maxNum = 0;
+            threeNumbers = [0, 0, 0];
             for (let col = 0; col < 3; col++) {
-                theSum += boardNumeric[row][col];
+                // threeNumbers[col] = board[row][col];
+                val = board[row][col];
+                theSum += val;               
+                minNum = Math.min(val, 0);
+                maxNum = Math.max(val, 0);
             }
 
-            if (Math.abs(theSum) === either2or3) {
+            absSum = Math.abs(theSum);
+
+            if (absSum === either2or3 && (either2or3 === 2 || either2or3 === 3)) {
                 winnerCells = [[row, 0], [row, 1], [row, 2]];
                 if (either2or3 === 3) {
                     markWinnerCells(winnerCells);
                 }
+                return true;
+            } else if (minNum === maxNum && theSum === oppoNum && either2or3 === 1) {
+                // Opportunity found
+                winnerCells = [[row, 0], [row, 1], [row, 2]]; 
                 return true;
             }
         }
@@ -249,7 +246,7 @@
         for (let col = 0; col < 3; col++) {
             let theSum = 0;
             for (let row = 0; row < 3; row++) {
-                theSum += boardNumeric[row][col]
+                theSum += board[row][col]
             }
             if (Math.abs(theSum) === either2or3) {
                 winnerCells = [[0, col], [1, col], [2, col]];
@@ -261,7 +258,7 @@
         }
 
         // Checking diagonal one
-        if (Math.abs(boardNumeric[0][0] + boardNumeric[1][1] + boardNumeric[2][2]) === either2or3) {
+        if (Math.abs(board[0][0] + board[1][1] + board[2][2]) === either2or3) {
             winnerCells = [[0, 0], [1, 1], [2, 2]];
             if (either2or3 === 3) {
                 markWinnerCells(winnerCells);
@@ -271,7 +268,7 @@
         }
 
         // Checking diagonal two
-        if (Math.abs(boardNumeric[0][2] + boardNumeric[1][1] + boardNumeric[2][0]) === either2or3) {
+        if (Math.abs(board[0][2] + board[1][1] + board[2][0]) === either2or3) {
             winnerCells = [[0, 2], [1, 1], [2, 0]];
             if (either2or3 === 3) {
                 markWinnerCells(winnerCells);
@@ -306,8 +303,7 @@
                     colIndex = 2;
                 }
 
-                boardNumeric[rowIndex][colIndex] = oppoNum;
-                // board[rowIndex][colIndex] = oppoChar;
+                board[rowIndex][colIndex] = oppoNum;
 
                 moveCount++;
                 console.log("moveCount =", moveCount);
@@ -322,18 +318,15 @@
                     if (winnerCells !== null && winnerCells.length === 3) {
                         let oppoCharCount = 0;
                         for (let i = 0; i < 3; i++) {
-                            // if (board[(winnerCells[i][0])][(winnerCells[i][1])] === E) {
-                            if (boardNumeric[(winnerCells[i][0])][(winnerCells[i][1])] === 0) {
+                            if (board[(winnerCells[i][0])][(winnerCells[i][1])] === 0) {
                                 // Empty cell found
-                                // board[(winnerCells[i][0])][(winnerCells[i][1])] = oppoChar;
-                                boardNumeric[(winnerCells[i][0])][(winnerCells[i][1])] = oppoNum;
+                                board[(winnerCells[i][0])][(winnerCells[i][1])] = oppoNum;
 
                                 moveCount++;
                                 if (moveCount < 9) info = 'user_move';
                             } 
                             
-                            // if (board[(winnerCells[i][0])][(winnerCells[i][1])] === oppoChar) {
-                            if (boardNumeric[(winnerCells[i][0])][(winnerCells[i][1])] === oppoNum) {
+                            if (board[(winnerCells[i][0])][(winnerCells[i][1])] === oppoNum) {
                                 oppoCharCount++;
                             }
                         }
@@ -358,10 +351,8 @@
                 rowIndex = randomInt(3);
                 colIndex = randomInt(3);
                 console.log("rowIndex, colIndex =", rowIndex, colIndex);
-                // if (board[rowIndex][colIndex] === E) {
-                if (boardNumeric[rowIndex][colIndex] === 0) {
-                    // board[rowIndex][colIndex] = oppoChar;
-                    boardNumeric[rowIndex][colIndex] = oppoNum;
+                if (board[rowIndex][colIndex] === 0) {
+                    board[rowIndex][colIndex] = oppoNum;
                     moveCount++;
                     console.log("moveCount =", moveCount);
                     // isWin = checkThree(3);
@@ -370,13 +361,11 @@
                     // console.log("isWin, winnerCells =", isWin, winnerCells);
                     if (isWin) {
                         oppoTurn = true;
-                        // alert(uiStrings['opponent_won'][language]);
-                        // infoText = uiStrings['opponent_won'][language];
                         info = 'opponent_won';
                         whoPlaysFirst = null;
                         return;
                     }
-                    // infoText = uiStrings["user_move"][language];
+
                     if (moveCount < 9) info = 'user_move';
                     oppoTurn = false;
                     return;
@@ -495,7 +484,7 @@
 <table class="center margin-after">
     <!-- {#each board as row, rowIndex} -->
     <!-- {cell < 0 ? 'fat-char' : ''}" -->
-    {#each boardNumeric as row, rowIndex}
+    {#each board as row, rowIndex}
         <tr>
             {#each row as cell, colIndex}
                 <td on:click={ () => markCell(rowIndex, colIndex) }
