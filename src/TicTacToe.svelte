@@ -23,8 +23,20 @@
 
     $: infoText = uiStrings[info][language];
 
-    const X = "x", O = "o", E = " ";
-    const XW = "X", OW = "O"; // winner cells
+    // const X = "x", O = "o", E = " ";
+    // const XW = "X", OW = "O"; // winner cells
+
+    // const num2char = (num) => num === 0 ? ' ' : num === 1 ? 'x' : 'o';
+    // const num2char = (num) => num === 0 ? ' ' : num > 0 ? 'x' : 'o';
+    
+    // &#x25CB;  // white circle in Unicode // use instead of 'o'
+    // &times;  //                          // use instead of 'x'
+    // &#x20DD;  // U+25EF = large circle in Unicode // use instead of 'o'
+
+    // &#x274C;  // U+274C = cross in Unicode // use instead of 'x'
+    // &#x2573;  // BOX DRAWINGS LIGHT DIAGONAL CROSS in Unicode // use instead of 'x'
+    // &#x25EF;  // U+25EF = large circle in Unicode // use instead of 'o'
+    const num2char = (num) => num === 0 ? ' ' : num > 0 ? '&#x2573;' : '&#x25EF;';
 
     const emptyBoardNumeric = [
         [0, 0, 0],
@@ -32,18 +44,20 @@
         [0, 0, 0],
     ];
 
+    /*
     const emptyBoard = [
         [E, E, E],
         [E, E, E],
         [E, E, E],
     ];
+    */
 
     let whoPlaysFirst = null;  // true if user plays first, otherwise false
 
-    let board = null;
+    // let board = null;
     let boardNumeric = null;
 
-    let userChar, oppoChar;
+    // let userChar, oppoChar;
     let userNum, oppoNum;
 
     let isWin = false;
@@ -51,9 +65,9 @@
 
     $: {
         gameBegan = (whoPlaysFirst === null ? false : true);
-        userChar = gameBegan ? (whoPlaysFirst === 'user' ? X : O) : ' ';
+        // userChar = gameBegan ? (whoPlaysFirst === 'user' ? X : O) : ' ';
         userNum = gameBegan ? (whoPlaysFirst === 'user' ? 1 : -1) : 0;
-        oppoChar = gameBegan ? (whoPlaysFirst === 'opponent' ? X : O) : ' ';
+        // oppoChar = gameBegan ? (whoPlaysFirst === 'opponent' ? X : O) : ' ';
         oppoNum = gameBegan ? (whoPlaysFirst === 'opponent' ? 1 : -1) : 0;
         // console.log("gameBegan, userChar =", gameBegan, userChar);
     }
@@ -97,7 +111,7 @@
 
 
     function restartGame() {        
-        board = JSON.parse(JSON.stringify(emptyBoard));
+        // board = JSON.parse(JSON.stringify(emptyBoard));
         boardNumeric = JSON.parse(JSON.stringify(emptyBoardNumeric));
 
         if (whoPlaysFirst === "opponent") {
@@ -116,7 +130,7 @@
         gameBegan = false;
         winnerCells = null;
 
-        board = board; // for reactivity
+        // board = board; // for reactivity
         winnerCells = winnerCells; // for reactivity
 
         if (whoPlaysFirst === "opponent") {
@@ -146,10 +160,10 @@
         }
 
         // let userChar = whoPlaysFirst ? 'X' : 'O';
-        if (board[rowIndex][colIndex] === E) {
+        if (boardNumeric[rowIndex][colIndex] === 0) {
             // console.log("Trying to mark the cell...")
             // console.log("userChar =", userChar);
-            board[rowIndex][colIndex] = userChar;  
+            // board[rowIndex][colIndex] = userChar;  
             boardNumeric[rowIndex][colIndex] = userNum;  
             // infoText = uiStrings["opponent_move"][language];
             moveCount++;   
@@ -166,7 +180,7 @@
                 oppoTurn = true;
                 whoPlaysFirst = null;
 
-                board = board; // for reactivity
+                // board = board; // for reactivity
                 winnerCells = winnerCells; // for reactivity
                 return;
             }
@@ -189,7 +203,8 @@
     function markWinnerCells(winnerCells) {
         if (winnerCells === null || winnerCells.length !== 3) return;
 
-        let char;
+        // let char;
+        let num;
 
         oppoTurn = true;
         let repeats = 5;
@@ -199,11 +214,14 @@
             (function(h) {
                  setTimeout(function() {
                     for (let i = 0; i < 3; i++){
-                        char = board[(winnerCells[i][0])][(winnerCells[i][1])];
-                        char = (h % 2 === 0 ? char.toUpperCase() : char.toLowerCase());
-                        board[(winnerCells[i][0])][(winnerCells[i][1])] = char;
+                        // char = board[(winnerCells[i][0])][(winnerCells[i][1])];
+                        // char = (h % 2 === 0 ? char.toUpperCase() : char.toLowerCase());
+                        num = boardNumeric[(winnerCells[i][0])][(winnerCells[i][1])];
+                        num = (h % 2 === 0 ? num * 2 : num / 2);
+                        // board[(winnerCells[i][0])][(winnerCells[i][1])] = char;
+                        boardNumeric[(winnerCells[i][0])][(winnerCells[i][1])] = num;
                     }
-                    if (h === repeats - 1) oppoTurn = false;
+                    // if (h === repeats - 1) oppoTurn = false;
                  }, h * 500);
             }(h));
         }        
@@ -289,7 +307,7 @@
                 }
 
                 boardNumeric[rowIndex][colIndex] = oppoNum;
-                board[rowIndex][colIndex] = oppoChar;
+                // board[rowIndex][colIndex] = oppoChar;
 
                 moveCount++;
                 console.log("moveCount =", moveCount);
@@ -304,16 +322,18 @@
                     if (winnerCells !== null && winnerCells.length === 3) {
                         let oppoCharCount = 0;
                         for (let i = 0; i < 3; i++) {
-                            if (board[(winnerCells[i][0])][(winnerCells[i][1])] === E) {
+                            // if (board[(winnerCells[i][0])][(winnerCells[i][1])] === E) {
+                            if (boardNumeric[(winnerCells[i][0])][(winnerCells[i][1])] === 0) {
                                 // Empty cell found
-                                board[(winnerCells[i][0])][(winnerCells[i][1])] = oppoChar;
+                                // board[(winnerCells[i][0])][(winnerCells[i][1])] = oppoChar;
                                 boardNumeric[(winnerCells[i][0])][(winnerCells[i][1])] = oppoNum;
 
                                 moveCount++;
                                 if (moveCount < 9) info = 'user_move';
                             } 
                             
-                            if (board[(winnerCells[i][0])][(winnerCells[i][1])] === oppoChar) {
+                            // if (board[(winnerCells[i][0])][(winnerCells[i][1])] === oppoChar) {
+                            if (boardNumeric[(winnerCells[i][0])][(winnerCells[i][1])] === oppoNum) {
                                 oppoCharCount++;
                             }
                         }
@@ -324,6 +344,7 @@
                             isWin = true;
                             oppoTurn = true;
                             info = "opponent_won";
+                            whoPlaysFirst = null;
                             markWinnerCells(winnerCells);
                         }
                         return;
@@ -337,8 +358,9 @@
                 rowIndex = randomInt(3);
                 colIndex = randomInt(3);
                 console.log("rowIndex, colIndex =", rowIndex, colIndex);
-                if (board[rowIndex][colIndex] === E) {
-                    board[rowIndex][colIndex] = oppoChar;
+                // if (board[rowIndex][colIndex] === E) {
+                if (boardNumeric[rowIndex][colIndex] === 0) {
+                    // board[rowIndex][colIndex] = oppoChar;
                     boardNumeric[rowIndex][colIndex] = oppoNum;
                     moveCount++;
                     console.log("moveCount =", moveCount);
@@ -373,18 +395,32 @@
 <style>
     table, tr, td {
         border: 1px solid black;
-        border-collapse: collapse;
+        border-collapse: collapse;        
+        font-family: Arial, Helvetica, sans-serif;
     }
+
+    table {
+        margin-top: 1em;
+        background-color: aquamarine;
+    }
+
+    /*
+    .fat-char {
+        font-weight: bolder;
+    }
+    */
 
     td {
         height: 2em;
         width: 2em;
         vertical-align: center;
         font-size: 3em;
+        font-weight: bolder;
     }
 
     .winner {
         font-weight: 200;
+        /* font-size: 2em; */
         background-color: yellow;
         color: blue;
         font-weight: bolder;
@@ -454,14 +490,20 @@
 </label>
 
 <!-- Table -->
+            <!-- class={cell === XW || cell === OW ? 'winner' : ''} -->
+
 <table class="center margin-after">
-    {#each board as row, rowIndex}
+    <!-- {#each board as row, rowIndex} -->
+    <!-- {cell < 0 ? 'fat-char' : ''}" -->
+    {#each boardNumeric as row, rowIndex}
         <tr>
             {#each row as cell, colIndex}
                 <td on:click={ () => markCell(rowIndex, colIndex) }
-                    class={cell === XW || cell === OW ? 'winner' : ''}
+                    class="{cell === 2 || cell === -2 ? 'winner' : ''}"
+                            
                 >
-                    { cell } 
+                    <!-- { cell } -->
+                    { @html num2char(cell) }
                 </td>
             {/each}
         </tr>
