@@ -80,6 +80,7 @@
         }
     }
 
+    /*
     function countMoves() {
         let emptyCells = 0;
 
@@ -91,40 +92,117 @@
 
         return 9 - emptyCells;
     }
+    */
 
-    function isGoodMark(r, c) { // rowIndex, colIndex
+    function isMustHaveSpot(r, c, num) { // rowIndex, colIndex, and number (userNum or oppoNum)
+        // midside cell on top or bottom (r !== 1)
+        if (c === 1) { 
+            if (board[r][0] === board[r][2] && board[r][0] === num) { // row
+                console.log("midside cell on top or bottom");
+                if (num === oppoNum) {
+                    winnerCells = [[r, 0], [r, 1], [r, 2]];
+                }
+                return true;                                                           
+            } 
+
+            if (board[2-r][1] === board[1][1] && board[2-r][1] === num) { // center col
+                console.log("midside cell on top or bottom");
+                if (num === oppoNum) {
+                    winnerCells = [[0, 1], [1, 1], [2, 1]];
+                }
+                return true;                                                          
+            } 
+        }  
+
+        // midside cell on left side or right side (c !== 1)
+        if (r === 1) {
+            if (board[0][c] === board[2][c] && board[0][c] === num) { // col
+                console.log("midside cell on left side or right side");
+                if (num === oppoNum) {
+                    winnerCells = [[0, c], [1, c], [2, c]];
+                }
+                return true;                                        
+            } 
+
+            if (board[1][2-c] === board[1][1] && board[1][2-c] === num) { // center row
+                console.log("midside cell on left side or right side");
+                if (num === oppoNum) {
+                    winnerCells = [[1, 0], [1, 1], [1, 2]];
+                }
+                return true;                                                          
+            } 
+        }
+
+        // corner cell
+        if (r !== 1 && c !== 1) {
+            if (board[1][c] === board[2-r][c] && board[1][c] === num) { // column
+                console.log("corner cell - column - isMustHaveSpot");
+                if (num === oppoNum) {
+                    winnerCells = [[0, c], [1, c], [2, c]];
+                }
+                return true;                                                          
+            }   
+
+            if (board[r][1] === board[r][2-c] && board[r][1] === num) { // row
+                console.log("corner cell - row - isMustHaveSpot");
+                if (num === oppoNum) {
+                    winnerCells = [[r, 0], [r, 1], [r, 2]];
+                }
+                return true;                                                          
+            }   
+
+            if (board[1][1] === board[2-r][2-c] && board[1][1] !== num) { // diagonals
+                console.log("corner cell - diagonal - isMustHaveSpot");
+                if (num === oppoNum) {
+                    winnerCells = [[r, c], [1, 1], [2 - r, 2 - c]];
+                    console.log("winnerCells =", winnerCells);
+                }
+                return true;                                                          
+            }   
+        } 
+
+        return false;
+    }
+
+    function isGoodSpot(r, c) { // rowIndex, colIndex
         // midside cell on top or bottom (r !== 1)
         if (c === 1  
-            && (   (board[r][0] === board[r][2] && board[r][0] !== 0) // row
-                || (board[2-r][1] === board[1][1] && board[2-r][1] !== 0) // center col
-            )
-            ) {
+            && ((   (board[r][0] === oppoNum && board[r][2] === 0)  // row
+                 || (board[r][2] === oppoNum && board[r][0] === 0))  // row
+              || (  (board[2-r][1] === oppoNum && board[1][1] === 0)  // center column
+                 || (board[1][1] === oppoNum && board[2-r][1] === 0)) // center column
+            )) {
                 console.log("midside cell on top or bottom");
                 return true;                                                                
         }
 
         // midside cell on left side or right side (c !== 1)
         if (r === 1  
-            && (   (board[0][c] === board[2][c] && board[0][c] !== 0) // col
-                || (board[1][2-c] === board[1][1] && board[1][2-c] !== 0) // center row
-            )
-            ) {
-                console.log("midside cell on left side or right side");
-                return true;                                        
+            && ((   (board[0][c] === oppoNum && board[2][c] === 0)  // column
+                 || (board[2][c] === oppoNum && board[0][c] === 0))  // column
+              || (  (board[1][2-c] === oppoNum && board[1][1] === 0) // center row
+                 || (board[1][1] === oppoNum && board[1][2-c] === 0)) // center row
+            )) {
+                console.log("midside cell on top or bottom");
+                return true;                                                                
         }
 
         if (r !== 1 && c !== 1  // corner cell
-            && (   (board[1][c] === board[2-r][c] && board[1][c] !== 0)   // col
-                || (board[r][1] === board[r][2-c] && board[r][1] !== 0)  // row
-                || (board[1][1] === board[2-r][2-c] && board[1][1] !== 0) // diagonals
-            )
-            ) {
+            && ((   (board[1][c] === oppoNum && board[2-r][c] === 0)   // column
+                 || (board[2-r][c] === oppoNum && board[1][c] === 0))  // column
+              || (  (board[r][1] === oppoNum && board[r][2-c] === 0)   // row
+                 || (board[r][2-c] === oppoNum && board[r][1] === 0))  // row
+              || (  (board[1][1] === oppoNum && board[2-r][2-c] === 0) // diagonals
+                 || (board[2-r][2-c] === oppoNum && board[1][1] === 0)) // diagonals
+            )) {
                 console.log("corner cell");
                 return true;                                                              
         }
 
-        return false;
+        return false;        
     }
+
+
 
     function isWinnerCell(rowIndex, colIndex) {
         let result = (winnerCells !== null 
@@ -155,7 +233,7 @@
 
         if (whoPlaysFirst === "opponent") {
             oppoMove();
-            if (moveCount > 2) checkForWinner();
+            // if (moveCount > 2) isWinnerFound();
         } else if (whoPlaysFirst === "user") {
             info = 'user_move';
         } else {
@@ -180,29 +258,30 @@
             board[rowIndex][colIndex] = userNum;  
             moveCount++;   
             console.log("moveCount =", moveCount);
-            oppoTurn = moveCount < 9 ? true : false;
-            info = 'opponent_move';
 
-            isWin = checkThree(3) || false;
-            if (isWin) {                
+            if (isWinnerFound()) {                
+                // markWinnerCells();
                 info = 'user_won';
-                oppoTurn = true;
+                oppoTurn = true; // To block X/O marking by user
                 whoPlaysFirst = null;
-
-                // winnerCells = winnerCells; // for reactivity
                 return;
-            }
+            }            
 
-            if (moveCount === 9) {
+            if (moveCount === 9) { 
+                // Nobody won, and no more empty cells are left
                 info = 'score_draw';
                 whoPlaysFirst = null;
             } else {
+                oppoTurn = true;
+                info = 'opponent_move';                
                 setTimeout(oppoMove, 1000);                
             }
         }
     }
 
-    function markWinnerCells(winnerCells) {
+    // function markWinnerCells(winnerCells) {
+    function markWinnerCells() {
+        // Adds flashing effect, which is applied to three winning X's (or O's)
         if (winnerCells === null || winnerCells.length !== 3) return;
 
         let num;
@@ -225,132 +304,47 @@
         }        
     }
 
-    function checkForWinner() {
-        // let arrayOf3 = [0, 0, 0];
-        // let check;
-
+    function isWinnerFound() {
         // Checking each row
         for (let r = 0; r < 3; r++) {
-            // arrayOf3 = [board[r][0], board[r][1], board[r][2]];
-            // if (isWinningStreak(arrayOf3)) {
             if (isWinningStreak(board[r][0], board[r][1], board[r][2])) {
                 winnerCells = [[r, 0], [r, 1], [r, 2]];
-                return;
+                // markWinnerCells(winnerCells);
+                markWinnerCells();
+                return true;
             }            
         }
 
         // Checking each column 
         for (let c = 0; c < 3; c++) {
-            // arrayOf3 = [board[0][c], board[1][c], board[2][c]];
-            // if (isWinningStreak(arrayOf3)) {
             if (isWinningStreak(board[0][c], board[1][c], board[2][c])) {
                 winnerCells = [[0, c], [1, c], [2, c]];
-                return;
+                markWinnerCells();
+                return true;
             }
         }        
 
         // Checking each diagonal
         for (let i = 0; i < 2; i++) {
-            // arrayOf3 = [board[2 - 2*i][0], board[1][1], board[2*i][2]];
-            // if (isWinningStreak(arrayOf3)) {
-            if (isWinningStreak(board[2 - 2*i][0], board[1][1], board[2*i][2])) {
-                winnerCells = [[2 - 2*i, 0], [1, 1], [2*i, 2]];
-                return;
+            if (isWinningStreak(board[2 - 2 * i][0], board[1][1], board[2 * i][2])) {
+                winnerCells = [[2 - 2 * i, 0], [1, 1], [2 * i, 2]];
+                console.log("winnerCells =", winnerCells);
+                markWinnerCells();
+                return true;
             }
         }
+
+        return false; // Nobody won (yet, or at all)
     }
 
-    // function isWinningStreak(arrayOf3) { // input: array of three numbers
     function isWinningStreak(c0, c1, c2) { // input: content of three cells
-        // if (Math.max(...arrayOf3) === Math.min(...arrayOf3)) {
-        // if (Math.max(c0, c1, c2) === Math.min(c0, c1, c2)) {
         if (Math.abs(c0 + c1 + c2) === 3) {
-            // info = (arrayOf3[0] === oppoNum ? "opponent_won" : "user_won");
             info = (c0 === oppoNum ? "opponent_won" : "user_won");
             whoPlaysFirst = null;
             return true;
-        } else {
-            return false;
         }        
-    }
-
-    function checkThreeNumbers(either2or3) {
-
-
-    }
-
-
-
-    function checkThree(either2or3) {
-        let threeNumbers;
-        let minNum = 0;
-        let maxNum = 0;
-        let theSum;
-        let absSum;
-        let val;
-
-        // Checking each row
-        for (let row = 0; row < 3; row++) {
-            theSum = 0; 
-            minNum = 0;
-            maxNum = 0;
-            threeNumbers = [0, 0, 0];
-            for (let col = 0; col < 3; col++) {
-                // threeNumbers[col] = board[row][col];
-                val = board[row][col];
-                theSum += val;               
-                minNum = Math.min(val, 0);
-                maxNum = Math.max(val, 0);
-            }
-
-            absSum = Math.abs(theSum);
-
-            if (absSum === either2or3 && (either2or3 === 2 || either2or3 === 3)) {
-                winnerCells = [[row, 0], [row, 1], [row, 2]];
-                if (either2or3 === 3) {
-                    markWinnerCells(winnerCells);
-                }
-                return true;
-            } else if (minNum === maxNum && theSum === oppoNum && either2or3 === 1) {
-                // Opportunity found
-                winnerCells = [[row, 0], [row, 1], [row, 2]]; 
-                return true;
-            }
-        }
-
-        // Checking each column 
-        for (let col = 0; col < 3; col++) {
-            let theSum = 0;
-            for (let row = 0; row < 3; row++) {
-                theSum += board[row][col]
-            }
-            if (Math.abs(theSum) === either2or3) {
-                winnerCells = [[0, col], [1, col], [2, col]];
-                if (either2or3 === 3) {
-                    markWinnerCells(winnerCells);
-                }
-                return true;
-            }
-        }
-
-        // Checking diagonal one
-        if (Math.abs(board[0][0] + board[1][1] + board[2][2]) === either2or3) {
-            winnerCells = [[0, 0], [1, 1], [2, 2]];
-            if (either2or3 === 3) {
-                markWinnerCells(winnerCells);
-            }
-            return true;
-
-        }
-
-        // Checking diagonal two
-        if (Math.abs(board[0][2] + board[1][1] + board[2][0]) === either2or3) {
-            winnerCells = [[0, 2], [1, 1], [2, 0]];
-            if (either2or3 === 3) {
-                markWinnerCells(winnerCells);
-            }
-            return true;
-        }
+        
+        return false;
     }
 
 
@@ -360,54 +354,61 @@
 
         let rowIndex, colIndex;
 
-        if (moveCount === 8) {
-            info = "score_draw";
-            whoPlaysFirst = null;
-
+        if (moveCount === 8) { // Only one empty cell is left
             for (let r = 0; r < 3; r++) {
                 for (let c = 0; c < 3; c++) {
                     if (board[r][c] === 0) {
                         board[r][c] = oppoNum;
+                        info = isWinnerFound() ? "opponent_won" : "score_draw";
+                        whoPlaysFirst = null;
                         return;
                     }
                 }
             }
         }
 
-        setTimeout(function() {
-            // If the very first move, mark any corner
-            if (moveCount === 0) {
-                let corner = randomInt(4);
-
-                if (corner == 0) {
-                    rowIndex = 0;
-                    colIndex = 0;
-                } else if (corner = 1) {
-                    rowIndex = 0;
-                    colIndex = 2;
-                } else if (corner = 2) {
-                    rowIndex = 2;
-                    colIndex = 0;
-                } else if (corner = 3) {
-                    rowIndex = 2;
-                    colIndex = 2;
-                }
-
+        setTimeout(function() {            
+            if (moveCount === 0) { // If the very first move, mark any corner
+                [rowIndex, colIndex] = [[0, 0], [0, 2], [2, 0], [2, 2]][randomInt(4)];
                 board[rowIndex][colIndex] = oppoNum;        
-                console.log("rowIndex, colIndex =", rowIndex, colIndex);
-                console.log("board =", board);
-
                 moveCount++;
                 console.log("moveCount =", moveCount);
                 info = 'user_move';
-                oppoTurn = false;
+                oppoTurn = false; // Unblocking X/O marking by user
                 return;
             }
 
-            // If a later move, look for your own or your opponent's to-be-complete streak
-            if (moveCount < 9) {                
-                // moveCount++;
+            if (moveCount === 1) { // After user made the very first move
+                // Checking corners for user's X
+                if (board[0][0] === userNum || board[0][2] === userNum
+                ||  board[2][0] === userNum || board[2][2] === userNum) {
+                    board[1][1] = oppoNum; // Marking the center cell
+                    moveCount++;
+                    console.log("moveCount =", moveCount);
+                    info = 'user_move';
+                    oppoTurn = false; // Unblocking X/O marking by user
+                    return;
+                }            
+            }
 
+            if (moveCount === 3) {
+                if (    board[1][1] === oppoNum 
+                    && (  (board[0][0] === userNum && board[2][2] === userNum) 
+                       || (board[0][2] === userNum && board[2][0] === userNum))
+                ) {
+                    // take any midside cell
+                    [rowIndex, colIndex] = [[0, 1], [1, 0], [2, 1], [1, 2]][randomInt(4)];
+                    board[rowIndex][colIndex] = oppoNum;        
+                    moveCount++;
+                    console.log("moveCount =", moveCount);
+                    info = 'user_move';
+                    oppoTurn = false; // Unblocking X/O marking by user
+                    return;
+                }
+            }
+
+            // A later move
+            if (moveCount < 9) {                
                 if (board[1][1] === 0  // center cell
                     && (   (board[0][0] === board[2][2] && board[0][0] !== 0)
                         || (board[0][2] === board[2][0] && board[0][2] !== 0)
@@ -422,10 +423,50 @@
                         return;                    
                 }          
 
+                // Look for your own to-be-complete streak
                 for (let r = 0; r < 3; r++) {
                     for (let c = 0; c < 3; c++) {
                         if (board[r][c] === 0) { // maybe we should mark this empty cell?                            
-                            if (isGoodMark(r, c)) {
+                            if (isMustHaveSpot(r, c, oppoNum)) {
+                                board[r][c] = oppoNum;            
+                                moveCount++;           
+
+                                if (isWinnerFound()) {
+                                    console.log("winner found!");
+                                    oppoTurn = true;
+                                    info = 'opponent_won';
+                                    whoPlaysFirst = null;                                    
+                                } else {
+                                    info = 'user_move'; 
+                                    oppoTurn = false;                                                              
+                                }
+
+                                return;
+                            }                            
+                        }
+                    }
+                }
+                
+                // Look for your opponent's to-be-complete streak
+                for (let r = 0; r < 3; r++) {
+                    for (let c = 0; c < 3; c++) {
+                        if (board[r][c] === 0) { // maybe we should mark this empty cell?                            
+                            if (isMustHaveSpot(r, c, userNum)) {
+                                board[r][c] = oppoNum;            
+                                moveCount++;           
+                                info = 'user_move'; 
+                                oppoTurn = false;
+                                return;                                   
+                            }                            
+                        }
+                    }
+                }                
+                
+                // Look for opportunity to build a streak
+                for (let r = 0; r < 3; r++) {
+                    for (let c = 0; c < 3; c++) {
+                        if (board[r][c] === 0) { // maybe we should mark this empty cell?                            
+                            if (isGoodSpot(r, c)) {
                                 board[r][c] = oppoNum;            
                                 moveCount++;           
                                 info = 'user_move'; 
@@ -436,37 +477,6 @@
                     }
                 }
 
-                /*
-                if (checkThree(2)) {
-                    if (winnerCells !== null && winnerCells.length === 3) {
-                        let oppoCellCount = 0;
-                        for (let i = 0; i < 3; i++) {
-                            if (board[(winnerCells[i][0])][(winnerCells[i][1])] === 0) {
-                                // Empty cell found
-                                board[(winnerCells[i][0])][(winnerCells[i][1])] = oppoNum;
-
-                                moveCount++;
-                                if (moveCount < 9) info = 'user_move';
-                            } 
-                            
-                            if (board[(winnerCells[i][0])][(winnerCells[i][1])] === oppoNum) {
-                                oppoCellCount++;
-                            }
-                        }
-
-                        console.log("oppoCellCount =", oppoCellCount);
-                        oppoTurn = false;
-                        if (oppoCellCount === 3) {
-                            isWin = true;
-                            oppoTurn = true;
-                            info = "opponent_won";
-                            whoPlaysFirst = null;
-                            markWinnerCells(winnerCells);
-                        }
-                        return;
-                    }
-                }
-                */
             } else {
                 whoPlaysFirst = null;
                 return;
@@ -482,9 +492,7 @@
                     console.log("moveCount =", moveCount);
                     // isWin = checkThree(3);
 
-                    isWin = checkThree(3) || false;
-                    // console.log("isWin, winnerCells =", isWin, winnerCells);
-                    if (isWin) {
+                    if (isWinnerFound()) {
                         oppoTurn = true;
                         info = 'opponent_won';
                         whoPlaysFirst = null;
