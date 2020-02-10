@@ -226,13 +226,14 @@
     }
 
     function checkForWinner() {
-        let arrayOf3 = [0, 0, 0];
+        // let arrayOf3 = [0, 0, 0];
         // let check;
 
         // Checking each row
         for (let r = 0; r < 3; r++) {
-            arrayOf3 = [board[r][0], board[r][1], board[r][2]];
-            if (isWinningStreak(arrayOf3)) {
+            // arrayOf3 = [board[r][0], board[r][1], board[r][2]];
+            // if (isWinningStreak(arrayOf3)) {
+            if (isWinningStreak(board[r][0], board[r][1], board[r][2])) {
                 winnerCells = [[r, 0], [r, 1], [r, 2]];
                 return;
             }            
@@ -240,8 +241,9 @@
 
         // Checking each column 
         for (let c = 0; c < 3; c++) {
-            arrayOf3 = [board[0][c], board[1][c], board[2][c]];
-            if (isWinningStreak(arrayOf3)) {
+            // arrayOf3 = [board[0][c], board[1][c], board[2][c]];
+            // if (isWinningStreak(arrayOf3)) {
+            if (isWinningStreak(board[0][c], board[1][c], board[2][c])) {
                 winnerCells = [[0, c], [1, c], [2, c]];
                 return;
             }
@@ -249,25 +251,28 @@
 
         // Checking each diagonal
         for (let i = 0; i < 2; i++) {
-            arrayOf3 = [board[2 - 2*i][0], board[1][1], board[2*i][2]];
-            if (isWinningStreak(arrayOf3)) {
+            // arrayOf3 = [board[2 - 2*i][0], board[1][1], board[2*i][2]];
+            // if (isWinningStreak(arrayOf3)) {
+            if (isWinningStreak(board[2 - 2*i][0], board[1][1], board[2*i][2])) {
                 winnerCells = [[2 - 2*i, 0], [1, 1], [2*i, 2]];
                 return;
             }
         }
     }
 
-    function isWinningStreak(arrayOf3) { // input: array of three numbers
-        if (Math.max(...arrayOf3) === Math.min(...arrayOf3)) {
-            info = (arrayOf3[0] === oppoNum ? "opponent_won" : "user_won");
+    // function isWinningStreak(arrayOf3) { // input: array of three numbers
+    function isWinningStreak(c0, c1, c2) { // input: content of three cells
+        // if (Math.max(...arrayOf3) === Math.min(...arrayOf3)) {
+        // if (Math.max(c0, c1, c2) === Math.min(c0, c1, c2)) {
+        if (Math.abs(c0 + c1 + c2) === 3) {
+            // info = (arrayOf3[0] === oppoNum ? "opponent_won" : "user_won");
+            info = (c0 === oppoNum ? "opponent_won" : "user_won");
             whoPlaysFirst = null;
             return true;
         } else {
             return false;
         }        
     }
-
-
 
     function checkThreeNumbers(either2or3) {
 
