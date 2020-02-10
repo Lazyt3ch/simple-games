@@ -338,9 +338,11 @@
     }
 
     function isWinningStreak(c0, c1, c2) { // input: content of three cells
+        console.log("c0, c1, c2 =", c0, c1, c2);
         if (Math.abs(c0 + c1 + c2) === 3) {
             info = (c0 === oppoNum ? "opponent_won" : "user_won");
             whoPlaysFirst = null;
+            markWinnerCells();
             return true;
         }        
         
