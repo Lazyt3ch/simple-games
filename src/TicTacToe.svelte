@@ -151,9 +151,10 @@
                 return true;                                                          
             }   
 
-            if (board[1][1] === board[2-r][2-c] && board[1][1] !== num) { // diagonals
+            if (board[1][1] === board[2-r][2-c] && board[1][1] === num) { // diagonals
                 console.log("corner cell - diagonal - isMustHaveSpot");
-                if (num === oppoNum) {
+                console.log("num, oppoNum =", num, oppoNum);
+                if (num === oppoNum) {                    
                     winnerCells = [[r, c], [1, 1], [2 - r, 2 - c]];
                     console.log("winnerCells =", winnerCells);
                 }
@@ -260,7 +261,7 @@
             console.log("moveCount =", moveCount);
 
             if (isWinnerFound()) {                
-                // markWinnerCells();
+                // flashWinnerCells();
                 info = 'user_won';
                 oppoTurn = true; // To block X/O marking by user
                 whoPlaysFirst = null;
@@ -279,15 +280,20 @@
         }
     }
 
-    // function markWinnerCells(winnerCells) {
-    function markWinnerCells() {
+    // function flashWinnerCells(winnerCells) {
+    function flashWinnerCells() {        
         // Adds flashing effect, which is applied to three winning X's (or O's)
+
+        console.log("FUNCTION: flashWinnerCells");
+        console.log("winnerCells =", winnerCells);
+
         if (winnerCells === null || winnerCells.length !== 3) return;
 
         let num;
 
         oppoTurn = true;
         let repeats = 5;
+        board = board; // for reactivity
 
         for (let h = 0; h < repeats; h++) {
             // console.log("h =", h);
@@ -297,20 +303,25 @@
                         num = board[(winnerCells[i][0])][(winnerCells[i][1])];
                         num = (h % 2 === 0 ? num * 2 : num / 2);
                         board[(winnerCells[i][0])][(winnerCells[i][1])] = num;
+                        board = board; // for reactivity
+                        console.log("FLASHING:  h =", h);
                     }
                     // if (h === repeats - 1) oppoTurn = false;
-                 }, h * 500);
+                 }, h * 1000);
             }(h));
         }        
     }
 
     function isWinnerFound() {
+        console.log("FUNCTION: isWinnerFound");
+
         // Checking each row
         for (let r = 0; r < 3; r++) {
             if (isWinningStreak(board[r][0], board[r][1], board[r][2])) {
+                console.log("winner found - isWinnerFound");
                 winnerCells = [[r, 0], [r, 1], [r, 2]];
-                // markWinnerCells(winnerCells);
-                markWinnerCells();
+                // flashWinnerCells(winnerCells);
+                flashWinnerCells();                
                 return true;
             }            
         }
@@ -318,8 +329,9 @@
         // Checking each column 
         for (let c = 0; c < 3; c++) {
             if (isWinningStreak(board[0][c], board[1][c], board[2][c])) {
+                console.log("winner found - isWinnerFound");
                 winnerCells = [[0, c], [1, c], [2, c]];
-                markWinnerCells();
+                flashWinnerCells();
                 return true;
             }
         }        
@@ -327,9 +339,10 @@
         // Checking each diagonal
         for (let i = 0; i < 2; i++) {
             if (isWinningStreak(board[2 - 2 * i][0], board[1][1], board[2 * i][2])) {
+                console.log("winner found - isWinnerFound");
                 winnerCells = [[2 - 2 * i, 0], [1, 1], [2 * i, 2]];
                 console.log("winnerCells =", winnerCells);
-                markWinnerCells();
+                flashWinnerCells();
                 return true;
             }
         }
@@ -342,13 +355,153 @@
         if (Math.abs(c0 + c1 + c2) === 3) {
             info = (c0 === oppoNum ? "opponent_won" : "user_won");
             whoPlaysFirst = null;
-            markWinnerCells();
+            flashWinnerCells();
             return true;
         }        
         
         return false;
     }
 
+    function moveOne() {
+        let rowIndex, colIndex;
+        [rowIndex, colIndex] = [[0, 0], [0, 2], [2, 0], [2, 2]][randomInt(4)];
+        board[rowIndex][colIndex] = oppoNum;        
+        moveCount++;
+        console.log("moveCount =", moveCount);
+        info = 'user_move';
+        oppoTurn = false; // Unblocking X/O marking by user
+    }
+
+    function isMoveTwoOkay() {
+        // Checking corners for user's X
+        if (board[0][0] === userNum || board[0][2] === userNum
+        ||  board[2][0] === userNum || board[2][2] === userNum) {
+            board[1][1] = oppoNum; // Marking the center cell
+            moveCount++;
+            console.log("moveCount =", moveCount);
+            info = 'user_move';
+            oppoTurn = false; // Unblocking X/O marking by user
+            return true;
+        }     
+        return false;       
+    }
+
+    function isMoveFourOkay() {
+        let rowIndex, colIndex;
+        if (    board[1][1] === oppoNum 
+             && (  (board[0][0] === userNum && board[2][2] === userNum) 
+                || (board[0][2] === userNum && board[2][0] === userNum))
+        ) {
+            // take any midside cell
+            [rowIndex, colIndex] = [[0, 1], [1, 0], [2, 1], [1, 2]][randomInt(4)];
+            board[rowIndex][colIndex] = oppoNum;        
+            moveCount++;
+            console.log("moveCount =", moveCount);
+            info = 'user_move';
+            oppoTurn = false; // Unblocking X/O marking by user
+            return true;
+        }
+        return false;
+    }
+
+    function moveNine() {
+        for (let r = 0; r < 3; r++) {
+            for (let c = 0; c < 3; c++) {
+                if (board[r][c] === 0) {
+                    board[r][c] = oppoNum;
+                    info = isWinnerFound() ? "opponent_won" : "score_draw";
+                    whoPlaysFirst = null;
+                }
+            }
+        }        
+    }
+
+    function isOppoStreakOkay() {
+        // Look for opponent's to-be-complete streak
+        for (let r = 0; r < 3; r++) {
+            for (let c = 0; c < 3; c++) {
+                if (board[r][c] === 0) { // maybe opponent should mark this empty cell?                            
+                    if (isMustHaveSpot(r, c, oppoNum)) {
+                        board[r][c] = oppoNum;            
+                        moveCount++;           
+
+                        if (isWinnerFound()) {
+                            console.log("winner found!");
+                            oppoTurn = true;
+                            info = 'opponent_won';
+                            whoPlaysFirst = null;                                    
+                        } else {
+                            info = 'user_move'; 
+                            oppoTurn = false;                                                              
+                        }
+
+                        return true;
+                    }                            
+                }
+            }
+        }      
+        return false;  
+    }
+
+    function isUserStreakPreventionOkay() {
+        for (let r = 0; r < 3; r++) {
+            for (let c = 0; c < 3; c++) {
+                if (board[r][c] === 0) { // maybe opponent should mark this empty cell?                            
+                    if (isMustHaveSpot(r, c, userNum)) {
+                        board[r][c] = oppoNum;            
+                        moveCount++;           
+                        info = 'user_move'; 
+                        oppoTurn = false;
+                        return true;                                   
+                    }                            
+                }
+            }
+        }      
+        return false;              
+    }
+
+    function isStreakAttemptOkay() {
+        // Look for opportunity to build a streak
+        for (let r = 0; r < 3; r++) {
+            for (let c = 0; c < 3; c++) {
+                if (board[r][c] === 0) { // maybe opponent should mark this empty cell?                            
+                    if (isGoodSpot(r, c)) {
+                        board[r][c] = oppoNum;            
+                        moveCount++;           
+                        info = 'user_move'; 
+                        oppoTurn = false;
+                        return true;                                   
+                    }                            
+                }
+            }
+        }
+        return false;
+    }
+
+    function moveRandom() {
+        while (true) {
+            rowIndex = randomInt(3);
+            colIndex = randomInt(3);
+            console.log("rowIndex, colIndex =", rowIndex, colIndex);
+            if (board[rowIndex][colIndex] === 0) {
+                board[rowIndex][colIndex] = oppoNum;
+                moveCount++;
+                console.log("moveCount =", moveCount);
+                // isWin = checkThree(3);
+
+                if (isWinnerFound()) {
+                    oppoTurn = true;
+                    info = 'opponent_won';
+                    whoPlaysFirst = null;
+                    return;
+                }
+
+                if (moveCount < 9) info = 'user_move';
+                oppoTurn = false;
+                return;
+            }
+        }     
+    }
 
     function oppoMove() {
         oppoTurn = true; // To prevent the user from making a move out of turn
@@ -357,60 +510,28 @@
         let rowIndex, colIndex;
 
         if (moveCount === 8) { // Only one empty cell is left
-            for (let r = 0; r < 3; r++) {
-                for (let c = 0; c < 3; c++) {
-                    if (board[r][c] === 0) {
-                        board[r][c] = oppoNum;
-                        info = isWinnerFound() ? "opponent_won" : "score_draw";
-                        whoPlaysFirst = null;
-                        return;
-                    }
-                }
-            }
+            moveNine();
+            return;
         }
 
         setTimeout(function() {            
             if (moveCount === 0) { // If the very first move, mark any corner
-                [rowIndex, colIndex] = [[0, 0], [0, 2], [2, 0], [2, 2]][randomInt(4)];
-                board[rowIndex][colIndex] = oppoNum;        
-                moveCount++;
-                console.log("moveCount =", moveCount);
-                info = 'user_move';
-                oppoTurn = false; // Unblocking X/O marking by user
+                moveOne();
                 return;
             }
 
             if (moveCount === 1) { // After user made the very first move
                 // Checking corners for user's X
-                if (board[0][0] === userNum || board[0][2] === userNum
-                ||  board[2][0] === userNum || board[2][2] === userNum) {
-                    board[1][1] = oppoNum; // Marking the center cell
-                    moveCount++;
-                    console.log("moveCount =", moveCount);
-                    info = 'user_move';
-                    oppoTurn = false; // Unblocking X/O marking by user
-                    return;
-                }            
+                if (isMoveTwoOkay()) return;
             }
 
             if (moveCount === 3) {
-                if (    board[1][1] === oppoNum 
-                    && (  (board[0][0] === userNum && board[2][2] === userNum) 
-                       || (board[0][2] === userNum && board[2][0] === userNum))
-                ) {
-                    // take any midside cell
-                    [rowIndex, colIndex] = [[0, 1], [1, 0], [2, 1], [1, 2]][randomInt(4)];
-                    board[rowIndex][colIndex] = oppoNum;        
-                    moveCount++;
-                    console.log("moveCount =", moveCount);
-                    info = 'user_move';
-                    oppoTurn = false; // Unblocking X/O marking by user
-                    return;
-                }
+                if (isMoveFourOkay()) return;
             }
 
-            // A later move
+            // A later move, except for above-mentioned ones
             if (moveCount < 9) {                
+                /*
                 if (board[1][1] === 0  // center cell
                     && (   (board[0][0] === board[2][2] && board[0][0] !== 0)
                         || (board[0][2] === board[2][0] && board[0][2] !== 0)
@@ -424,89 +545,24 @@
                         oppoTurn = false;
                         return;                    
                 }          
+                */
 
-                // Look for your own to-be-complete streak
-                for (let r = 0; r < 3; r++) {
-                    for (let c = 0; c < 3; c++) {
-                        if (board[r][c] === 0) { // maybe we should mark this empty cell?                            
-                            if (isMustHaveSpot(r, c, oppoNum)) {
-                                board[r][c] = oppoNum;            
-                                moveCount++;           
-
-                                if (isWinnerFound()) {
-                                    console.log("winner found!");
-                                    oppoTurn = true;
-                                    info = 'opponent_won';
-                                    whoPlaysFirst = null;                                    
-                                } else {
-                                    info = 'user_move'; 
-                                    oppoTurn = false;                                                              
-                                }
-
-                                return;
-                            }                            
-                        }
-                    }
-                }
+                // Look for opponent's to-be-complete streak
+                if (isOppoStreakOkay()) return;
                 
-                // Look for your opponent's to-be-complete streak
-                for (let r = 0; r < 3; r++) {
-                    for (let c = 0; c < 3; c++) {
-                        if (board[r][c] === 0) { // maybe we should mark this empty cell?                            
-                            if (isMustHaveSpot(r, c, userNum)) {
-                                board[r][c] = oppoNum;            
-                                moveCount++;           
-                                info = 'user_move'; 
-                                oppoTurn = false;
-                                return;                                   
-                            }                            
-                        }
-                    }
-                }                
+                // Look for user's to-be-complete streak
+                if (isUserStreakPreventionOkay()) return;
                 
                 // Look for opportunity to build a streak
-                for (let r = 0; r < 3; r++) {
-                    for (let c = 0; c < 3; c++) {
-                        if (board[r][c] === 0) { // maybe we should mark this empty cell?                            
-                            if (isGoodSpot(r, c)) {
-                                board[r][c] = oppoNum;            
-                                moveCount++;           
-                                info = 'user_move'; 
-                                oppoTurn = false;
-                                return;                                   
-                            }                            
-                        }
-                    }
-                }
+                if (isStreakAttemptOkay()) return;
 
             } else {
                 whoPlaysFirst = null;
                 return;
             }
 
-            while (true) {
-                rowIndex = randomInt(3);
-                colIndex = randomInt(3);
-                console.log("rowIndex, colIndex =", rowIndex, colIndex);
-                if (board[rowIndex][colIndex] === 0) {
-                    board[rowIndex][colIndex] = oppoNum;
-                    moveCount++;
-                    console.log("moveCount =", moveCount);
-                    // isWin = checkThree(3);
-
-                    if (isWinnerFound()) {
-                        oppoTurn = true;
-                        info = 'opponent_won';
-                        whoPlaysFirst = null;
-                        return;
-                    }
-
-                    if (moveCount < 9) info = 'user_move';
-                    oppoTurn = false;
-                    return;
-                }
-            }     
-
+            // If nothing has worked so far, opponent will try and make a random move
+            moveRandom();
         }, 500);   
     }
 
