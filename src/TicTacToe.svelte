@@ -7,8 +7,6 @@
 
     let moveCount = 0;
 
-    // let gameBegan = false;
-
     let highlighted = false;
 
     let selectedLang;
@@ -19,8 +17,6 @@
     let infoText;
 
     let lastUserCell = null;
-
-    // let userMoveAllowed = false;
 
     $: infoText = uiStrings[info][language];
 
@@ -40,20 +36,17 @@
         [0, 0, 0],
     ];
 
-    let whoPlaysFirst = null;  // true if user plays first, otherwise false
+    let whoPlaysFirst = null;  // "user" if user plays first, otherwise "opponent"
 
     let board = null;
 
     let userNum, oppoNum;
 
-    let isWin = false;
-    let winnerCells = null;
+    let streak = null;
 
     $: {
-        // gameBegan = !(whoPlaysFirst === null);
         userNum = whoPlaysFirst === null ? 0 : (whoPlaysFirst === 'user' ? 1 : -1);
         oppoNum = -userNum;
-        // oppoNum = gameBegan ? (whoPlaysFirst === 'opponent' ? 1 : -1) : 0;
     }
 
     $: {
@@ -62,45 +55,13 @@
         }        
     }
 
-    $: { 
-        language = language;
-    }
-
-    $: {
-        if (whoPlaysFirst !== null) {
-            // showAlert(whoPlaysFirst);
-        }
-    }
-
-    $: {
-        if (isWin) {
-            oppoTurn = true;
-            winnerCells = winnerCells;
-            // console.log("isWin, winnerCells =", isWin, winnerCells);
-        }
-    }
-
-    /*
-    function countMoves() {
-        let emptyCells = 0;
-
-        for (let r = 0; r < 3; r++) {
-            for (let c = 0; c < 3; c++) {
-                emptyCells += (board[r][c] === 0 ? 1 : 0)
-            }
-        }
-
-        return 9 - emptyCells;
-    }
-    */
-
     function isMustHaveSpot(r, c, num) { // rowIndex, colIndex, and number (userNum or oppoNum)
         // midside cell on top or bottom (r !== 1)
         if (c === 1) { 
             if (board[r][0] === board[r][2] && board[r][0] === num) { // row
                 console.log("midside cell on top or bottom");
                 if (num === oppoNum) {
-                    winnerCells = [[r, 0], [r, 1], [r, 2]];
+                    streak = [[r, 0], [r, 1], [r, 2]];
                 }
                 return true;                                                           
             } 
@@ -108,7 +69,7 @@
             if (board[2-r][1] === board[1][1] && board[2-r][1] === num) { // center col
                 console.log("midside cell on top or bottom");
                 if (num === oppoNum) {
-                    winnerCells = [[0, 1], [1, 1], [2, 1]];
+                    streak = [[0, 1], [1, 1], [2, 1]];
                 }
                 return true;                                                          
             } 
@@ -119,7 +80,7 @@
             if (board[0][c] === board[2][c] && board[0][c] === num) { // col
                 console.log("midside cell on left side or right side");
                 if (num === oppoNum) {
-                    winnerCells = [[0, c], [1, c], [2, c]];
+                    streak = [[0, c], [1, c], [2, c]];
                 }
                 return true;                                        
             } 
@@ -127,7 +88,7 @@
             if (board[1][2-c] === board[1][1] && board[1][2-c] === num) { // center row
                 console.log("midside cell on left side or right side");
                 if (num === oppoNum) {
-                    winnerCells = [[1, 0], [1, 1], [1, 2]];
+                    streak = [[1, 0], [1, 1], [1, 2]];
                 }
                 return true;                                                          
             } 
@@ -138,7 +99,7 @@
             if (board[1][c] === board[2-r][c] && board[1][c] === num) { // column
                 console.log("corner cell - column - isMustHaveSpot");
                 if (num === oppoNum) {
-                    winnerCells = [[0, c], [1, c], [2, c]];
+                    streak = [[0, c], [1, c], [2, c]];
                 }
                 return true;                                                          
             }   
@@ -146,7 +107,7 @@
             if (board[r][1] === board[r][2-c] && board[r][1] === num) { // row
                 console.log("corner cell - row - isMustHaveSpot");
                 if (num === oppoNum) {
-                    winnerCells = [[r, 0], [r, 1], [r, 2]];
+                    streak = [[r, 0], [r, 1], [r, 2]];
                 }
                 return true;                                                          
             }   
@@ -155,13 +116,12 @@
                 console.log("corner cell - diagonal - isMustHaveSpot");
                 console.log("num, oppoNum =", num, oppoNum);
                 if (num === oppoNum) {                    
-                    winnerCells = [[r, c], [1, 1], [2 - r, 2 - c]];
-                    console.log("winnerCells =", winnerCells);
+                    streak = [[r, c], [1, 1], [2 - r, 2 - c]];
+                    console.log("streak =", streak);
                 }
                 return true;                                                          
             }   
         } 
-
         return false;
     }
 
@@ -199,61 +159,40 @@
                 console.log("corner cell");
                 return true;                                                              
         }
-
         return false;        
     }
-
-
-
-    function isWinnerCell(rowIndex, colIndex) {
-        let result = (winnerCells !== null 
-            && winnerCells.some(cell => (cell[0] === rowIndex && cell[1] === colIndex)));
-        return result;
-    }
-
 
     function randomInt(n) {
         return Math.floor(Math.random() * Math.floor(n));
     }
 
-
     function restartGame() {        
         board = JSON.parse(JSON.stringify(emptyBoard));
+
+        moveCount = 0;
+        streak = null; 
 
         if (whoPlaysFirst === "opponent") {
             oppoTurn = true;
             info = "opponent_move";
-        } else {
-            info = "user_move";
-            oppoTurn = false;
-        }
-        
-        moveCount = 0;
-        // gameBegan = false;
-        winnerCells = null;
-
-        if (whoPlaysFirst === "opponent") {
             oppoMove();
-            // if (moveCount > 2) isWinnerFound();
         } else if (whoPlaysFirst === "user") {
+            oppoTurn = false;
             info = 'user_move';
         } else {
             info = 'lets_play';
         }
-
-        isWin = false;
     }  
 
     function userMove(rowIndex, colIndex) {
-        if (oppoTurn) return;
-        
-        if (moveCount === 0 && whoPlaysFirst === "opponent") return;
-
         if (whoPlaysFirst === null) { 
             highlighted = true;
-            setTimeout(() => highlighted = false, 2000);            
+            setTimeout( () => highlighted = false, 1000 );            
             return;
         }
+
+        if (oppoTurn) return;        
+        if (moveCount === 0 && whoPlaysFirst === "opponent") return;
 
         if (board[rowIndex][colIndex] === 0) {
             board[rowIndex][colIndex] = userNum;  
@@ -261,7 +200,6 @@
             console.log("moveCount =", moveCount);
 
             if (isWinnerFound()) {                
-                // flashWinnerCells();
                 info = 'user_won';
                 oppoTurn = true; // To block X/O marking by user
                 whoPlaysFirst = null;
@@ -275,39 +213,36 @@
             } else {
                 oppoTurn = true;
                 info = 'opponent_move';                
-                setTimeout(oppoMove, 1000);                
+                setTimeout(oppoMove, 500);                
             }
         }
     }
 
-    // function flashWinnerCells(winnerCells) {
-    function flashWinnerCells() {        
+    function flashStreak() {        
         // Adds flashing effect, which is applied to three winning X's (or O's)
 
-        console.log("FUNCTION: flashWinnerCells");
-        console.log("winnerCells =", winnerCells);
+        console.log("FUNCTION: flashStreak");
+        console.log("streak =", streak);
 
-        if (winnerCells === null || winnerCells.length !== 3) return;
+        if (streak === null || streak.length !== 3) return;
 
         let num;
 
         oppoTurn = true;
         let repeats = 5;
-        board = board; // for reactivity
 
         for (let h = 0; h < repeats; h++) {
-            // console.log("h =", h);
             (function(h) {
                  setTimeout(function() {
                     for (let i = 0; i < 3; i++){
-                        num = board[(winnerCells[i][0])][(winnerCells[i][1])];
+                        num = board[(streak[i][0])][(streak[i][1])];
                         num = (h % 2 === 0 ? num * 2 : num / 2);
-                        board[(winnerCells[i][0])][(winnerCells[i][1])] = num;
+                        board[(streak[i][0])][(streak[i][1])] = num;
+                        console.log(board[(streak[i][0])][(streak[i][1])]);
                         board = board; // for reactivity
                         console.log("FLASHING:  h =", h);
                     }
-                    // if (h === repeats - 1) oppoTurn = false;
-                 }, h * 1000);
+                 }, h * 500);
             }(h));
         }        
     }
@@ -319,9 +254,8 @@
         for (let r = 0; r < 3; r++) {
             if (isWinningStreak(board[r][0], board[r][1], board[r][2])) {
                 console.log("winner found - isWinnerFound");
-                winnerCells = [[r, 0], [r, 1], [r, 2]];
-                // flashWinnerCells(winnerCells);
-                flashWinnerCells();                
+                streak = [[r, 0], [r, 1], [r, 2]];
+                flashStreak();                
                 return true;
             }            
         }
@@ -330,8 +264,8 @@
         for (let c = 0; c < 3; c++) {
             if (isWinningStreak(board[0][c], board[1][c], board[2][c])) {
                 console.log("winner found - isWinnerFound");
-                winnerCells = [[0, c], [1, c], [2, c]];
-                flashWinnerCells();
+                streak = [[0, c], [1, c], [2, c]];
+                flashStreak();
                 return true;
             }
         }        
@@ -340,9 +274,9 @@
         for (let i = 0; i < 2; i++) {
             if (isWinningStreak(board[2 - 2 * i][0], board[1][1], board[2 * i][2])) {
                 console.log("winner found - isWinnerFound");
-                winnerCells = [[2 - 2 * i, 0], [1, 1], [2 * i, 2]];
-                console.log("winnerCells =", winnerCells);
-                flashWinnerCells();
+                streak = [[2 - 2 * i, 0], [1, 1], [2 * i, 2]];
+                console.log("streak =", streak);
+                flashStreak();
                 return true;
             }
         }
@@ -355,7 +289,6 @@
         if (Math.abs(c0 + c1 + c2) === 3) {
             info = (c0 === oppoNum ? "opponent_won" : "user_won");
             whoPlaysFirst = null;
-            flashWinnerCells();
             return true;
         }        
         
@@ -392,7 +325,7 @@
              && (  (board[0][0] === userNum && board[2][2] === userNum) 
                 || (board[0][2] === userNum && board[2][0] === userNum))
         ) {
-            // take any midside cell
+            // Take any midside cell
             [rowIndex, colIndex] = [[0, 1], [1, 0], [2, 1], [1, 2]][randomInt(4)];
             board[rowIndex][colIndex] = oppoNum;        
             moveCount++;
@@ -479,6 +412,7 @@
     }
 
     function moveRandom() {
+        let rowIndex, colIndex;
         while (true) {
             rowIndex = randomInt(3);
             colIndex = randomInt(3);
@@ -487,7 +421,6 @@
                 board[rowIndex][colIndex] = oppoNum;
                 moveCount++;
                 console.log("moveCount =", moveCount);
-                // isWin = checkThree(3);
 
                 if (isWinnerFound()) {
                     oppoTurn = true;
@@ -507,14 +440,12 @@
         oppoTurn = true; // To prevent the user from making a move out of turn
         info = 'opponent_move';
 
-        let rowIndex, colIndex;
-
-        if (moveCount === 8) { // Only one empty cell is left
-            moveNine();
-            return;
-        }
-
         setTimeout(function() {            
+            if (moveCount === 8) { // Only one empty cell is left
+                moveNine();
+                return;
+            }
+
             if (moveCount === 0) { // If the very first move, mark any corner
                 moveOne();
                 return;
@@ -531,31 +462,14 @@
 
             // A later move, except for above-mentioned ones
             if (moveCount < 9) {                
-                /*
-                if (board[1][1] === 0  // center cell
-                    && (   (board[0][0] === board[2][2] && board[0][0] !== 0)
-                        || (board[0][2] === board[2][0] && board[0][2] !== 0)
-                        || (board[1][0] === board[1][2] && board[1][0] !== 0)
-                        || (board[0][1] === board[2][1] && board[0][1] !== 0)   
-                    )
-                ) {
-                        board[1][1] = oppoNum;        
-                        info = 'user_move';    
-                        moveCount++;            
-                        oppoTurn = false;
-                        return;                    
-                }          
-                */
-
                 // Look for opponent's to-be-complete streak
                 if (isOppoStreakOkay()) return;
                 
                 // Look for user's to-be-complete streak
                 if (isUserStreakPreventionOkay()) return;
                 
-                // Look for opportunity to build a streak
+                // Look for opportunity to try and build a streak
                 if (isStreakAttemptOkay()) return;
-
             } else {
                 whoPlaysFirst = null;
                 return;
@@ -646,6 +560,14 @@
     .left-margin {
         margin-left: 5%;
     }
+
+    .unselectable {
+        -moz-user-select: -moz-none;
+        -khtml-user-select: none;
+        -webkit-user-select: none;
+        -o-user-select: none;
+        user-select: none;
+    }    
 </style>
 
 
@@ -668,8 +590,7 @@
         <tr>
             {#each row as cell, colIndex}
                 <td on:click={ () => userMove(rowIndex, colIndex) }
-                    class="{cell === 2 || cell === -2 ? 'winner' : ''}"
-                            
+                    class="{cell === 2 || cell === -2 ? 'winner' : ''} unselectable"                            
                 >
                     { @html num2char(cell) }
                 </td>
@@ -690,7 +611,7 @@
 </div>
 
 <!-- Info Text -->
-<h2 class="center"> 
+<h2 class="center unselectable"> 
     <!-- Do not remove &nbsp; -->
     { infoText } &nbsp;
 </h2>
@@ -701,16 +622,16 @@
         class="limited-width margin-after {highlighted? 'highlighted': ''}"
         on:change={() => oppoTurn = true}    
     >
-        <label> { uiStrings['who_plays_first'][language] } </label>
+        <label class="unselectable"> { uiStrings['who_plays_first'][language] } </label>
         
         <div class="div-inline">
-            <label for="user-begins"> 
+            <label for="user-begins" class="unselectable"> 
                 <input type='radio' bind:group={whoPlaysFirst} 
                     id='user-begins' name="who-begins" value='user'>
                 { uiStrings['user_begins'][language] } 
             </label>
 
-            <label for="opponent-begins" class="left-margin">
+            <label for="opponent-begins" class="left-margin unselectable">
                 <input type='radio' bind:group={whoPlaysFirst} 
                     id='opponent-begins' name="who-begins" value='opponent'>
                 { uiStrings['opponent_begins'][language] } 
