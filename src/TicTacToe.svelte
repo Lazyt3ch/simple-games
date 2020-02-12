@@ -1,7 +1,7 @@
 <script>    
     import { fade } from 'svelte/transition';
     
-    import { languages, gameName, uiStrings } from './ui/TicTacToe.js';
+    import { languages, gameName, uiStrings as ui } from './ui/TicTacToe.js';
 
     // console.log("gameName =", gameName);
 
@@ -22,7 +22,7 @@
 
     let lastUserCell = null;
 
-    $: infoText = uiStrings[info][language];
+    $: infoText = ui[info][language];
 
   
     // &#x25CB;  // white circle in Unicode // use instead of 'o'
@@ -575,7 +575,7 @@
 </style>
 
 
-<!-- <h1 class="center">{ uiStrings['game_name'][language] }</h1> -->
+<!-- <h1 class="center">{ ui['game_name'][language] }</h1> -->
 <h1 class="center">{ gameName[language] }</h1>
 
 <label for="language-select" class="rightish">
@@ -607,11 +607,11 @@
 <!-- Buttons -->
 <div class="center margin-after">
     <button class="cool-button" on:click={restartGame} disabled={whoPlaysFirst === null}>
-        { uiStrings['start_game'][language] }
+        { ui['start_game'][language] }
     </button>
 
     <button class="cool-button" on:click={restartGame} disabled={whoPlaysFirst === null}>
-        { uiStrings['restart_game'][language] }
+        { ui['restart_game'][language] }
     </button>
 </div>
 
@@ -627,19 +627,19 @@
         class="limited-width margin-after {highlighted? 'highlighted': ''}"
         on:change={() => oppoTurn = true}    
     >
-        <label class="unselectable"> { uiStrings['who_plays_first'][language] } </label>
+        <label class="unselectable"> { ui['who_plays_first'][language] } </label>
         
         <div class="div-inline">
             <label for="user-begins" class="unselectable"> 
                 <input type='radio' bind:group={whoPlaysFirst} 
                     id='user-begins' name="who-begins" value='user'>
-                { uiStrings['user_begins'][language] } 
+                { ui['user_begins'][language] } 
             </label>
 
             <label for="opponent-begins" class="left-margin unselectable">
                 <input type='radio' bind:group={whoPlaysFirst} 
                     id='opponent-begins' name="who-begins" value='opponent'>
-                { uiStrings['opponent_begins'][language] } 
+                { ui['opponent_begins'][language] } 
             </label>
         </div>
     </fieldset>

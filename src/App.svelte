@@ -1,25 +1,32 @@
 <script>
-	import TicTacToe from './TicTacToe.svelte';
-	import Battleship from './Battleship.svelte';
-
-	import { languages, uiStrings } from './ui/App.js';
+	import { languages, uiStrings as ui } from './ui/App.js';
 
 	import { gameName as game0 } from './ui/TicTacToe.js';
 	import { gameName as game1 } from './ui/Battleship.js';
 
-	let selectedGame = null;
-	let game = null;
+	import TicTacToe from './TicTacToe.svelte';
+	import Battleship from './Battleship.svelte';
 
 	// let language = "en";
 	let language = languages[0].short;
 	// let selectedLang = languages[0];
 	let selectedLang;
 
-	let games = [
-		uiStrings['select_game'][language],
-		game0[language],
-		game1[language],
-	]
+	let selectedGame = null;
+	let game = null;
+	let games;
+
+	function updateGameNames() {
+		games = [
+			ui['select_game'][language],
+			game0[language],
+			game1[language],
+		]			
+	}
+
+	$: {
+		if (language !== null) updateGameNames();
+	}
 
 	console.log("games =", games);
 
@@ -32,11 +39,11 @@
 	<!-- Game selector -->
 	<label for="game-select" >
 		&nbsp;
-		<select name="game-name" id="game-select" 
+		<select name="game-name" id="game-select" class="game-select"
 			bind:value={selectedGame} on:change={() => game = selectedGame}
 		>
 			{#each games as game, index}
-				<option value="{game}" > { game } </option>
+				<option value="{game}" disabled={index === 0}> { game } </option>
 			{/each}
 		</select>
 	</label>
@@ -44,7 +51,7 @@
 	<!-- Language selector -->
 	<label for="language-select" >
 		&nbsp;
-		<select name="language" id="language-select" 
+		<select name="language" id="language-select" class="language-select"
 			bind:value={selectedLang} on:change={() => language = selectedLang}
 		>
 			{#each languages as lang}
@@ -60,6 +67,15 @@
 
 
 <style>
+	.game-select {
+		min-width: 12em;
+	}
+
+	.language-select {
+		min-width: 7em;
+	}
+
+
 	/*
 	main {
 		text-align: center;

@@ -1,7 +1,7 @@
 <script>
     import { fade } from 'svelte/transition';
     
-    import { languages, gameName, uiStrings } from './ui/Battleship.js';
+    import { languages, gameName, uiStrings as ui } from './ui/Battleship.js';
 
     // export gameName;
 
