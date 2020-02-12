@@ -1,21 +1,19 @@
-
-// Languages specific to this game
 export const languages = [
     { short: "en", full: "English" },
     { short: "ru", full: "русский" },
 ]
 
 export const gameName = {
-    en: 'Tic Tac Toe',
-    ru: 'Крестики-нолики',
+    en: 'Battleship',
+    ru: 'Морской бой',
 }
 
 export const uiStrings = {
     /*
     'game_name':
     {
-        en: 'Tic Tac Toe',
-        ru: 'Крестики-нолики',
+        en: 'Battleship',
+        ru: 'Морской бой',
     },
     */
     'start_game': 
@@ -91,5 +89,4 @@ export const uiStrings = {
     
 
 
-};
-
+}

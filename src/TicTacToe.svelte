@@ -1,15 +1,19 @@
 <script>    
     import { fade } from 'svelte/transition';
     
-    import { languages, uiStrings } from './ui/TicTacToe.js';
+    import { languages, gameName, uiStrings } from './ui/TicTacToe.js';
+
+    // console.log("gameName =", gameName);
+
+    // export gameName;
 
     let language = languages[0].short;
+    let selectedLang;
 
     let moveCount = 0;
 
     let highlighted = false;
 
-    let selectedLang;
 
     let oppoTurn = false;
 
@@ -571,7 +575,8 @@
 </style>
 
 
-<h1 class="center">{ uiStrings['game_name'][language] }</h1>
+<!-- <h1 class="center">{ uiStrings['game_name'][language] }</h1> -->
+<h1 class="center">{ gameName[language] }</h1>
 
 <label for="language-select" class="rightish">
     &nbsp;
