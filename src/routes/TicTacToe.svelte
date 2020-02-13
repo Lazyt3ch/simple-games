@@ -12,20 +12,42 @@
     // let language = null;
     let language, selectedLang;
     
-    console.log("$globalLanguage =", $globalLanguage);
+    console.log("TicTacToe:  $globalLanguage =", $globalLanguage);
 
-    function setUpLanguage() {
+	let globLang = null;
+
+	const unsubscribe = globalLanguage.subscribe(value => {
+		globLang = value;
+		console.log("globLang =", globLang);
+	});    
+
+    function setLanguage() {
         for (let i = 0; i < languages.length; i++) {
-            if (languages[i].short === $globalLanguage) {
-                language = $globalLanguage;
+            if (languages[i].short === globLang) {
+                language = globLang;
+                selectedLang = globLang;
                 return;
             }
         }
         language = languages[0].short;
     }
 
-    setUpLanguage();    
+    setLanguage();    
     selectedLang = language;
+
+	function updateGlobalLanguage() {
+		console.log("App:  trying to update globalLanguage...");
+		globalLanguage.update(() => language);
+		console.log("App:  $globalLanguage =", $globalLanguage);
+	}
+
+	$: {
+		if (selectedLang !== null) updateGlobalLanguage();
+	}    
+
+    $: {
+        if (selectedLang !== null) setLanguage();
+    }
 
     let moveCount = 0;
 

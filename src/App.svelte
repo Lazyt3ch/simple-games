@@ -53,15 +53,9 @@
 	// const globalLanguage = writable(language);
 	
 	function updateGlobalLanguage() {
-		globalLanguage.update(() => globLang);
-		/*
-		for (let i = 0; i < languages.length; i++) {
-			if (languages[i].short === selectedLang) {
-				globalLanguageIndex.update(() => i);
-				return;
-			}
-		}
-		*/
+		console.log("App:  trying to update globalLanguage...");
+		globalLanguage.update(() => language);
+		console.log("App:  $globalLanguage =", $globalLanguage);
 	}
 
 	$: {
