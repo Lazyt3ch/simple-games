@@ -16,23 +16,24 @@
 	import { gameId as gameId1, gameName as gameName1 } from './routes/ui/TicTacToe.js';
 	import { gameId as gameId2, gameName as gameName2 } from './routes/ui/Battleship.js';
 
-	// import { writable } from 'svelte/store';
-
-	// let langIndex;
-
 	/*
-	const unsubscribe = globalLanguageIndex.subscribe(value => {
-		langIndex = value;
-		console.log("langIndex =", langIndex);
-	});
-	*/
-
 	let globLang = null;
 
 	const unsubscribe = globalLanguage.subscribe(value => {
 		globLang = value;
 		console.log("globLang =", globLang);
 	});
+	*/
+
+    let language;
+    
+    console.log("App:  $globalLanguage =", $globalLanguage);
+
+	const unsubscribe = globalLanguage.subscribe(value => {
+        language = value;        
+		console.log("App:  language =", language);
+	});    
+
 
 	const routes = {// Exact paths
 		'/': Home,
@@ -48,7 +49,7 @@
 	// let selectedLang = languages[0];
 	let selectedLang;
 	// let language = languages[langIndex].short;
-	let language = globLang;
+	// let language = globLang;
 	console.log("language =", language);
 	// const globalLanguage = writable(language);
 	

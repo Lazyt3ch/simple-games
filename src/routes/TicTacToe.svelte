@@ -580,23 +580,10 @@
 </style>
 
 
-<h1 class="center">{ gameName[language] }</h1>
-<!--
+<!-- GAME NAME -->
 <h1 class="center">{ gameName[language] }</h1>
 
-<label for="language-select" class="rightish">
-    &nbsp;
-    <select name="language" id="language-select" 
-        bind:value={selectedLang} on:change={() => language = selectedLang}
-    >
-        {#each languages as lang}
-            <option value="{lang.short}"> { lang.full } </option>
-        {/each}
-    </select>
-</label>
--->
-
-<!-- Table -->
+<!-- TABLE -->
 <table class="center margin-after">
     {#each board as row, rowIndex}
         <tr>

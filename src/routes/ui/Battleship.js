@@ -89,6 +89,16 @@ export const uiStrings = {
         ru: "Вы сыграли вничью.",
     },
     
+    'user_ships':
+    {
+        en: "Your ships",
+        ru: "Ваши корабли",
+    },
+    'opponent_ships':
+    {
+        en: "Enemy ships",
+        ru: "Корабли противника",
+    },
 
 
 }

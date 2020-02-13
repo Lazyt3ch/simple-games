@@ -2,7 +2,17 @@
     import { languages, uiStrings as ui } from './ui/Home.js';    
     import { globalLanguage } from '../stores.js';
 
-    $: language = globalLanguage;
+    /* $: language = globalLanguage; */
+
+    let language;
+    
+    console.log("Home:  $globalLanguage =", $globalLanguage);
+
+	const unsubscribe = globalLanguage.subscribe(value => {
+        language = value;        
+		console.log("Home:  language =", language);
+	});    
+
 
 </script>
 
