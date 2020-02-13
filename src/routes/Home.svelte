@@ -1,11 +1,8 @@
 <script>
-    // import globalLanguage from '../App.svelte';
-
     import { languages, uiStrings as ui } from './ui/Home.js';    
+    import { globalLanguage } from '../stores.js';
 
-    // import { language } from '../App.svelte';
-
-    // console.log("Home: language =", language);
+    $: language = globalLanguage;
 
 </script>
 
@@ -26,6 +23,7 @@
 </style>
 
 <div class="centered colorful">
-    <!-- <h1>{ ui["welcome"][language] }</h1> -->
-    <h1>PLACEHOLDER</h1>
+    <h1>{ ui["welcome"][language] }</h1>
+    <!-- <h1>PLACEHOLDER</h1> -->
+    <!-- <p> { $globalLanguageIndex } </p> -->
 </div>

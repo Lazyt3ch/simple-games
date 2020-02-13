@@ -1,29 +1,40 @@
 <script>
 	import Router from 'svelte-spa-router';
-
-	// import { writable } from 'svelte/store';
+	import {push, pop, replace} from 'svelte-spa-router'	
 
 	import { languages, uiStrings as ui } from './ui/App.js';
-	import { globalLanguageIndex } from './stores.js';
+	// import { globalLanguageIndex } from './stores.js';
+	import { globalLanguage } from './stores.js';
 	// console.log("globalLanguageIndex =", globalLanguageIndex);
 
 	import Home from './routes/Home.svelte';
 
 	import TicTacToe from './routes/TicTacToe.svelte';
 	import Battleship from './routes/Battleship.svelte';
+	// let gamelinks = null;
 
-	import { gameName as game0 } from './routes/ui/TicTacToe.js';
-	import { gameName as game1 } from './routes/ui/Battleship.js';
+	import { gameId as gameId1, gameName as gameName1 } from './routes/ui/TicTacToe.js';
+	import { gameId as gameId2, gameName as gameName2 } from './routes/ui/Battleship.js';
 
-	let langIndex;
+	// import { writable } from 'svelte/store';
 
+	// let langIndex;
+
+	/*
 	const unsubscribe = globalLanguageIndex.subscribe(value => {
 		langIndex = value;
 		console.log("langIndex =", langIndex);
 	});
+	*/
 
-	const routes = {
-		// Exact paths
+	let globLang = null;
+
+	const unsubscribe = globalLanguage.subscribe(value => {
+		globLang = value;
+		console.log("globLang =", globLang);
+	});
+
+	const routes = {// Exact paths
 		'/': Home,
 		'/tictactoe': TicTacToe,
 		'/battleship': Battleship,
@@ -36,25 +47,51 @@
 	// export language;
 	// let selectedLang = languages[0];
 	let selectedLang;
-	let language = languages[langIndex].short;
+	// let language = languages[langIndex].short;
+	let language = globLang;
 	console.log("language =", language);
 	// const globalLanguage = writable(language);
 	
+	function updateGlobalLanguage() {
+		globalLanguage.update(() => globLang);
+		/*
+		for (let i = 0; i < languages.length; i++) {
+			if (languages[i].short === selectedLang) {
+				globalLanguageIndex.update(() => i);
+				return;
+			}
+		}
+		*/
+	}
+
+	$: {
+		if (selectedLang !== null) updateGlobalLanguage();
+	}
+
+	let gameIndex = null;
 	let game = null;
 	let games;
 	updateGameNames();
-	let selectedGame = games[0];
+	let selectedGameId = games[0].id;
 
 	function updateGameNames() {
 		games = [
-			ui['select_game'][language],
-			game0[language],
-			game1[language],
+			{ id: 'home', name: ui['select_game'] },
+			{ id: gameId1, name: gameName1 },
+			{ id: gameId2, name: gameName2 },
 		]			
 	}	
 
 	$: {
 		if (language !== null) updateGameNames(); 
+	}
+
+	$: {
+		if (selectedGameId !== null) {
+			console.log("selectedGameId =", selectedGameId);
+			console.log(`/${selectedGameId}`);
+			push(`/${selectedGameId}`);
+		}
 	}
 
 	console.log("games =", games);
@@ -66,14 +103,15 @@
 <main>
 
 	<!-- Game selector -->
+	<!--			bind:value={selectedGame} on:change={() => game = selectedGame} -->
 	<label for="game-select" >
 		&nbsp;
 		<select name="game-name" id="game-select" class="game-select"
-			bind:value={selectedGame} on:change={() => game = selectedGame}
+			bind:value={selectedGameId}
 		>
 			{#each games as game, index}
-				<!-- <option value="{game}" disabled={index === 0}> { game } </option> -->
-				<option value="{game}" > { game } </option>
+				<option value="{games[index].id}" disabled={index === 0}> { game.name[language] } </option> 
+				<!-- <option value="{game}" > { game } </option> -->
 			{/each}
 		</select>
 	</label>
@@ -92,8 +130,7 @@
 
 	<hr> <!-- Above this line, the App; below this line, a specific game -->
 
-	<!-- <TicTacToe> </TicTacToe> -->
-
+	<!-- Component displayed (depending on route) -->
 	<Router {routes} />
 </main>
 

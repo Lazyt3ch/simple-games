@@ -1,3 +1,5 @@
+export const gameId = 'battleship';
+
 export const languages = [
     { short: "en", full: "English" },
     { short: "ru", full: "русский" },

@@ -3,12 +3,29 @@
     
     import { languages, gameName, uiStrings as ui } from './ui/TicTacToe.js';
 
+    import { globalLanguage } from '../stores.js';
+
     // console.log("gameName =", gameName);
 
     // export gameName;
 
-    let language = languages[0].short;
-    let selectedLang;
+    // let language = null;
+    let language, selectedLang;
+    
+    console.log("$globalLanguage =", $globalLanguage);
+
+    function setUpLanguage() {
+        for (let i = 0; i < languages.length; i++) {
+            if (languages[i].short === $globalLanguage) {
+                language = $globalLanguage;
+                return;
+            }
+        }
+        language = languages[0].short;
+    }
+
+    setUpLanguage();    
+    selectedLang = language;
 
     let moveCount = 0;
 

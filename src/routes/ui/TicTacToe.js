@@ -1,3 +1,4 @@
+export const gameId = 'tictactoe';
 
 // Languages specific to this game
 export const languages = [
