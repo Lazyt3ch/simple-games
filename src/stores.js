@@ -6,3 +6,5 @@ console.log("FILE: store.js  |  languages =", languages);
 
 // export const globalLanguageIndex = writable(0);
 export const globalLanguage = writable(languages[0].short);
+
+export const currentGame = writable('');

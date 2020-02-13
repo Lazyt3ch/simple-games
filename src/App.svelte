@@ -4,8 +4,13 @@
 
 	import { languages, uiStrings as ui } from './ui/App.js';
 	// import { globalLanguageIndex } from './stores.js';
-	import { globalLanguage } from './stores.js';
+
+	// currentGame is a bugfix that disables transitions when routing
+	import { globalLanguage, currentGame } from './stores.js';
 	// console.log("globalLanguageIndex =", globalLanguageIndex);
+
+	// import { currentGame } from './stores.js';
+
 
 	import Home from './routes/Home.svelte';
 
@@ -35,7 +40,14 @@
 	});    
 
 
-	const routes = {// Exact paths
+	let curGame;
+
+	const unsubscribe2 = currentGame.subscribe(value => {
+        curGame = value;        
+		console.log("App:  curGame =", curGame);
+	});    
+
+	const routes = { // Exact paths
 		'/': Home,
 		'/tictactoe': TicTacToe,
 		'/battleship': Battleship,
@@ -59,8 +71,18 @@
 		console.log("App:  $globalLanguage =", $globalLanguage);
 	}
 
+	function updateCurrentGame() {
+		console.log("App:  trying to update currentGame...");
+		currentGame.update(() => selectedGameId);
+		console.log("App:  $currentGame =", $currentGame);
+	}	
+
 	$: {
 		if (selectedLang !== null) updateGlobalLanguage();
+	}
+
+	$: {
+		if (selectedGameId !== null) updateCurrentGame();
 	}
 
 	let gameIndex = null;

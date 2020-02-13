@@ -1,9 +1,10 @@
 <script>    
     import { fade } from 'svelte/transition';
     
-    import { languages, gameName, uiStrings as ui } from './ui/TicTacToe.js';
+    import { languages, gameName, gameId, uiStrings as ui } from './ui/TicTacToe.js';
 
-    import { globalLanguage } from '../stores.js';
+    // currentGame is a bugfix that disables transitions when routing
+    import { globalLanguage, currentGame } from '../stores.js';
 
     let language;
     
@@ -12,6 +13,13 @@
 	const unsubscribe = globalLanguage.subscribe(value => {
         language = value;        
 		console.log("TicTacToe:  language =", language);
+    });    
+    
+    let curGame;
+
+	const unsubscribe2 = currentGame.subscribe(value => {
+        curGame = value;        
+		console.log("TicTacToe:  curGame, gameId =", curGame, " &", gameId);
 	});    
 
     let moveCount = 0;
@@ -581,7 +589,7 @@
 
 
 <!-- GAME NAME -->
-<h1 class="center">{ gameName[language] }</h1>
+<!-- <h1 class="center">{ gameName[language] }</h1> -->
 
 <!-- TABLE -->
 <table class="center margin-after">
@@ -598,7 +606,7 @@
     {/each}
 </table>
 
-<!-- Buttons -->
+<!-- BUTTONS -->
 <div class="center margin-after">
     <button class="cool-button" on:click={restartGame} disabled={whoPlaysFirst === null}>
         { ui['start_game'][language] }
@@ -609,15 +617,16 @@
     </button>
 </div>
 
-<!-- Info Text -->
+<!-- INFO TEXT -->
 <h2 class="center unselectable"> 
     <!-- Do not remove &nbsp; -->
     { infoText } &nbsp;
 </h2>
 
-<!-- Who Plays First radio buttons etc -->
-{#if whoPlaysFirst === null}
-    <fieldset id='who-plays-first' transition:fade="{{delay: 300, duration: 800}}"
+<!-- WHO PLAYS FIRST radio buttons etc -->
+<!-- The fade transition messes up with routing, so use currentGame as a bugfix!!! -->
+{#if whoPlaysFirst === null && curGame === gameId}
+    <fieldset id='who-plays-first' transition:fade="{{delay: 100, duration: 500}}"
         class="limited-width margin-after {highlighted? 'highlighted': ''}"
         on:change={() => oppoTurn = true}    
     >

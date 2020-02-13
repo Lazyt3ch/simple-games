@@ -1,8 +1,12 @@
 <script>
     // import { fade } from 'svelte/transition';
     
-    import { languages, gameName, uiStrings as ui } from './ui/Battleship.js';
-    import { globalLanguage } from '../stores.js';
+    import { languages, gameName, gameId, uiStrings as ui } from './ui/Battleship.js';
+    // import { globalLanguage } from '../stores.js';
+
+    // currentGame is a bugfix that disables transitions when routing
+    import { globalLanguage, currentGame } from '../stores.js';
+
 
     // LANGUAGE HEAD ==============================>
     let language;    
@@ -39,12 +43,12 @@
         for (let r = 0; r < totalHeight; r++) {
             let row;
             if (r === 0) {
-                row = [9];
+                row = [' '];
             } else {
-                row = [alphabet.slice(r - 1, i)]; // row header
+                row = [alphabet.slice(r - 1, r)]; // row header
             }
 
-            for (let c = 0; c < totalWidth; c++) {
+            for (let c = 0; c < dataWidth; c++) {
                 if (r === 0) {
                     row.push(c + 1); // column header
                 } else {
@@ -67,7 +71,11 @@
             char = ' ';
         }
         */
-        char = num.toString();
+        if (num === 0) {
+            char = ' ';
+        } else {
+            char = num.toString();
+        }
 
         return char;
     }
@@ -98,6 +106,19 @@
     console.log("oppoBoard =", oppoBoard);    
     */
 
+    function getCellClass(rowIndex, colIndex) {
+        return `
+        ${colIndex % dataHeight === 0 && rowIndex > 0 ? 'thick-right-border' : ''}
+        ${rowIndex % dataWidth === 0 && colIndex > 0 ? 'thick-bottom-border' : ''}
+        ${colIndex === 0 && rowIndex === 0 ? 'no-top-left-borders' : ''}
+        ${(colIndex === 0 || rowIndex === 0) && colIndex !== rowIndex 
+            ? 'table-top-and-left-headers' : ''}
+        ${(colIndex === 0 && colIndex === rowIndex) ? 'top-left-header-cell' : ''}
+        `
+
+        // table-top-and-left-headers
+    }
+
     // GAME LOGIC TAIL ==============================>
 
 </script>
@@ -105,7 +126,7 @@
 
 <style>
     table, tr, td {
-        border: 1px solid black;
+        /* border: 1px solid black; */
         border-collapse: collapse;        
         font-family: Arial, Helvetica, sans-serif;
         font-size: 1em;
@@ -114,25 +135,58 @@
 
     table {
         margin-top: 1em;
-        background-color: aquamarine;
+        background-color: inherit;        
     }
 
     td {
-        height: 0.5em;
-        width: 0.5em;
+        height: 2em;
+        width: 2em;
         vertical-align: center;
-        font-size: 3em;
-        font-weight: bolder;
+        text-align: center;
+        /* font-size: 3em;
+        font-weight: bolder; */
+
+        background-color: aquamarine;
+
+        border-style: solid;
+        border-width: 1px;
+        border-color: gray;
+    }
+
+    .thick-bottom-border {
+        border-bottom-color: black;
+        border-bottom-width: 3px;
+    }
+
+    .thick-right-border {
+        border-right-color: black;
+        border-right-width: 3px;
+    }    
+
+    .no-top-left-borders {
+        border-top-style: none;
+        border-left-style: none;
+    }
+
+    .table-top-and-left-headers {
+        background-color: lightsteelblue;
+    }
+
+    .top-left-header-cell {
+        background-color: inherit;
+        border-style: none;
     }
 
     .user {
         display: inline-block;
+        margin-left: 1em;
         margin-right: 2em;
         /* float: left; */
     }
 
     .opponent {
         display: inline-block;
+        margin-left: 1em;
         /* float: right; */
     }    
 
@@ -142,50 +196,64 @@
         text-align: center;
     }
 
+    /*
     .margin-after {
         margin-bottom: 1em;
+    }
+    */
+
+    .container {
+        width: 100%;
+    }
+
+    .user-or-opponent {
+        text-align: center;
     }
 
 </style>
 
 
 <!-- GAME NAME -->
-<h1 class="center">{ gameName[language] }</h1>
+<!-- <h1 class="center">{ gameName[language] }</h1> -->
 
-<div class="user">
-    <h3>{ ui["user_ships"][language] }</h3>
+<div class="container">
+    <div class="user">
+        <h3 class="user-or-opponent">{ ui["user_ships"][language] }</h3>
 
-    <!-- TABLE with USER's SHIPS -->
-    <table>
-        {#each userBoard as row, rowIndex}
-            <tr>
-                {#each row as cell, colIndex}
-                    <td on:click={ () => placeShip(rowIndex, colIndex) }
-                        class="{cell === 2 || cell === -2 ? 'winner' : ''} unselectable"                            
-                    >
-                        { @html num2char(cell) }
-                    </td>
-                {/each}
-            </tr>
-        {/each}
-    </table>
-</div>
+        <!-- TABLE with USER's SHIPS -->
+        <table>
+            {#each userBoard as row, rowIndex}
+                <tr>
+                    {#each row as cell, colIndex}
+                        <td on:click={ () => placeShip(rowIndex, colIndex) }
+                            class="{getCellClass(rowIndex, colIndex)}"                                                   
+                        >
+                            { @html rowIndex > 0 && colIndex > 0 ? num2char(cell) : cell }
+                        </td>
+                    {/each}
+                </tr>
+            {/each}
+        </table>
+    </div>
 
-<div class="opponent">
-    <h3>{ ui["opponent_ships"][language] }</h3>
+    <div class="opponent">
+        <h3 class="user-or-opponent">{ ui["opponent_ships"][language] }</h3>
 
-    <!-- TABLE with OPPONENT's SHIPS -->
-    <table>
-        {#each oppoBoard as row, rowIndex}
-            <tr>
-                {#each row as cell, colIndex}
-                    <td on:click={ () => fireSalvo(rowIndex, colIndex) }
-                        class="{cell === 2 || cell === -2 ? 'winner' : ''} unselectable"                            
-                    >
-                        { @html num2char(cell) }
-                    </td>
-                {/each}
-            </tr>
-        {/each}
-    </table>
-</div>
+        <!-- TABLE with OPPONENT's SHIPS -->
+        <table>
+            {#each oppoBoard as row, rowIndex}
+                <tr>
+                    {#each row as cell, colIndex}
+                        <td on:click={ () => fireSalvo(rowIndex, colIndex) }
+                            class="{getCellClass(rowIndex, colIndex)}"                         
+                        >
+                            { @html rowIndex > 0 && colIndex > 0 ? num2char(cell) : cell }
+                        </td>
+                    {/each}
+                </tr>
+            {/each}
+        </table>
+    </div>
+</div>    
+
+<p>&nbsp</p> <!-- dummy paragraph -->
