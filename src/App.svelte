@@ -98,10 +98,11 @@
 
 	<!-- Game selector -->
 	<!--			bind:value={selectedGame} on:change={() => game = selectedGame} -->
+	<!-- 			bind:value={selectedGameId} on:change={() => selectedGameId=games[0].id} -->
 	<label for="game-select" >
 		&nbsp;
-		<select name="game-name" id="game-select" class="game-select"
-			bind:value={selectedGameId}
+		<select name="game-name" id="game-select" class="game-select leftish"
+			bind:value={selectedGameId} 
 		>
 			{#each games as game, index}
 				<option value="{games[index].id}" disabled={index === 0}> { game.name[language] } </option> 
@@ -113,7 +114,7 @@
 	<!-- Language selector -->
 	<label for="language-select" >
 		&nbsp;
-		<select name="language" id="language-select" class="language-select"
+		<select name="language" id="language-select" class="language-select rightish"
 			bind:value={selectedLang} on:change={() => language = selectedLang}
 		>
 			{#each languages as lang}
@@ -136,6 +137,18 @@
 
 	.language-select {
 		min-width: 7em;
+	}
+
+    .rightish {
+        /* margin-left: 70%;
+        margin-right: auto; */
+		float: right;
+        text-align: left;
+    }	
+
+	.leftish {
+		float: left;
+		text-align: left;
 	}
 
 

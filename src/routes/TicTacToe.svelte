@@ -5,54 +5,18 @@
 
     import { globalLanguage } from '../stores.js';
 
-    // console.log("gameName =", gameName);
-
-    // export gameName;
-
-    // let language = null;
-    let language, selectedLang;
+    let language;
     
     console.log("TicTacToe:  $globalLanguage =", $globalLanguage);
 
-	let globLang = null;
-
 	const unsubscribe = globalLanguage.subscribe(value => {
-		globLang = value;
-		console.log("globLang =", globLang);
+        language = value;        
+		console.log("TicTacToe:  language =", language);
 	});    
-
-    function setLanguage() {
-        for (let i = 0; i < languages.length; i++) {
-            if (languages[i].short === globLang) {
-                language = globLang;
-                selectedLang = globLang;
-                return;
-            }
-        }
-        language = languages[0].short;
-    }
-
-    setLanguage();    
-    selectedLang = language;
-
-	function updateGlobalLanguage() {
-		console.log("App:  trying to update globalLanguage...");
-		globalLanguage.update(() => language);
-		console.log("App:  $globalLanguage =", $globalLanguage);
-	}
-
-	$: {
-		if (selectedLang !== null) updateGlobalLanguage();
-	}    
-
-    $: {
-        if (selectedLang !== null) setLanguage();
-    }
 
     let moveCount = 0;
 
     let highlighted = false;
-
 
     let oppoTurn = false;
 
@@ -562,11 +526,13 @@
         text-align: center;
     }
 
+    /*
     .rightish {
         margin-left: 70%;
         margin-right: auto;
         text-align: left;
     }
+    */
 
     .margin-after {
         margin-bottom: 1em;
@@ -614,7 +580,8 @@
 </style>
 
 
-<!-- <h1 class="center">{ ui['game_name'][language] }</h1> -->
+<h1 class="center">{ gameName[language] }</h1>
+<!--
 <h1 class="center">{ gameName[language] }</h1>
 
 <label for="language-select" class="rightish">
@@ -627,6 +594,7 @@
         {/each}
     </select>
 </label>
+-->
 
 <!-- Table -->
 <table class="center margin-after">
