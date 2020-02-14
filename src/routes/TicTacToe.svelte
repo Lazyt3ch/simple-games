@@ -26,8 +26,8 @@
 		console.log("TicTacToe:  language =", language);
     });    
     
+    // currentGame is a bugfix that disables transitions when routing
     let curGame;
-
 	const unsubscribe2 = currentGame.subscribe(value => {
         curGame = value;        
 		console.log("TicTacToe:  curGame, gameId =", curGame, " &", gameId);

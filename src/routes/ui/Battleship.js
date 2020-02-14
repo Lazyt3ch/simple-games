@@ -99,12 +99,12 @@ export const uiStrings = {
         en: "Enemy ships",
         ru: "Корабли противника",
     },
-    'selectShipText':
+    'select_ship_text':
     {
-        en: "Add a ship to your board",
-        ru: "Добавьте корабль на свою доску",
+        en: "Position your ships",
+        ru: "Разместите свои корабли",
     },
-    'selectShip':
+    'select_ship':
     {
         en: "Select a ship...",
         ru: "Выберите корабль...",
@@ -130,6 +130,30 @@ export const uiStrings = {
         en: "Motorboat",
         ru: "Катер",
     },
+
+    // Table listing ship classes, sizes, quantities, etc
+    'class':
+    {
+        en: "Class",
+        ru: "Тип",
+    },
+    'size':
+    {
+        en: "Size",
+        ru: "Размер",
+    },
+    'total_number':
+    {
+        en: "Total number",
+        ru: "Общая численность",
+    },
+    'to_be_positioned':
+    {
+        en: "To be positioned",
+        ru: "Осталось разместить",
+    },
+
+
 
 
 

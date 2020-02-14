@@ -1,5 +1,5 @@
 <script>
-    // import { fade } from 'svelte/transition';
+    import { fade } from 'svelte/transition';
     
     import { languages, gameName, gameId, uiStrings as ui } from './ui/Battleship.js';
     // import { globalLanguage } from '../stores.js';
@@ -15,8 +15,17 @@
 	const unsubscribe = globalLanguage.subscribe(value => {
         language = value;        
 		console.log("Battleship:  language =", language);
-	});    
+    });     
     // LANGUAGE TAIL ==============================<
+
+
+    // currentGame is a bugfix that disables transitions when routing
+    let curGame;
+	const unsubscribe2 = currentGame.subscribe(value => {
+        curGame = value;        
+		console.log("Battleship:  curGame, gameId =", curGame, " &", gameId);
+    });    
+    
 
     // GAME LOGIC HEAD ==============================>
 
@@ -114,14 +123,37 @@
         // table-top-and-left-headers
     }
 
+    let isUserShipsPlaced = false;
+
     const ships = [        
-        { class: 'battleship', size: 4, quantity: 1 },
-        { class: 'cruiser',   size: 3, quantity: 2 },
-        { class: 'destroyer', size: 2, quantity: 3 },
-        { class: 'motorboat', size: 1, quantity: 4 },
+        { class: 'battleship', size: 4, totalNumber: 1 },
+        { class: 'cruiser',   size: 3, totalNumber: 2 },
+        { class: 'destroyer', size: 2, totalNumber: 3 },
+        { class: 'motorboat', size: 1, totalNumber: 4 },
     ]
 
-    let shipOptions = ['Select a ship', ...ships];
+    let userShips = [];
+
+    function restartGame() {
+        // userShips = JSON.parse(JSON.stringify(ships));
+        userShips = [];
+        ships.forEach( ship => {
+            let userShip = {
+                class: ship.class,
+                size: ship.size,
+                totalNumber: ship.totalNumber,
+                toBePositioned: ship.totalNumber,              
+            }
+            userShips.push(userShip);
+        })
+
+        console.log("userShips =", userShips);
+
+    }
+
+    restartGame();
+
+    let shipOptions = ['Select a ship', ...userShips];
 
     let selectedShipClass = null;
 
@@ -131,7 +163,45 @@
 
 
 <style>
-    table, tr, td {
+    .ship-list {        
+        margin-top: .5em;
+        border-collapse: collapse;      
+
+        font-size: 1em;
+    }
+
+    .ship-list-data {
+        background-color: white;
+
+        border-style: solid;
+        border-width: 1px;
+        border-color: gray;   
+
+        padding: 0.2em;
+        /* text-align: left; */
+
+        word-wrap: normal;
+    }
+
+    .content-leftish {
+        text-align: left;
+    }
+
+    .content-rightish {
+        text-align: right;
+    }    
+
+    .ship-list-headers {
+        font-size: .8em;
+    }
+
+    .small-header {
+        margin-block-end: .5em;
+    }
+
+
+
+    .board, .board-row, .board-data {
         /* border: 1px solid black; */
         border-collapse: collapse;        
         font-family: Arial, Helvetica, sans-serif;
@@ -139,12 +209,12 @@
         font-weight: 100;
     }
 
-    table {
+    .board {
         margin-top: 1em;
         background-color: inherit;        
     }
 
-    td {
+    .board-data {
         height: 2em;
         width: 2em;
         vertical-align: center;
@@ -187,20 +257,24 @@
         /* display: inline-block; */
         margin-left: 1em;
         margin-right: 2em;
+        margin-top: 0;
         float: left;
     }
 
     .opponent {
         /* display: inline-block; */
         margin-left: 1em;
+        margin-top: 0;
         float: right;
     }    
 
-    /*
     .ship-select {
-        display: inline-block;
+        /* display: inline-block; */
+        margin-top: 1em;
+        float: right;
+        margin-right: 1em;
+        margin-bottom: 1em;
     }
-    */
 
     .center {
         margin-left: auto;
@@ -216,11 +290,20 @@
 
     .container {
         width: 100%;
+        max-width: 70em;
+        margin-top: 0.5em;
     }
 
     .user-or-opponent {
         text-align: center;
+        margin: 0;
     }
+
+    /*
+    .leftish {
+        float: left;
+    }
+    */
 
 </style>
 
@@ -233,12 +316,12 @@
         <h3 class="user-or-opponent">{ ui["user_ships"][language] }</h3>
 
         <!-- TABLE with USER's SHIPS -->
-        <table>
+        <table class="board">
             {#each userBoard as row, rowIndex}
-                <tr>
+                <tr class="board-row">
                     {#each row as cell, colIndex}
                         <td on:click={ () => placeShip(rowIndex, colIndex) }
-                            class="{getCellClass(rowIndex, colIndex)}"                                                   
+                            class="{getCellClass(rowIndex, colIndex)} board-data"                                                   
                         >
                             { @html rowIndex > 0 && colIndex > 0 ? num2char(cell) : cell }
                         </td>
@@ -246,44 +329,72 @@
                 </tr>
             {/each}
         </table>
+    </div>
 
-        <!-- HERE USER CAN ADD SHIPS ONTO THE BOARD -->
+    <!-- HERE USER CAN ADD SHIPS ONTO THE BOARD -->
+    {#if !isUserShipsPlaced && curGame === gameId}
+        <div class='ship-select'>
+            <h4 class="small-header">{ ui['select_ship_text'][language] }</h4>
+            <!--
+            <label for="ship-select" >                
+            </label>    
+            -->
 
-        <!-- Ship selector -->
-        <label for="ship-select" >
-            { ui['selectShipText'][language] }
-            <select name="ship-class" id="ship-select" class="ship-select leftish"
+            <!-- Ship selector -->
+            <select name="ship-class" 
                 bind:value={selectedShipClass} 
             >
                 {#each shipOptions as ship, index}
-                    <option value="{shipOptions[index].id}" disabled={index === 0}>
-                        { index > 0 ? ui[ship.class][language] : ui['selectShip'][language] } 
+                    <option value="{shipOptions[index].class}" disabled={index === 0}>
+                        { index > 0 ? ui[ship.class][language] : ui['select_ship'][language] } 
                     </option> 
                 {/each}
             </select>
-        </label>    
 
-    </div>
+            <h4 class="small-header">{ ui['user_ships'][language] }</h4>
 
-
-    <div class="opponent">
-        <h3 class="user-or-opponent">{ ui["opponent_ships"][language] }</h3>
-
-        <!-- TABLE with OPPONENT's SHIPS -->
-        <table>
-            {#each oppoBoard as row, rowIndex}
-                <tr>
-                    {#each row as cell, colIndex}
-                        <td on:click={ () => fire(rowIndex, colIndex) }
-                            class="{getCellClass(rowIndex, colIndex)}"                         
-                        >
-                            { @html rowIndex > 0 && colIndex > 0 ? num2char(cell) : cell }
-                        </td>
-                    {/each}
+            <!-- TABLE TO DISPLAY HOW MANY USER SHIPS ARE AWAILABLE -->
+            <table class="ship-list">
+                <tr class="content-leftish ship-list-headers">
+                    <th class="ship-list-data"> { ui['class'][language]} </th>
+                    <th class="ship-list-data"> { ui['size'][language]} </th>       
+                    <th class="ship-list-data"> { ui['total_number'][language]} </th>                             
+                    <th class="ship-list-data"> { ui['to_be_positioned'][language]} </th>                             
                 </tr>
-            {/each}
-        </table>
-    </div>
+                {#each userShips as userShip, index}
+                    <tr>
+                        <td class="ship-list-data content-leftish"> { ui[userShip.class][language] } </td>
+                        <td class="ship-list-data content-rightish"> { userShip.size } </td>
+                        <td class="ship-list-data content-rightish"> { userShip.totalNumber } </td>
+                        <td class="ship-list-data content-rightish"> { userShip.toBePositioned } </td>
+                    </tr>
+                {/each}        
+            </table>
+        </div>
+
+        <div>&nbsp;</div>
+    {/if}
+
+    {#if isUserShipsPlaced && curGame === gameId}}
+        <div class="opponent" transition:fade="{{delay: 100, duration: 500}}">
+            <h3 class="user-or-opponent">{ ui["opponent_ships"][language] }</h3>
+
+            <!-- TABLE with OPPONENT's SHIPS -->
+            <table class="board">
+                {#each oppoBoard as row, rowIndex}
+                    <tr class="board-row">
+                        {#each row as cell, colIndex}
+                            <td on:click={ () => fire(rowIndex, colIndex) }
+                                class="{getCellClass(rowIndex, colIndex)} board-data"                         
+                            >
+                                { @html rowIndex > 0 && colIndex > 0 ? num2char(cell) : cell }
+                            </td>
+                        {/each}
+                    </tr>
+                {/each}
+            </table>
+        </div>
+    {/if}
 </div>    
 
 <p>&nbsp</p> <!-- dummy paragraph -->
