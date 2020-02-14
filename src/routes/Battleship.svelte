@@ -7,6 +7,18 @@
     // currentGame is a bugfix that disables transitions when routing
     import { globalLanguage, currentGame } from '../stores.js';
 
+    import { onDestroy } from 'svelte';
+
+    document.addEventListener('click', updateMousePosition);    
+
+    onDestroy(() => {
+        console.log('the component is being destroyed');
+        document.removeEventListener('click', updateMousePosition);
+        // isAlive = false;
+    });    
+
+    
+
 
     // LANGUAGE HEAD ==============================>
     let language;    
@@ -90,6 +102,15 @@
 
     }
 
+    let mouseX = 0, mouseY = 0; // mouse position
+
+    function updateMousePosition() {
+        // if (cellClicksBlocked) return;
+        mouseX = event.clientX;
+        mouseY = event.clientY;
+        console.log("mouseX, mouseY =", mouseX, mouseY);
+    }
+
 
     let selectedShipClass = null;
     // let selectedShipClass = ui['select_ship'][language];
@@ -149,6 +170,7 @@
     }
 
     let isUserShipsPlaced = false;
+    // let isUserShipsPlaced = true;    
 
     const ships = [        
         { class: 'battleship', size: 4, totalNumber: 1 },
@@ -189,13 +211,37 @@
         return false;
     }
 
+    let popupText = '';
+    let popupVisible = false;
+    let cellClicksBlocked = false;
+    let popupX = 0, popupY = 0;
+
+    function showPopup(textToShow) {
+        popupText = textToShow;
+        popupVisible = true;
+        cellClicksBlocked = true;
+        // popupX = Math.max(20, mouseX - 50);
+        // popupY = mouseY - 50;
+        popupX = mouseX;
+        popupY = mouseY;
+        console.log("mouseX, mouseY, popupX, popupY =", mouseX, mouseY, popupX, popupY);
+
+        // style="left: {Math.max(20, mouseX - 50)}px; top: {mouseY - 50}px"
+
+        setTimeout( () => {
+            popupVisible = false;
+            cellClicksBlocked = false;
+        }, 2000);
+    }
 
     function placeShip(rowIndex, colIndex) {
+        // if (cellClicksBlocked) return;
         if (rowIndex === 0 || colIndex === 0) return; // headers
 
         if (userBoard[rowIndex][colIndex] === 0) {  // empty cell
             if (isUnsafeAtCorners(rowIndex, colIndex)) {
-                alert("You cannot place a ship here!");
+                // alert("You cannot place a ship here!");
+                showPopup(ui['cannot_position_here'][language]);
                 return;
             }
             userBoard[rowIndex][colIndex] = 1; // ship-containing cell            
@@ -380,6 +426,86 @@
     }
     */
 
+    /* POPUP HEAD ==================================> */
+    /* source: https://www.w3schools.com/howto/tryit.asp?filename=tryhow_js_popup */
+
+    /* Popup container - can be anything you want 
+    .popup {
+        position: relative;
+        display: inline-block;
+        cursor: pointer;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+    } */
+
+    /* The actual popup 
+    .popup .popuptext {
+        visibility: hidden;
+        width: 160px;
+        background-color: #555;
+        color: #fff;
+        text-align: center;
+        border-radius: 6px;
+        padding: 8px 0;
+        position: absolute;
+        z-index: 1;
+        bottom: 125%;
+        left: 50%;
+        margin-left: -80px;
+    } */
+
+    /* Popup arrow 
+    .popup .popuptext::after {
+        content: "";
+        position: absolute;
+        top: 100%;
+        left: 50%;
+        margin-left: -5px;
+        border-width: 5px;
+        border-style: solid;
+        border-color: #555 transparent transparent transparent;
+    } */
+
+    /* Toggle this class - hide and show the popup 
+    .popup .show {
+        visibility: visible;
+        -webkit-animation: fadeIn 1s;
+        animation: fadeIn 1s;
+    } */
+
+    /* Add animation (fade in the popup) 
+    @-webkit-keyframes fadeIn {
+        from {opacity: 0;} 
+        to {opacity: 1;}
+    } */
+
+    /*
+    @keyframes fadeIn {
+        from {opacity: 0;}
+        to {opacity:1 ;}
+    } */
+    /* POPUP TAIL ==================================< */
+
+    .cell-popup {
+        position: absolute;
+        z-index: 100;
+        background-color: black;
+        color: white;        
+        padding: 0.5em;        
+        border-radius: 5px;
+        font-size: .8em;
+    }
+
+    .popup-hidden {
+        visibility: hidden;
+    }
+
+    .popup-visible {
+        visibility: visible;
+    }
+
 </style>
 
 
@@ -475,3 +601,9 @@
 </div>    
 
 <p>&nbsp</p> <!-- dummy paragraph -->
+
+<div id="cell-popup" class="cell-popup popup-{popupVisible ? 'visible' : 'hidden'}"
+    style="left: {popupX}px; top: {popupY}px"
+>
+    { popupText }
+</div>

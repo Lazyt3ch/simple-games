@@ -152,6 +152,11 @@ export const uiStrings = {
         en: "To be positioned",
         ru: "Осталось разместить",
     },
+    'cannot_position_here':
+    {
+        en: "You cannot position a ship here!",
+        ru: "Здесь нельзя разместить корабль!",
+    },
 
 
 
