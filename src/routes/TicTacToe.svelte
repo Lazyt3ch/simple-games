@@ -1,10 +1,21 @@
 <script>    
+    // import { onDestroy } from 'svelte';
+
     import { fade } from 'svelte/transition';
     
     import { languages, gameName, gameId, uiStrings as ui } from './ui/TicTacToe.js';
 
     // currentGame is a bugfix that disables transitions when routing
     import { globalLanguage, currentGame } from '../stores.js';
+
+    /*
+    let isAlive = true;
+
+    onDestroy(() => {
+        console.log('the component is being destroyed');
+        isAlive = false;
+    });
+    */
 
     let language;
     
@@ -625,7 +636,8 @@
 
 <!-- WHO PLAYS FIRST radio buttons etc -->
 <!-- The fade transition messes up with routing, so use currentGame as a bugfix!!! -->
-{#if whoPlaysFirst === null && curGame === gameId}
+<!-- {#if whoPlaysFirst === null && isAlive} -->
+{#if whoPlaysFirst === null && curGame === gameId} 
     <fieldset id='who-plays-first' transition:fade="{{delay: 100, duration: 500}}"
         class="limited-width margin-after {highlighted? 'highlighted': ''}"
         on:change={() => oppoTurn = true}    

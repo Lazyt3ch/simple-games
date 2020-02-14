@@ -99,6 +99,38 @@ export const uiStrings = {
         en: "Enemy ships",
         ru: "Корабли противника",
     },
+    'selectShipText':
+    {
+        en: "Add a ship to your board",
+        ru: "Добавьте корабль на свою доску",
+    },
+    'selectShip':
+    {
+        en: "Select a ship...",
+        ru: "Выберите корабль...",
+    },
+    // Ship classes below
+    'battleship':
+    {
+        en: "Battleship",
+        ru: "Линкор",
+    },
+    'cruiser':
+    {
+        en: "Cruiser",
+        ru: "Крейсер",
+    },
+    'destroyer':
+    {
+        en: "Destroyer",
+        ru: "Эсминец",
+    },
+    'motorboat':
+    {
+        en: "Motorboat",
+        ru: "Катер",
+    },
+
 
 
 }

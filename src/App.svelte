@@ -117,42 +117,6 @@
 
 </script>
 
-<main>
-
-	<!-- Game selector -->
-	<!--			bind:value={selectedGame} on:change={() => game = selectedGame} -->
-	<!-- 			bind:value={selectedGameId} on:change={() => selectedGameId=games[0].id} -->
-	<label for="game-select" >
-		&nbsp;
-		<select name="game-name" id="game-select" class="game-select leftish"
-			bind:value={selectedGameId} 
-		>
-			{#each games as game, index}
-				<option value="{games[index].id}" disabled={index === 0}> { game.name[language] } </option> 
-				<!-- <option value="{game}" > { game } </option> -->
-			{/each}
-		</select>
-	</label>
-
-	<!-- Language selector -->
-	<label for="language-select" >
-		&nbsp;
-		<select name="language" id="language-select" class="language-select rightish"
-			bind:value={selectedLang} on:change={() => language = selectedLang}
-		>
-			{#each languages as lang}
-				<option value="{lang.short}"> { lang.full } </option>
-			{/each}
-		</select>
-	</label>
-
-	<hr> <!-- Above this line, the App; below this line, a specific game -->
-
-	<!-- Component displayed (depending on route) -->
-	<Router {routes} />
-</main>
-
-
 <style>
 	.game-select {
 		min-width: 12em;
@@ -200,3 +164,38 @@
 	}
 </style>
 
+
+<main>
+
+	<!-- Game selector -->
+	<!--			bind:value={selectedGame} on:change={() => game = selectedGame} -->
+	<!-- 			bind:value={selectedGameId} on:change={() => selectedGameId=games[0].id} -->
+	<label for="game-select" >
+		&nbsp;
+		<select name="game-name" id="game-select" class="game-select leftish"
+			bind:value={selectedGameId} 
+		>
+			{#each games as game, index}
+				<option value="{games[index].id}" disabled={index === 0}> { game.name[language] } </option> 
+				<!-- <option value="{game}" > { game } </option> -->
+			{/each}
+		</select>
+	</label>
+
+	<!-- Language selector -->
+	<label for="language-select" >
+		&nbsp;
+		<select name="language" id="language-select" class="language-select rightish"
+			bind:value={selectedLang} on:change={() => language = selectedLang}
+		>
+			{#each languages as lang}
+				<option value="{lang.short}"> { lang.full } </option>
+			{/each}
+		</select>
+	</label>
+
+	<hr> <!-- Above this line, the App; below this line, a specific game -->
+
+	<!-- Component displayed (depending on route) -->
+	<Router {routes} />
+</main>

@@ -66,11 +66,6 @@
     function num2char(num) {
         let char;
 
-        /*
-        if (num === 0) {
-            char = ' ';
-        }
-        */
         if (num === 0) {
             char = ' ';
         } else {
@@ -81,7 +76,7 @@
     }
 
 
-    function fireSalvo() {
+    function fire() {
 
 
     }
@@ -118,6 +113,17 @@
 
         // table-top-and-left-headers
     }
+
+    const ships = [        
+        { class: 'battleship', size: 4, quantity: 1 },
+        { class: 'cruiser',   size: 3, quantity: 2 },
+        { class: 'destroyer', size: 2, quantity: 3 },
+        { class: 'motorboat', size: 1, quantity: 4 },
+    ]
+
+    let shipOptions = ['Select a ship', ...ships];
+
+    let selectedShipClass = null;
 
     // GAME LOGIC TAIL ==============================>
 
@@ -178,17 +184,23 @@
     }
 
     .user {
-        display: inline-block;
+        /* display: inline-block; */
         margin-left: 1em;
         margin-right: 2em;
-        /* float: left; */
+        float: left;
     }
 
     .opponent {
-        display: inline-block;
+        /* display: inline-block; */
         margin-left: 1em;
-        /* float: right; */
+        float: right;
     }    
+
+    /*
+    .ship-select {
+        display: inline-block;
+    }
+    */
 
     .center {
         margin-left: auto;
@@ -234,7 +246,25 @@
                 </tr>
             {/each}
         </table>
+
+        <!-- HERE USER CAN ADD SHIPS ONTO THE BOARD -->
+
+        <!-- Ship selector -->
+        <label for="ship-select" >
+            { ui['selectShipText'][language] }
+            <select name="ship-class" id="ship-select" class="ship-select leftish"
+                bind:value={selectedShipClass} 
+            >
+                {#each shipOptions as ship, index}
+                    <option value="{shipOptions[index].id}" disabled={index === 0}>
+                        { index > 0 ? ui[ship.class][language] : ui['selectShip'][language] } 
+                    </option> 
+                {/each}
+            </select>
+        </label>    
+
     </div>
+
 
     <div class="opponent">
         <h3 class="user-or-opponent">{ ui["opponent_ships"][language] }</h3>
@@ -244,7 +274,7 @@
             {#each oppoBoard as row, rowIndex}
                 <tr>
                     {#each row as cell, colIndex}
-                        <td on:click={ () => fireSalvo(rowIndex, colIndex) }
+                        <td on:click={ () => fire(rowIndex, colIndex) }
                             class="{getCellClass(rowIndex, colIndex)}"                         
                         >
                             { @html rowIndex > 0 && colIndex > 0 ? num2char(cell) : cell }
