@@ -91,9 +91,34 @@
     }
 
 
-    function placeShip() {
+    let selectedShipClass = null;
+    // let selectedShipClass = ui['select_ship'][language];
+
+    $: {
+        if (selectedShipClass) {
+            console.log("selectedShipClass =", selectedShipClass);
+        }
+    }
+
+    let curShipIndex = 0;
+
+    function recountUserShips() {
 
     }
+
+    /*
+    function isAnythingAround(rowIndex, colIndex) {
+        for (let r = Math.max(1, rowIndex - 1); r < rowIndex + 1 && r < totalWidth; r++) {
+            for (let c = Math.max(1, colIndex - 1); c < colIndex + 1 && c < totalHeight; c++) {
+
+            }
+        }
+
+        return true;
+    }
+    */
+
+
 
 
     let userBoard = newEmptyBoard();
@@ -134,16 +159,67 @@
 
     let userShips = [];
 
+    function isValidCell(rowIndex, colIndex) {
+        return (rowIndex > 0 && rowIndex < 11 && colIndex > 0 && colIndex < 11);
+    }
+
+    function isUnsafeAtCorners(rowIndex, colIndex) {      
+        console.log("rowIndex, colIndex =", rowIndex, colIndex);
+        
+        // top left corner  
+        if (isValidCell(rowIndex - 1, colIndex - 1) && userBoard[rowIndex - 1][colIndex - 1] !== 0) {
+            return true;
+        }
+
+        // top right corner
+        if (isValidCell(rowIndex - 1, colIndex + 1) && userBoard[rowIndex - 1][colIndex + 1] !== 0) {
+            return true;
+        }
+
+        // bottom left corner  
+        if (isValidCell(rowIndex + 1, colIndex - 1) && userBoard[rowIndex + 1][colIndex - 1] !== 0) {
+            return true;
+        }        
+
+        // bottom right corner  
+        if (isValidCell(rowIndex + 1, colIndex + 1) && userBoard[rowIndex + 1][colIndex + 1] !== 0) {
+            return true;
+        }      
+
+        return false;
+    }
+
+
+    function placeShip(rowIndex, colIndex) {
+        if (rowIndex === 0 || colIndex === 0) return; // headers
+
+        if (userBoard[rowIndex][colIndex] === 0) {  // empty cell
+            if (isUnsafeAtCorners(rowIndex, colIndex)) {
+                alert("You cannot place a ship here!");
+                return;
+            }
+            userBoard[rowIndex][colIndex] = 1; // ship-containing cell            
+        } else if (userBoard[rowIndex][colIndex] === 1) { // ship-containing cell
+            userBoard[rowIndex][colIndex] = 0;  // empty cell
+        }
+
+        userBoard = userBoard;
+    }    
+
+
     function restartGame() {
         // userShips = JSON.parse(JSON.stringify(ships));
         userShips = [];
+        // let shipIndex = 0;
         ships.forEach( ship => {
             let userShip = {
                 class: ship.class,
                 size: ship.size,
                 totalNumber: ship.totalNumber,
-                toBePositioned: ship.totalNumber,              
+                toBePositioned: ship.totalNumber,         
+                // shipIndex: shipIndex,     
             }
+            // shipIndex++;
             userShips.push(userShip);
         })
 
@@ -154,8 +230,6 @@
     restartGame();
 
     let shipOptions = ['Select a ship', ...userShips];
-
-    let selectedShipClass = null;
 
     // GAME LOGIC TAIL ==============================>
 
@@ -196,6 +270,7 @@
     }
 
     .small-header {
+        margin-block-start: .5em;
         margin-block-end: .5em;
     }
 
@@ -270,7 +345,7 @@
 
     .ship-select {
         /* display: inline-block; */
-        margin-top: 1em;
+        margin-top: .5em;
         float: right;
         margin-right: 1em;
         margin-bottom: 1em;
@@ -340,12 +415,14 @@
             </label>    
             -->
 
-            <!-- Ship selector -->
+            <!-- Ship class selector -->
             <select name="ship-class" 
                 bind:value={selectedShipClass} 
             >
                 {#each shipOptions as ship, index}
-                    <option value="{shipOptions[index].class}" disabled={index === 0}>
+                    <option value="{index > 0 ? shipOptions[index].class : null}" 
+                        disabled={index === 0}
+                    >
                         { index > 0 ? ui[ship.class][language] : ui['select_ship'][language] } 
                     </option> 
                 {/each}

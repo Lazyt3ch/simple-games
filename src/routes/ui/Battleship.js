@@ -106,8 +106,8 @@ export const uiStrings = {
     },
     'select_ship':
     {
-        en: "Select a ship...",
-        ru: "Выберите корабль...",
+        en: "Select a ship class...",
+        ru: "Выберите тип корабля...",
     },
     // Ship classes below
     'battleship':
