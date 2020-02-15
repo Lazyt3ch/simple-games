@@ -130,7 +130,11 @@ export const uiStrings = {
         en: "Motorboat",
         ru: "Катер",
     },
-
+    'unknown':
+    {
+        en: "What is this???",
+        ru: "Что это???",
+    },
     // Table listing ship classes, sizes, quantities, etc
     'class':
     {
@@ -145,21 +149,43 @@ export const uiStrings = {
     'total_number':
     {
         en: "Total number",
-        ru: "Общая численность",
+        ru: "Численность",
     },
     'to_be_positioned':
     {
         en: "To be positioned",
-        ru: "Осталось разместить",
+        ru: "Еще не размещены",
     },
+
+    // popup messages
     'cannot_position_here':
     {
-        en: "You cannot position a ship here!",
-        ru: "Здесь нельзя разместить корабль!",
+        // en: "You cannot position a ship here!",
+        // ru: "Здесь нельзя разместить корабль!",
+        en: "A ship must not touch any other ships!",
+        ru: "Корабль не должен касаться других кораблей!",
     },
 
+    'invalid_ship_size':
+    {
+        en: "That would create a ship of incorrect size!",
+        ru: "Так получится корабль неправильного размера!",
+    },
 
+    'position_ships':
+    {
+        en: "You need to position all of your ships on your board. " +
+            "See the table for hints what is missing and what is excessive",
+        ru: "Для начала разместите все свои корабли на доске. " + 
+            "Таблица подскажет, чего не хватает, а что лишнее.",
+    },
 
-
+    'can_start_now':
+    {
+        en: "You need to position all of your ships on your board. " +
+            "See the table for hints what is missing and what is excessive",
+        ru: "Для начала разместите все свои корабли на доске. " + 
+            "Таблица подскажет, чего не хватает, а что лишнее.",
+    },    
 
 }

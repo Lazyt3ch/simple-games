@@ -1,4 +1,6 @@
 <script>
+    import { beforeUpdate, tick } from 'svelte';
+
     import { fade } from 'svelte/transition';
     
     import { languages, gameName, gameId, uiStrings as ui } from './ui/Battleship.js';
@@ -16,9 +18,6 @@
         document.removeEventListener('click', updateMousePosition);
         // isAlive = false;
     });    
-
-    
-
 
     // LANGUAGE HEAD ==============================>
     let language;    
@@ -40,6 +39,14 @@
     
 
     // GAME LOGIC HEAD ==============================>
+
+    let whoPlaysFirst = null;
+
+    let info = 'position_ships';
+    // globalToBePositioned
+    // let infoText;
+
+    $: infoText = ui[info][language];
 
     const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 
@@ -155,17 +162,47 @@
     console.log("oppoBoard =", oppoBoard);    
     */
 
-    function getCellClass(rowIndex, colIndex) {
-        return `
-        ${colIndex % dataHeight === 0 && rowIndex > 0 ? 'thick-right-border' : ''}
-        ${rowIndex % dataWidth === 0 && colIndex > 0 ? 'thick-bottom-border' : ''}
-        ${colIndex === 0 && rowIndex === 0 ? 'no-top-left-borders' : ''}
-        ${(colIndex === 0 || rowIndex === 0) && colIndex !== rowIndex 
-            ? 'table-top-and-left-headers' : ''}
-        ${(colIndex === 0 && colIndex === rowIndex) ? 'top-left-header-cell' : ''}
-        `
+    // async function getCellClass(rowIndex, colIndex) {        
+    function getCellClass(rowIndex, colIndex) {        
+        // await tick();
 
-        // table-top-and-left-headers
+        // console.log("FUNCTION: getCellClass; rowIndex, colIndex =", rowIndex, colIndex);
+
+        // ${colIndex % dataHeight === 0 && rowIndex > 0 ? 'thick-right-border' : ''}
+        // ${rowIndex % dataWidth === 0 && colIndex > 0 ? 'thick-bottom-border' : ''}
+
+        let cellClass = `
+        board-cell
+        ${colIndex === 0 && rowIndex === 0 ? 'no-top-left-borders' : ''}
+        ${(colIndex === 0 || rowIndex === 0) && colIndex !== rowIndex ? 'top-and-left-headers' : ''}
+        ${(colIndex === 0 && colIndex === rowIndex) ? 'top-left-header-cell' : ''}
+        ${(rowIndex > 0 && colIndex > 0 && userBoard[rowIndex][colIndex] === 0) ? 'board-data' : ''}        
+        ${(rowIndex > 0 && colIndex > 0 && userBoard[rowIndex][colIndex] === 1) ? 'ship-cell' : ''}
+        `;
+
+        /*
+        let cellClass = 
+        (colIndex === 0 && rowIndex === 0 ? 'no-top-left-borders' : '') + ' ' +
+        ((colIndex === 0 || rowIndex === 0) && colIndex !== rowIndex ? 'top-and-left-headers' : '') + ' ' +
+        ((colIndex === 0 && colIndex === rowIndex) ? 'top-left-header-cell' : '') + ' ' +
+        ((rowIndex > 0 && colIndex > 0 && userBoard[rowIndex][colIndex] === 0) ? 'board-data' : '') + ' ' +
+        ((rowIndex > 0 && colIndex > 0 && userBoard[rowIndex][colIndex] === 1) ? 'ship-cell' : '');  
+        */
+
+        // console.log("cellClass =", cellClass);
+        return cellClass;
+
+        // top-and-left-headers
+    }
+
+    function getInfoClass(toBePositioned, totalNumber) {
+        let cellClass = `
+        ${toBePositioned === 0 ? 'ships-ready' : ''}
+        ${toBePositioned < 0 ? 'ships-overlimit' : ''}
+        ${toBePositioned > 0 && toBePositioned < totalNumber ? 'ships-underway' : ''}
+        `;
+
+        return cellClass;    
     }
 
     let isUserShipsPlaced = false;
@@ -176,12 +213,65 @@
         { class: 'cruiser',   size: 3, totalNumber: 2 },
         { class: 'destroyer', size: 2, totalNumber: 3 },
         { class: 'motorboat', size: 1, totalNumber: 4 },
+        // { class: 'unknown', size: 0, totalNumber: 0 }, // Here both size & totalNumber are dummy values
     ]
 
     const totalClasses = ships.length;
 
+    // Make an array of valid ship sizes
+    let validSizes = [];
+    for (let i = 0; i < totalClasses; i++) {
+        validSizes.push(ships[i].size);
+    }    
+    // console.log("validSizes =", validSizes);
+
     let userShips = [];
-    
+
+    function isValidSize(rowIndex, colIndex) {
+        let shipSize = 1;
+
+        // Check left
+        for (let c = Math.max(colIndex - 1, 1); c > 0; c--) {
+            if (c !== colIndex && userBoard[rowIndex][c] === 1) {
+                shipSize++;
+            } else {
+                break;
+            }
+        }
+
+        // Check right
+        for (let c = Math.min(colIndex + 1, dataWidth); c < totalWidth; c++) {
+            if (c !== colIndex && userBoard[rowIndex][c] === 1) {
+                shipSize++;
+            } else {
+                break;
+            }
+        }        
+
+        // Check top
+        for (let r = Math.max(rowIndex - 1, 1); r > 0; r--) {
+            if (r !== rowIndex && userBoard[r][colIndex] === 1) {
+                shipSize++;
+            } else {
+                break;
+            }
+        }
+
+        // Check bottom
+        for (let r = Math.min(rowIndex + 1, dataHeight); r < totalHeight; r++) {
+            if (r !== rowIndex && userBoard[r][colIndex] === 1) {
+                shipSize++;
+            } else {
+                break;
+            }
+        }              
+
+        console.log("shipSize =", shipSize);
+
+        return (validSizes.indexOf(shipSize) > -1);
+    }    
+
+    let isUserReady = false;
 
     function recountUserShips() {
         // To be called each time the user marks/unmarks a cell on the user board
@@ -197,7 +287,7 @@
                     if ((c === 1 || userBoard[r][c - 1] === 0) 
                     && (c === dataWidth || userBoard[r][c + 1] === 0)) {
                         curShipSize++;
-                        console.log("VERTICAL: r, c, curShipSize", r, c, curShipSize);
+                        // console.log("VERTICAL: r, c, curShipSize", r, c, curShipSize);
                     }
                 } 
                 
@@ -230,7 +320,7 @@
                     if ((r === 1 || userBoard[r - 1][c] === 0) 
                     && (r === dataHeight || userBoard[r + 1][c] === 0)) {
                         curShipSize++;
-                        console.log("HORIZONTAL: r, c, curShipSize", r, c, curShipSize);
+                        // console.log("HORIZONTAL: r, c, curShipSize", r, c, curShipSize);
                     }
                 } 
             
@@ -238,7 +328,7 @@
                     // console.log("HORIZONTAL: r, c =", r, c);
                     if (curShipSize) {
                         // Handle any ships, including one-cell ships 
-                        console.log("HORIZONTAL (HANDLING): r, c =", r, c);
+                        // console.log("HORIZONTAL (HANDLING): r, c =", r, c);
                         for (let s = 0; s < totalClasses; s++) {
                             if (userShips[s].size === curShipSize) {
                                 userShips[s].toBePositioned--;                                
@@ -251,9 +341,20 @@
             }
         }
 
+        let curToBePositioned = 0;
+        for (let s = 0; s < totalClasses; s++) {
+            curToBePositioned += userShips[s].toBePositioned;
+        }
+
+        globalToBePositioned = curToBePositioned;
+        console.log("globalToBePositioned =", globalToBePositioned);
+        if (globalToBePositioned === 0) {
+            info = 'can_start_now';
+            console.log("info, infoText = ", info, infoText);
+        }
 
         userShips = userShips;
-        console.log("userShips =", userShips);
+        // console.log("userShips =", userShips);
     }
 
 
@@ -262,7 +363,7 @@
     }
 
     function isUnsafeAtCorners(rowIndex, colIndex) {      
-        console.log("rowIndex, colIndex =", rowIndex, colIndex);
+        // console.log("rowIndex, colIndex =", rowIndex, colIndex);
         
         // top left corner  
         if (isValidCell(rowIndex - 1, colIndex - 1) && userBoard[rowIndex - 1][colIndex - 1] !== 0) {
@@ -320,6 +421,12 @@
                 showPopup(ui['cannot_position_here'][language]);
                 return;
             }
+
+            if (!isValidSize(rowIndex, colIndex)) {
+                showPopup(ui['invalid_ship_size'][language]);
+                return;
+            }
+
             userBoard[rowIndex][colIndex] = 1; // ship-containing cell            
         } else if (userBoard[rowIndex][colIndex] === 1) { // ship-containing cell
             userBoard[rowIndex][colIndex] = 0;  // empty cell
@@ -330,6 +437,7 @@
         recountUserShips();
     }    
 
+    let globalToBePositioned = 0;
 
     function initUserShips() {
         userShips = [];
@@ -340,6 +448,10 @@
                 totalNumber: ship.totalNumber,
                 toBePositioned: ship.totalNumber,         
             }
+
+            globalToBePositioned += ship.totalNumber;
+            console.log("globalToBePositioned =", globalToBePositioned);
+
             userShips.push(userShip);
         })
 
@@ -360,7 +472,8 @@
 
 
 <style>
-    .ship-list {        
+    /* Table with user ships data etc */
+    .ship-list-table {        
         margin-top: .5em;
         border-collapse: collapse;      
 
@@ -398,35 +511,42 @@
     }
 
 
-
-    .board, .board-row, .board-data {
-        /* border: 1px solid black; */
-        border-collapse: collapse;        
-        font-family: Arial, Helvetica, sans-serif;
-        font-size: 1em;
-        font-weight: 100;
-    }
-
+    /* Board (table) */
     .board {
+        border-collapse: collapse;  
         margin-top: 1em;
-        background-color: inherit;        
-    }
+        background-color: inherit;     
+        padding: 0;
+    }    
 
+    .board-cell { /* any cells, including header cells */
+        width: 2em;
+        height: 2em;
+        /* width: 30px;
+        height: 30px; */
+        /*
+        padding: 0;
+        margin: 0;
+        */
+    }
+   
     .board-data {
+        /* font-size: 1em; */ /* Use this option in development */
+        font-size: 0; /* Use this option in production */
+        font-weight: 100;
+
         height: 2em;
         width: 2em;
         vertical-align: center;
         text-align: center;
-        /* font-size: 3em;
-        font-weight: bolder; */
-
-        background-color: aquamarine;
+        background-color: lightskyblue;
 
         border-style: solid;
         border-width: 1px;
         border-color: gray;
     }
 
+    /*
     .thick-bottom-border {
         border-bottom-color: black;
         border-bottom-width: 3px;
@@ -436,20 +556,36 @@
         border-right-color: black;
         border-right-width: 3px;
     }    
+    */
 
+    /*
     .no-top-left-borders {
         border-top-style: none;
         border-left-style: none;
     }
+    */
 
-    .table-top-and-left-headers {
+    .top-and-left-headers {
         background-color: lightsteelblue;
+        text-align: center;
+        font-size: 1em;
+        font-family: Arial, Helvetica, sans-serif;
+        font-weight: 100;
     }
 
     .top-left-header-cell {
         background-color: inherit;
         border-style: none;
     }
+
+    .ship-cell {
+        border-style: none;
+        background-color: cadetblue;
+        font-size: 0;
+    }
+
+
+
 
     .user {
         /* display: inline-block; */
@@ -466,13 +602,32 @@
         float: right;
     }    
 
-    .ship-select {
+    /* .ship-select { */
+    .ship-list {
         /* display: inline-block; */
         margin-top: .5em;
         float: right;
         margin-right: 1em;
         margin-bottom: 1em;
     }
+
+    .ships-ready {
+        background-color: lightgreen;
+        color: blue;
+        font-weight: bold;
+    }
+
+    .ships-underway {
+        background-color: lightblue;
+        color: brown;
+        font-weight: bold;
+    }
+
+    .ships-overlimit {
+        background-color: red;
+        color: white;
+        font-weight: bold;
+    }    
 
     .center {
         margin-left: auto;
@@ -502,6 +657,35 @@
         float: left;
     }
     */
+
+    .info-text {
+        /* display: block; */
+        font-size: .8em;
+        font-weight: bold;
+        font-family: Arial, Helvetica, sans-serif;
+        color: black;
+        margin-top: 1em;
+        max-width: 25em;
+        text-align: left;
+    }
+
+    .unselectable {
+        -moz-user-select: -moz-none;
+        -khtml-user-select: none;
+        -webkit-user-select: none;
+        -o-user-select: none;
+        user-select: none;
+    }        
+
+    button.cool-button {
+        background-color: aqua;
+        color: blue;
+        font-weight: bold;
+        margin-top: .5em;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
 
     /* POPUP HEAD ==================================> */
     /* source: https://www.w3schools.com/howto/tryit.asp?filename=tryhow_js_popup */
@@ -588,6 +772,7 @@
 
 <!-- GAME NAME -->
 <!-- <h1 class="center">{ gameName[language] }</h1> -->
+<!-- class="{ () => getCellClass(rowIndex, colIndex) }"  -->
 
 <div class="container">
     <div class="user">
@@ -595,11 +780,13 @@
 
         <!-- TABLE with USER's SHIPS -->
         <table class="board">
-            {#each userBoard as row, rowIndex}
-                <tr class="board-row">
-                    {#each row as cell, colIndex}
+            <!-- Must use a key in #each loop -->
+            {#each userBoard as row, rowIndex (rowIndex)} 
+                <tr>
+                    <!-- Must use a key in #each loop -->
+                    {#each row as cell, colIndex (colIndex * dataHeight + colIndex)}
                         <td on:click={ () => placeShip(rowIndex, colIndex) }
-                            class="{getCellClass(rowIndex, colIndex)} board-data"                                                   
+                            class="{ getCellClass(rowIndex, colIndex) }"                                                   
                         >
                             { @html rowIndex > 0 && colIndex > 0 ? num2char(cell) : cell }
                         </td>
@@ -609,16 +796,20 @@
         </table>
     </div>
 
-    <!-- HERE USER CAN ADD SHIPS ONTO THE BOARD -->
+    <!-- HERE USER CAN CHECK USER SHIPS POSITIONED ON THE BOARD -->
     {#if !isUserShipsPlaced && curGame === gameId}
+        <div class="ship-list">
+        <!--
         <div class='ship-select'>
             <h4 class="small-header">{ ui['select_ship_text'][language] }</h4>
+            -->
             <!--
             <label for="ship-select" >                
             </label>    
             -->
 
             <!-- Ship class selector -->
+            <!--
             <select name="ship-class" 
                 bind:value={selectedShipClass} 
             >
@@ -630,26 +821,43 @@
                     </option> 
                 {/each}
             </select>
+            -->
 
             <h4 class="small-header">{ ui['user_ships'][language] }</h4>
 
             <!-- TABLE TO DISPLAY HOW MANY USER SHIPS ARE AWAILABLE -->
-            <table class="ship-list">
+            <table class="ship-list-table">
                 <tr class="content-leftish ship-list-headers">
                     <th class="ship-list-data"> { ui['class'][language]} </th>
                     <th class="ship-list-data"> { ui['size'][language]} </th>       
                     <th class="ship-list-data"> { ui['total_number'][language]} </th>                             
                     <th class="ship-list-data"> { ui['to_be_positioned'][language]} </th>                             
                 </tr>
-                {#each userShips as userShip, index}
+                <!-- Must use a key in #each loop -->
+                {#each userShips as userShip, index (index)}
                     <tr>
                         <td class="ship-list-data content-leftish"> { ui[userShip.class][language] } </td>
                         <td class="ship-list-data content-rightish"> { userShip.size } </td>
                         <td class="ship-list-data content-rightish"> { userShip.totalNumber } </td>
-                        <td class="ship-list-data content-rightish"> { userShip.toBePositioned } </td>
+                        <td class="ship-list-data content-rightish 
+                            { getInfoClass(userShip.toBePositioned, userShip.totalNumber) }
+                            "> 
+                            { userShip.toBePositioned } 
+                        </td>
                     </tr>
                 {/each}        
             </table>
+
+            <!-- INFO TEXT -->
+            <div class="center unselectable info-text"> 
+                <!-- Do not remove &nbsp; -->
+                { infoText } &nbsp;
+            </div>            
+
+            <button class="cool-button" on:click={restartGame} 
+                    disabled={globalToBePositioned !== 0 && whoPlaysFirst === null}>
+                { ui['start_game'][language] }
+            </button>            
         </div>
 
         <div>&nbsp;</div>
@@ -661,11 +869,13 @@
 
             <!-- TABLE with OPPONENT's SHIPS -->
             <table class="board">
-                {#each oppoBoard as row, rowIndex}
-                    <tr class="board-row">
-                        {#each row as cell, colIndex}
+                <!-- Must use a key in #each loop -->
+                {#each oppoBoard as row, rowIndex (rowIndex)}
+                    <tr>
+                        <!-- Must use a key in #each loop -->
+                        {#each row as cell, colIndex (colIndex * dataHeight + colIndex)}
                             <td on:click={ () => fire(rowIndex, colIndex) }
-                                class="{getCellClass(rowIndex, colIndex)} board-data"                         
+                                class="{getCellClass(rowIndex, colIndex)}"                         
                             >
                                 { @html rowIndex > 0 && colIndex > 0 ? num2char(cell) : cell }
                             </td>
