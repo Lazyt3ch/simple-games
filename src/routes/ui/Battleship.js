@@ -174,18 +174,16 @@ export const uiStrings = {
 
     'position_ships':
     {
-        en: "You need to position all of your ships on your board. " +
-            "See the table for hints what is missing and what is excessive",
-        ru: "Для начала разместите все свои корабли на доске. " + 
+        en: "You need to position all of your ships on the board. <br />" +
+            "See the table for hints what is missing or excessive.",
+        ru: "Для начала разместите все свои корабли на доске. <br />" + 
             "Таблица подскажет, чего не хватает, а что лишнее.",
     },
 
     'can_start_now':
     {
-        en: "You need to position all of your ships on your board. " +
-            "See the table for hints what is missing and what is excessive",
-        ru: "Для начала разместите все свои корабли на доске. " + 
-            "Таблица подскажет, чего не хватает, а что лишнее.",
+        en: "Now decide who plays first, and you can start the game!",
+        ru: "Теперь решите, кто сделает первый ход, и начните игру!",
     },    
 
 }

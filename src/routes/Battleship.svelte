@@ -44,10 +44,10 @@
 
     let info = 'position_ships';
     // globalToBePositioned
-    // let infoText;
+    let infoText;
 
     $: infoText = ui[info][language];
-
+    
     const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 
     // Both User's and Opponent's board size is 10 x 10
@@ -172,7 +172,7 @@
         // ${rowIndex % dataWidth === 0 && colIndex > 0 ? 'thick-bottom-border' : ''}
 
         let cellClass = `
-        board-cell
+        board-cell unselectable
         ${colIndex === 0 && rowIndex === 0 ? 'no-top-left-borders' : ''}
         ${(colIndex === 0 || rowIndex === 0) && colIndex !== rowIndex ? 'top-and-left-headers' : ''}
         ${(colIndex === 0 && colIndex === rowIndex) ? 'top-left-header-cell' : ''}
@@ -346,21 +346,22 @@
             curToBePositioned += userShips[s].toBePositioned;
         }
 
+        userShips = userShips;
+        // console.log("userShips =", userShips);
+
         globalToBePositioned = curToBePositioned;
         console.log("globalToBePositioned =", globalToBePositioned);
         if (globalToBePositioned === 0) {
             info = 'can_start_now';
             console.log("info, infoText = ", info, infoText);
         }
-
-        userShips = userShips;
-        // console.log("userShips =", userShips);
     }
 
 
     function isValidCell(rowIndex, colIndex) {
         return (rowIndex > 0 && rowIndex < 11 && colIndex > 0 && colIndex < 11);
     }
+
 
     function isUnsafeAtCorners(rowIndex, colIndex) {      
         // console.log("rowIndex, colIndex =", rowIndex, colIndex);
@@ -458,13 +459,26 @@
         console.log("userShips =", userShips);
     }
 
+
     function restartGame() {
         initUserShips();
     }
 
+
+    function startGame() {
+
+    }
+
     restartGame();
 
-    let shipOptions = ['Select a ship', ...userShips];
+    // let shipOptions = ['Select a ship', ...userShips];
+
+    let moveCount = 0;
+
+    let highlighted = false;
+
+    let oppoTurn = false;
+
 
     // GAME LOGIC TAIL ==============================>
 
@@ -660,8 +674,8 @@
 
     .info-text {
         /* display: block; */
-        font-size: .8em;
-        font-weight: bold;
+        font-size: 1em;
+        font-weight: normal;
         font-family: Arial, Helvetica, sans-serif;
         color: black;
         margin-top: 1em;
@@ -686,6 +700,14 @@
         margin-right: auto;
     }
 
+    /* used by who-plays-first */
+    .margin-after {
+        margin-bottom: 1em;
+    }
+
+    .limited-width {
+        max-width: 20em;
+    }
 
     /* POPUP HEAD ==================================> */
     /* source: https://www.w3schools.com/howto/tryit.asp?filename=tryhow_js_popup */
@@ -851,10 +873,37 @@
             <!-- INFO TEXT -->
             <div class="center unselectable info-text"> 
                 <!-- Do not remove &nbsp; -->
-                { infoText } &nbsp;
+                { @html infoText } &nbsp;
             </div>            
 
-            <button class="cool-button" on:click={restartGame} 
+            <!-- WHO PLAYS FIRST radio buttons etc -->
+            <!-- The fade transition messes up with routing, so use currentGame as a bugfix!!! -->
+            <!-- {#if whoPlaysFirst === null && isAlive} -->
+            {#if whoPlaysFirst === null && curGame === gameId && globalToBePositioned === 0} 
+                <fieldset id='who-plays-first' transition:fade="{{delay: 100, duration: 500}}"
+                    class="limited-width margin-after {highlighted? 'highlighted': ''}"
+                    on:change={() => oppoTurn = true}    
+                >
+                    <label class="unselectable"> { ui['who_plays_first'][language] } </label>
+                    
+                    <div class="div-inline">
+                        <label for="user-begins" class="unselectable"> 
+                            <input type='radio' bind:group={whoPlaysFirst} 
+                                id='user-begins' name="who-begins" value='user'>
+                            { ui['user_begins'][language] } 
+                        </label>
+
+                        <label for="opponent-begins" class="left-margin unselectable">
+                            <input type='radio' bind:group={whoPlaysFirst} 
+                                id='opponent-begins' name="who-begins" value='opponent'>
+                            { ui['opponent_begins'][language] } 
+                        </label>
+                    </div>
+                </fieldset>
+            {/if}
+
+
+            <button class="cool-button" on:click={startGame} 
                     disabled={globalToBePositioned !== 0 && whoPlaysFirst === null}>
                 { ui['start_game'][language] }
             </button>            
@@ -886,6 +935,9 @@
         </div>
     {/if}
 </div>    
+
+
+
 
 <p>&nbsp</p> <!-- dummy paragraph -->
 
