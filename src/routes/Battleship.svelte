@@ -53,10 +53,11 @@
     let totalWidth = dataWidth + 1;
 
     // 9 = unused cell (the upper left corner cell)
-    // 0 = empty cell
+    // 0 = empty cell    
     // 1 = undiscovered cell containing a ship
     // 2 = discovered cell containing a damaged ship
     // 3 = discovered cell containing a sunken ship
+    // 4 = empty cell that cannot be used because it touches a ship
 
     function newEmptyBoard() {
         let board = [];
@@ -123,9 +124,7 @@
 
     let curShipIndex = 0;
 
-    function recountUserShips() {
 
-    }
 
     /*
     function isAnythingAround(rowIndex, colIndex) {
@@ -179,7 +178,84 @@
         { class: 'motorboat', size: 1, totalNumber: 4 },
     ]
 
+    const totalClasses = ships.length;
+
     let userShips = [];
+    
+
+    function recountUserShips() {
+        // To be called each time the user marks/unmarks a cell on the user board
+
+        initUserShips();
+        let curShipSize;
+
+        // Checking for vertical ships (but not for one-cell ships)
+        for (let c = 1; c < totalWidth; c++) {
+            curShipSize = 0;
+            for (let r = 1; r < totalHeight; r++) {
+                if (userBoard[r][c] === 1) { // ship cell
+                    if ((c === 1 || userBoard[r][c - 1] === 0) 
+                    && (c === dataWidth || userBoard[r][c + 1] === 0)) {
+                        curShipSize++;
+                        console.log("VERTICAL: r, c, curShipSize", r, c, curShipSize);
+                    }
+                } 
+                
+                if (r === dataHeight || userBoard[r][c] === 0) {
+                    if (curShipSize) {
+                        if (curShipSize === 1) { // Skip one-cell ships
+                            curShipSize = 0;
+                            // return; 
+                        } else {
+                            for (let s = 0; s < totalClasses; s++) {
+                                if (userShips[s].size === curShipSize) {
+                                    userShips[s].toBePositioned--;                                    
+                                    break;
+                                }
+                            }    
+                            curShipSize = 0;           
+                        }         
+                    }
+                }
+            }
+        }
+
+        curShipSize = 0;
+
+        // Checking for horizontal ships and one-cell ships
+        for (let r = 1; r < totalHeight; r++) {
+            curShipSize = 0;
+            for (let c = 1; c < totalWidth; c++) {
+                if (userBoard[r][c] === 1) { // ship cell
+                    if ((r === 1 || userBoard[r - 1][c] === 0) 
+                    && (r === dataHeight || userBoard[r + 1][c] === 0)) {
+                        curShipSize++;
+                        console.log("HORIZONTAL: r, c, curShipSize", r, c, curShipSize);
+                    }
+                } 
+            
+            if (c === dataWidth || userBoard[r][c] === 0) {
+                    // console.log("HORIZONTAL: r, c =", r, c);
+                    if (curShipSize) {
+                        // Handle any ships, including one-cell ships 
+                        console.log("HORIZONTAL (HANDLING): r, c =", r, c);
+                        for (let s = 0; s < totalClasses; s++) {
+                            if (userShips[s].size === curShipSize) {
+                                userShips[s].toBePositioned--;                                
+                                break;
+                            }
+                        }            
+                        curShipSize = 0;            
+                    }
+                }
+            }
+        }
+
+
+        userShips = userShips;
+        console.log("userShips =", userShips);
+    }
+
 
     function isValidCell(rowIndex, colIndex) {
         return (rowIndex > 0 && rowIndex < 11 && colIndex > 0 && colIndex < 11);
@@ -250,27 +326,28 @@
         }
 
         userBoard = userBoard;
+
+        recountUserShips();
     }    
 
 
-    function restartGame() {
-        // userShips = JSON.parse(JSON.stringify(ships));
+    function initUserShips() {
         userShips = [];
-        // let shipIndex = 0;
         ships.forEach( ship => {
             let userShip = {
                 class: ship.class,
                 size: ship.size,
                 totalNumber: ship.totalNumber,
                 toBePositioned: ship.totalNumber,         
-                // shipIndex: shipIndex,     
             }
-            // shipIndex++;
             userShips.push(userShip);
         })
 
         console.log("userShips =", userShips);
+    }
 
+    function restartGame() {
+        initUserShips();
     }
 
     restartGame();
