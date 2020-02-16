@@ -569,6 +569,11 @@
         margin-right: 1em;
     }
 
+    button.cool-button:disabled {
+        background-color: lightgray;
+        color: gray;
+    }        
+
     fieldset {
         margin-left: auto;
         margin-right: auto;

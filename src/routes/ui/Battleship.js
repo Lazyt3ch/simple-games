@@ -182,8 +182,8 @@ export const uiStrings = {
 
     'can_start_now':
     {
-        en: "Now decide who plays first, and you can start the game!",
-        ru: "Теперь решите, кто сделает первый ход, и начните игру!",
+        en: "Now decide who makes the first move, and start playing!",
+        ru: "Осталось решить, кто сделает первый ход, и начать игру!",
     },    
 
 }

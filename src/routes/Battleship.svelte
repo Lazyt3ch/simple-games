@@ -11,6 +11,10 @@
 
     import { onDestroy } from 'svelte';
 
+    import WhoPlaysFirst from './ui/WhoPlaysFirst.svelte';
+
+    console.log("WhoPlaysFirst =", WhoPlaysFirst);
+
     document.addEventListener('click', updateMousePosition);    
 
     onDestroy(() => {
@@ -40,7 +44,12 @@
 
     // GAME LOGIC HEAD ==============================>
 
-    let whoPlaysFirst = null;
+    let whoPlaysFirst = null; // Must be *exactly* null, otherwise condition won't work!
+
+    function handleWhoBegins(event) {
+        whoPlaysFirst = event.detail.text;
+        console.log("whoPlaysFirst =", whoPlaysFirst);
+    }
 
     let info = 'position_ships';
     // globalToBePositioned
@@ -209,10 +218,16 @@
     // let isUserShipsPlaced = true;    
 
     const ships = [        
+        /*
         { class: 'battleship', size: 4, totalNumber: 1 },
         { class: 'cruiser',   size: 3, totalNumber: 2 },
         { class: 'destroyer', size: 2, totalNumber: 3 },
         { class: 'motorboat', size: 1, totalNumber: 4 },
+        */
+        { class: 'battleship', size: 4, totalNumber: 1 },
+        { class: 'cruiser',   size: 3, totalNumber: 1 },
+        { class: 'destroyer', size: 2, totalNumber: 1 },
+        { class: 'motorboat', size: 1, totalNumber: 1 },
         // { class: 'unknown', size: 0, totalNumber: 0 }, // Here both size & totalNumber are dummy values
     ]
 
@@ -459,15 +474,33 @@
         console.log("userShips =", userShips);
     }
 
+    function positionOppoShips() {
+        // to be implemented....
+
+    }
+
 
     function restartGame() {
         initUserShips();
+
+        if (whoPlaysFirst === "opponent") {
+            oppoTurn = true;
+            info = "opponent_move";
+            // oppoMove();
+        } else if (whoPlaysFirst === "user") {
+            oppoTurn = false;
+            info = 'user_move';
+        } else {
+            // info = 'lets_play';
+        }
     }
 
 
     function startGame() {
 
     }
+
+    let oppoTurn = false;
 
     restartGame();
 
@@ -477,7 +510,6 @@
 
     let highlighted = false;
 
-    let oppoTurn = false;
 
 
     // GAME LOGIC TAIL ==============================>
@@ -649,11 +681,9 @@
         text-align: center;
     }
 
-    /*
     .margin-after {
         margin-bottom: 1em;
     }
-    */
 
     .container {
         width: 100%;
@@ -699,6 +729,11 @@
         margin-left: auto;
         margin-right: auto;
     }
+
+    button.cool-button:disabled {
+        background-color: lightgray;
+        color: gray;
+    }    
 
     /* used by who-plays-first */
     .margin-after {
@@ -871,7 +906,7 @@
             </table>
 
             <!-- INFO TEXT -->
-            <div class="center unselectable info-text"> 
+            <div class="center unselectable info-text margin-after"> 
                 <!-- Do not remove &nbsp; -->
                 { @html infoText } &nbsp;
             </div>            
@@ -879,7 +914,10 @@
             <!-- WHO PLAYS FIRST radio buttons etc -->
             <!-- The fade transition messes up with routing, so use currentGame as a bugfix!!! -->
             <!-- {#if whoPlaysFirst === null && isAlive} -->
+            
             {#if whoPlaysFirst === null && curGame === gameId && globalToBePositioned === 0} 
+                <WhoPlaysFirst on:whoBegins={handleWhoBegins} />
+                <!--
                 <fieldset id='who-plays-first' transition:fade="{{delay: 100, duration: 500}}"
                     class="limited-width margin-after {highlighted? 'highlighted': ''}"
                     on:change={() => oppoTurn = true}    
@@ -900,11 +938,11 @@
                         </label>
                     </div>
                 </fieldset>
+                -->
             {/if}
 
-
             <button class="cool-button" on:click={startGame} 
-                    disabled={globalToBePositioned !== 0 && whoPlaysFirst === null}>
+                    disabled={globalToBePositioned !== 0 || whoPlaysFirst === null}>
                 { ui['start_game'][language] }
             </button>            
         </div>
