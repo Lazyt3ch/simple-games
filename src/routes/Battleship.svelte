@@ -77,18 +77,18 @@
 
     function newEmptyBoard() {
         let board = [];
+        let row;
 
         for (let r = 0; r < totalHeight; r++) {
-            let row;
-            if (r === 0) {
-                row = [' '];
+            if (r === 0) { // top-header row
+                row = [' ']; // top left header corner cell
             } else {
-                row = [alphabet.slice(r - 1, r)]; // row header
+                row = [alphabet.slice(r - 1, r)]; // row header ('A', 'B', 'C', ...)
             }
 
             for (let c = 0; c < dataWidth; c++) {
-                if (r === 0) {
-                    row.push(c + 1); // column header
+                if (r === 0) { // top-header row 
+                    row.push((c + 1).toString()); // column header ('1', '2', '3', ...)
                 } else {
                     row.push(0);
                 }                
@@ -154,11 +154,9 @@
     }
     */
 
-
-
-
     let userBoard = newEmptyBoard();
-    let oppoBoard = newEmptyBoard();
+    // let oppoBoard = newEmptyBoard();
+    let oppoBoard = JSON.parse(JSON.stringify(userBoard));
     console.log("userBoard =", userBoard);
     console.log("oppoBoard =", oppoBoard);
 
@@ -171,37 +169,17 @@
     console.log("oppoBoard =", oppoBoard);    
     */
 
-    // async function getCellClass(rowIndex, colIndex) {        
-    function getCellClass(rowIndex, colIndex) {        
-        // await tick();
-
-        // console.log("FUNCTION: getCellClass; rowIndex, colIndex =", rowIndex, colIndex);
-
-        // ${colIndex % dataHeight === 0 && rowIndex > 0 ? 'thick-right-border' : ''}
-        // ${rowIndex % dataWidth === 0 && colIndex > 0 ? 'thick-bottom-border' : ''}
-
+    function getCellClass(rowIndex, colIndex, someBoard) {        
         let cellClass = `
         board-cell unselectable
         ${colIndex === 0 && rowIndex === 0 ? 'no-top-left-borders' : ''}
         ${(colIndex === 0 || rowIndex === 0) && colIndex !== rowIndex ? 'top-and-left-headers' : ''}
         ${(colIndex === 0 && colIndex === rowIndex) ? 'top-left-header-cell' : ''}
-        ${(rowIndex > 0 && colIndex > 0 && userBoard[rowIndex][colIndex] === 0) ? 'board-data' : ''}        
-        ${(rowIndex > 0 && colIndex > 0 && userBoard[rowIndex][colIndex] === 1) ? 'ship-cell' : ''}
+        ${(rowIndex > 0 && colIndex > 0 && someBoard[rowIndex][colIndex] === 0) ? 'board-data' : ''}        
+        ${(rowIndex > 0 && colIndex > 0 && someBoard[rowIndex][colIndex] === 1) ? 'ship-cell' : ''}
         `;
-
-        /*
-        let cellClass = 
-        (colIndex === 0 && rowIndex === 0 ? 'no-top-left-borders' : '') + ' ' +
-        ((colIndex === 0 || rowIndex === 0) && colIndex !== rowIndex ? 'top-and-left-headers' : '') + ' ' +
-        ((colIndex === 0 && colIndex === rowIndex) ? 'top-left-header-cell' : '') + ' ' +
-        ((rowIndex > 0 && colIndex > 0 && userBoard[rowIndex][colIndex] === 0) ? 'board-data' : '') + ' ' +
-        ((rowIndex > 0 && colIndex > 0 && userBoard[rowIndex][colIndex] === 1) ? 'ship-cell' : '');  
-        */
-
         // console.log("cellClass =", cellClass);
         return cellClass;
-
-        // top-and-left-headers
     }
 
     function getInfoClass(toBePositioned, totalNumber) {
@@ -214,20 +192,21 @@
         return cellClass;    
     }
 
-    let isUserShipsPlaced = false;
+    // let isUserShipsPlaced = false;
+    let isReadyToPlay = false;
     // let isUserShipsPlaced = true;    
 
     const ships = [        
-        /*
         { class: 'battleship', size: 4, totalNumber: 1 },
         { class: 'cruiser',   size: 3, totalNumber: 2 },
         { class: 'destroyer', size: 2, totalNumber: 3 },
         { class: 'motorboat', size: 1, totalNumber: 4 },
-        */
+        /*
         { class: 'battleship', size: 4, totalNumber: 1 },
         { class: 'cruiser',   size: 3, totalNumber: 1 },
         { class: 'destroyer', size: 2, totalNumber: 1 },
         { class: 'motorboat', size: 1, totalNumber: 1 },
+        */
         // { class: 'unknown', size: 0, totalNumber: 0 }, // Here both size & totalNumber are dummy values
     ]
 
@@ -429,6 +408,8 @@
 
     function placeShip(rowIndex, colIndex) {
         // if (cellClicksBlocked) return;
+        if (isReadyToPlay) return;
+
         if (rowIndex === 0 || colIndex === 0) return; // headers
 
         if (userBoard[rowIndex][colIndex] === 0) {  // empty cell
@@ -471,12 +452,61 @@
             userShips.push(userShip);
         })
 
+        userShips.sort(function(a, b) {
+            return b.size - a.size;
+        });
+
         console.log("userShips =", userShips);
     }
 
-    function positionOppoShips() {
-        // to be implemented....
+    let oppoShipsFlatList = [];
 
+    function initOppoShips() {
+        let oppoShips = [];
+        ships.forEach( ship => {
+            let oppoShip = {
+                // class: ship.class,
+                size: ship.size,
+                totalNumber: ship.totalNumber,
+                toBePositioned: ship.totalNumber,         
+            };
+
+            // globalToBePositioned += ship.totalNumber;
+            // console.log("globalToBePositioned =", globalToBePositioned);
+
+            oppoShips.push(oppoShip);
+        })
+
+        oppoShips.sort(function(a, b) {
+            return b.size - a.size;
+        });
+
+        console.log("oppoShips =", oppoShips);
+
+        oppoShips.forEach( ship => {
+            oppoShipsFlatList.push(ship.size);
+        })
+
+        console.log("oppoShipsFlatList =", oppoShipsFlatList);
+
+        positionOppoShips();
+    }
+    
+
+    function positionOppoShips() {
+        // to be implemented...
+        // initOppoShips();
+
+        for (let s = 0; s < totalClasses; s++) {
+            while (true) {
+                // Math.floor(Math.random() * Math.floor(n));
+            }
+        }
+
+        console.log("userBoard =", userBoard);
+        console.log("oppoBoard =", oppoBoard);
+
+        isReadyToPlay = true;
     }
 
 
@@ -493,16 +523,19 @@
         } else {
             // info = 'lets_play';
         }
+
+        // initOppoShips();
+
+
     }
 
 
     function startGame() {
-
+        initOppoShips();
     }
 
     let oppoTurn = false;
 
-    restartGame();
 
     // let shipOptions = ['Select a ship', ...userShips];
 
@@ -511,6 +544,8 @@
     let highlighted = false;
 
 
+    // initialization
+    restartGame();
 
     // GAME LOGIC TAIL ==============================>
 
@@ -843,7 +878,7 @@
                     <!-- Must use a key in #each loop -->
                     {#each row as cell, colIndex (colIndex * dataHeight + colIndex)}
                         <td on:click={ () => placeShip(rowIndex, colIndex) }
-                            class="{ getCellClass(rowIndex, colIndex) }"                                                   
+                            class="{ getCellClass(rowIndex, colIndex, userBoard) }"                                                   
                         >
                             { @html rowIndex > 0 && colIndex > 0 ? num2char(cell) : cell }
                         </td>
@@ -854,7 +889,7 @@
     </div>
 
     <!-- HERE USER CAN CHECK USER SHIPS POSITIONED ON THE BOARD -->
-    {#if !isUserShipsPlaced && curGame === gameId}
+    {#if !isReadyToPlay && curGame === gameId}
         <div class="ship-list">
         <!--
         <div class='ship-select'>
@@ -950,21 +985,23 @@
         <div>&nbsp;</div>
     {/if}
 
-    {#if isUserShipsPlaced && curGame === gameId}}
+    {#if isReadyToPlay && curGame === gameId}}
         <div class="opponent" transition:fade="{{delay: 100, duration: 500}}">
             <h3 class="user-or-opponent">{ ui["opponent_ships"][language] }</h3>
 
             <!-- TABLE with OPPONENT's SHIPS -->
             <table class="board">
                 <!-- Must use a key in #each loop -->
-                {#each oppoBoard as row, rowIndex (rowIndex)}
+                {#each oppoBoard as oppoRow, oppoRowIndex (oppoRowIndex)}
                     <tr>
                         <!-- Must use a key in #each loop -->
-                        {#each row as cell, colIndex (colIndex * dataHeight + colIndex)}
-                            <td on:click={ () => fire(rowIndex, colIndex) }
-                                class="{getCellClass(rowIndex, colIndex)}"                         
+                        {#each oppoRow as oppoCell, oppoColIndex 
+                            (oppoColIndex * dataHeight + oppoColIndex)}
+                            <td on:click={ () => fire(oppoRowIndex, oppoColIndex) }
+                                class="{getCellClass(oppoRowIndex, oppoColIndex, oppoBoard)}"                         
                             >
-                                { @html rowIndex > 0 && colIndex > 0 ? num2char(cell) : cell }
+                                { @html oppoRowIndex > 0 && oppoColIndex > 0 
+                                    ? num2char(oppoCell) : oppoCell }
                             </td>
                         {/each}
                     </tr>
