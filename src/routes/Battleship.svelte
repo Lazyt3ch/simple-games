@@ -44,6 +44,10 @@
 
     // GAME LOGIC HEAD ==============================>
 
+    function randomInt(n) {
+        return Math.floor(Math.random() * Math.floor(n));
+    }
+
     let whoPlaysFirst = null; // Must be *exactly* null, otherwise condition won't work!
 
     function handleWhoBegins(event) {
@@ -74,6 +78,12 @@
     // 2 = discovered cell containing a damaged ship
     // 3 = discovered cell containing a sunken ship
     // 4 = empty cell that cannot be used because it touches a ship
+    // *********** cells *************
+    const EMPTY = 0;
+    const SHIP = 1;
+    const DAMAGED = 2;
+    const SUNKEN = 3;
+    const EDGE = 4;
 
     function newEmptyBoard() {
         let board = [];
@@ -113,11 +123,87 @@
         return char;
     }
 
+    function isShipSunken(rowIndex, colIndex) {
+        // 2 = discovered cell containing a damaged ship
+        // 3 = discovered cell containing a sunken ship            
+        
+        // let damagedCellsCount = 0;
+        let damagedCells = [];
+        let curCell;
 
-    function fire() {
+        // left
+        for (let r = rowIndex; r > 0; r--) {
+            curCell = oppoBoard[r][colIndex];
+            if (curCell === SHIP) {
+                return false; // some cells of this ship have not been hit yet
+            } else if (curCell === EMPTY) {
+                break; // No need to continue checking this direction            
+            } else if (curCell === DAMAGED) {
+                damagedCells.push([r, colIndex]);
+            }
+        }
 
+        // right
+        for (let r = rowIndex; r < totalHeight; r++) {
+            curCell = oppoBoard[r][colIndex];
+            if (curCell === SHIP) {
+                return false; // some cells of this ship have not been hit yet
+            } else if (curCell === EMPTY) {
+                break; // No need to continue checking this direction             
+            } else if (curCell === DAMAGED) {
+                damagedCells.push([r, colIndex]);
+            }
+        }        
+
+        // top
+        for (let c = colIndex; c > 0; r--) {
+            curCell = oppoBoard[rowIndex][c];
+            if (curCell === SHIP) {
+                return false; // some cells of this ship have not been hit yet
+            } else if (curCell === EMPTY) {
+                break; // No need to continue checking this direction             
+            } else if (curCell === DAMAGED) {
+                damagedCells.push([rowIndex, c]);
+            }
+        }               
+
+        // bottom
+        for (let c = colIndex; c < totalWidth; r++) {
+            curCell = oppoBoard[rowIndex][c];
+            if (curCell === SHIP) {
+                return false; // some cells of this ship have not been hit yet
+            } else if (curCell === EMPTY) {
+                break; // No need to continue checking this direction               
+            } else if (curCell === DAMAGED) {
+                damagedCells.push([rowIndex, c]);
+            }
+        }         
+
+        // Marking ship as sunken
+        oppoBoard[rowIndex][colIndex] = SUNKEN;
+        damagedCells.forEach(coord => {
+            oppoBoard[coord[0]][coord[1]] = SUNKEN;
+        });
+
+        return true;
+    }
+
+
+    function fire(rowIndex, colIndex) {
+        // user fires at a opponent board cell
+        // 2 = discovered cell containing a damaged ship
+        // 3 = discovered cell containing a sunken ship            
+        if (oppoBoard[rowIndex, colIndex] === SHIP) {            
+            if (isShipSunken(rowIndex, colIndex)) {
+                info = ui['oppo_ship_sunken'][language];
+            } else {
+                oppoBoard[rowIndex, colIndex] = DAMAGED;
+                info = ui['oppo_ship_hit'][language];
+            }
+        }
 
     }
+
 
     let mouseX = 0, mouseY = 0; // mouse position
 
@@ -154,11 +240,27 @@
     }
     */
 
-    let userBoard = newEmptyBoard();
-    // let oppoBoard = newEmptyBoard();
-    let oppoBoard = JSON.parse(JSON.stringify(userBoard));
-    console.log("userBoard =", userBoard);
-    console.log("oppoBoard =", oppoBoard);
+    let userBoard, oppoBoard;
+
+    function clearUserBoard() {
+        userBoard = newEmptyBoard();
+        console.log("userBoard =", userBoard);
+    }
+
+    function clearOppoBoard() {
+        // let oppoBoard = newEmptyBoard();
+        oppoBoard = JSON.parse(JSON.stringify(userBoard));
+        console.log("oppoBoard =", oppoBoard);
+    }
+
+
+
+    
+
+    
+
+
+    // initOppoBoard
 
     /*
     // For testing purposes only!
@@ -196,6 +298,7 @@
     let isReadyToPlay = false;
     // let isUserShipsPlaced = true;    
 
+    // Use fewer ships for development, but more ships for production
     const ships = [        
         { class: 'battleship', size: 4, totalNumber: 1 },
         { class: 'cruiser',   size: 3, totalNumber: 2 },
@@ -207,6 +310,7 @@
         { class: 'destroyer', size: 2, totalNumber: 1 },
         { class: 'motorboat', size: 1, totalNumber: 1 },
         */
+        
         // { class: 'unknown', size: 0, totalNumber: 0 }, // Here both size & totalNumber are dummy values
     ]
 
@@ -357,26 +461,51 @@
     }
 
 
-    function isUnsafeAtCorners(rowIndex, colIndex) {      
+    function isUnsafeAtCorners(rowIndex, colIndex, board) {      
         // console.log("rowIndex, colIndex =", rowIndex, colIndex);
         
         // top left corner  
-        if (isValidCell(rowIndex - 1, colIndex - 1) && userBoard[rowIndex - 1][colIndex - 1] !== 0) {
+        if (isValidCell(rowIndex - 1, colIndex - 1) && board[rowIndex - 1][colIndex - 1] !== 0) {
             return true;
         }
 
         // top right corner
-        if (isValidCell(rowIndex - 1, colIndex + 1) && userBoard[rowIndex - 1][colIndex + 1] !== 0) {
+        if (isValidCell(rowIndex - 1, colIndex + 1) && board[rowIndex - 1][colIndex + 1] !== 0) {
             return true;
         }
 
+        // bottom right corner  
+        if (isValidCell(rowIndex + 1, colIndex + 1) && board[rowIndex + 1][colIndex + 1] !== 0) {
+            return true;
+        }      
+
         // bottom left corner  
-        if (isValidCell(rowIndex + 1, colIndex - 1) && userBoard[rowIndex + 1][colIndex - 1] !== 0) {
+        if (isValidCell(rowIndex + 1, colIndex - 1) && board[rowIndex + 1][colIndex - 1] !== 0) {
             return true;
         }        
 
-        // bottom right corner  
-        if (isValidCell(rowIndex + 1, colIndex + 1) && userBoard[rowIndex + 1][colIndex + 1] !== 0) {
+        return false;
+    }
+    
+
+    function isUnsafeAtSides(rowIndex, colIndex, board) {              
+        // top  
+        if (isValidCell(rowIndex - 1, colIndex) && board[rowIndex - 1][colIndex] !== 0) {
+            return true;
+        }
+
+        // right
+        if (isValidCell(rowIndex, colIndex + 1) && board[rowIndex][colIndex + 1] !== 0) {
+            return true;
+        }
+
+        // bottom  
+        if (isValidCell(rowIndex + 1, colIndex) && board[rowIndex + 1][colIndex] !== 0) {
+            return true;
+        }        
+
+        // left  
+        if (isValidCell(rowIndex, colIndex - 1) && board[rowIndex][colIndex - 1] !== 0) {
             return true;
         }      
 
@@ -413,7 +542,7 @@
         if (rowIndex === 0 || colIndex === 0) return; // headers
 
         if (userBoard[rowIndex][colIndex] === 0) {  // empty cell
-            if (isUnsafeAtCorners(rowIndex, colIndex)) {
+            if (isUnsafeAtCorners(rowIndex, colIndex, userBoard)) {
                 // alert("You cannot place a ship here!");
                 showPopup(ui['cannot_position_here'][language]);
                 return;
@@ -433,6 +562,9 @@
 
         recountUserShips();
     }    
+
+
+
 
     let globalToBePositioned = 0;
 
@@ -459,7 +591,9 @@
         console.log("userShips =", userShips);
     }
 
+
     let oppoShipsFlatList = [];
+    let biggestSize;
 
     function initOppoShips() {
         let oppoShips = [];
@@ -481,10 +615,14 @@
             return b.size - a.size;
         });
 
+        biggestSize = oppoShips[0];
+
         console.log("oppoShips =", oppoShips);
 
         oppoShips.forEach( ship => {
-            oppoShipsFlatList.push(ship.size);
+            for (let s = 0; s < ship.totalNumber; s++) {
+                oppoShipsFlatList.push(ship.size);
+            }
         })
 
         console.log("oppoShipsFlatList =", oppoShipsFlatList);
@@ -493,17 +631,111 @@
     }
     
 
-    function positionOppoShips() {
-        // to be implemented...
-        // initOppoShips();
+    let oppoBoardFlatList = [];
+    // this array begin with [1, 1] and ends with [10, 10] 
+    // Note that board size is 11 x 11 (to include left header and top header)
+    //
+    // flatPos = (rowIndex - 1) * dataHeight + (colIndex - 1)
+    //
+    let eligibleCellCount = dataHeight * dataWidth; // cell count
 
-        for (let s = 0; s < totalClasses; s++) {
-            while (true) {
-                // Math.floor(Math.random() * Math.floor(n));
+    function initOppoBoardFlatList() {
+        for (let r = 0; r < totalHeight; r++) {
+            for (let c = 0; c < totalWidth; c++) {
+                oppoBoardFlatList.push([r, c]);
+            }
+        }
+    }
+
+    function positionOppoShips() {
+        let shipHeadFlatPos;
+        let shipTailDirection;
+        let shipHeadRow, shipHeadCol;
+        let shipTailRow, shipTailCol;
+        let isMisfit;
+
+        let oppoShipsToPosition = oppoShipsFlatList.length;
+        let isShipNotPositioned;
+
+        console.log("oppoShipsFlatList =", oppoShipsFlatList);
+
+        for (let s = 0; s < oppoShipsToPosition; s++) {
+            isShipNotPositioned = true;
+            
+            while (isShipNotPositioned) {
+                isMisfit = false;
+                // let shipHeadPosition = randomInt(eligibleCellCount);
+                // let shipHeadPosition = randomInt(eligibleCellCount);
+                console.log("=====================================================")
+                console.log("s =", s);
+                console.log("Ship size = ", oppoShipsFlatList[s]);
+                shipHeadFlatPos = randomInt(eligibleCellCount); // (0, 1, ... , 99)
+                console.log("shipHeadFlatPos =", shipHeadFlatPos);
+                // shipHeadRow = shipHeadFlatPos % dataHeight + 1;
+                shipHeadRow = Math.floor(shipHeadFlatPos / dataHeight) + 1;
+                shipHeadCol = shipHeadFlatPos - (shipHeadRow - 1) * dataHeight + 1;
+                console.log("shipHeadRow, shipHeadCol =", shipHeadRow, shipHeadCol);
+
+                // 0 = top, 1 = right, 2 = bottom, 3 = left
+                let shipTailDir = randomInt(4);
+                console.log("shipTailDir =", shipTailDir, "(0 = top, 1 = right, 2 = bottom, 3 = left)");
+                // shipTailRow = shipHeadRow
+                if (shipTailDir % 2 === 0) { // top or bottom
+                    shipTailRow = shipHeadRow + (shipTailDir === 0 ? -1 : 1) * (oppoShipsFlatList[s] - 1);
+                    // [shipHeadRow, shipTailRow] = [Math.max(shipHeadRow, shipTailRow)]
+                    if (shipTailRow < shipHeadRow) {
+                        [shipTailRow, shipHeadRow] = [shipHeadRow, shipTailRow]; // now tail > head
+                    } // right or left
+                    if (shipHeadRow < 1 || shipTailRow > dataHeight) {
+                        // break; // Part of the ship is outside the data board 
+                        isMisfit = true; // Part of the ship is outside the data board 
+                    }
+                    shipTailCol = shipHeadCol;
+                } else {
+                    shipTailRow = shipHeadRow;
+                    shipTailCol = shipHeadCol + (shipTailDir === 3 ? -1 : 1) * (oppoShipsFlatList[s] - 1);
+                    if (shipTailCol < shipHeadCol) {
+                        [shipTailCol, shipHeadCol] = [shipHeadCol, shipTailCol]; // now tail > head
+                    }
+                    if (shipHeadCol < 1 || shipTailCol > dataWidth) {
+                        // break; // Part of the ship is outside the data board 
+                        isMisfit = true; // Part of the ship is outside the data board 
+                    }                    
+                }
+                console.log("shipHeadRow, shipHeadCol =", shipHeadRow, shipHeadCol);
+                console.log("shipTailRow, shipTailCol =", shipTailRow, shipTailCol);
+
+                // let isMisfit = false;
+
+                if (!isMisfit) {
+                    // Supposedly, the ship is competely within the board.
+                    // Now we need to check if it touches or intersects with any other ship.
+                    for (let r = shipHeadRow; r <= shipTailRow; r++) {
+                        if (isMisfit) break;
+                        for (let c = shipHeadCol; c <= shipTailCol; c++) {
+                            if (oppoBoard[r][c] !== 0 ||
+                                isUnsafeAtSides(r, c, oppoBoard) || 
+                                isUnsafeAtCorners(r, c, oppoBoard)) {
+                                isMisfit = true;
+                                break;
+                            }
+                        }
+                    }
+
+                    if (!isMisfit) {
+                        for (let r = shipHeadRow; r <= shipTailRow; r++) {
+                            for (let c = shipHeadCol; c <= shipTailCol; c++) {
+                                oppoBoard[r][c] = 1;
+                            }
+                        }
+                        isShipNotPositioned = false;                
+                    }
+                }
+
+
             }
         }
 
-        console.log("userBoard =", userBoard);
         console.log("oppoBoard =", oppoBoard);
 
         isReadyToPlay = true;
@@ -511,6 +743,9 @@
 
 
     function restartGame() {
+        clearUserBoard();
+        clearOppoBoard();
+
         initUserShips();
 
         if (whoPlaysFirst === "opponent") {
@@ -554,6 +789,10 @@
 
 <style>
     /* Table with user ships data etc */
+    .ship-list {
+        /* display: flex; */
+    }
+
     .ship-list-table {        
         margin-top: .5em;
         border-collapse: collapse;      
@@ -721,6 +960,7 @@
     }
 
     .container {
+        display: block;
         width: 100%;
         max-width: 70em;
         margin-top: 0.5em;
@@ -731,14 +971,25 @@
         margin: 0;
     }
 
+    .user, .opponent {
+        /* display: flex; */
+    }
+
     /*
     .leftish {
         float: left;
     }
     */
 
+    .buttons-and-info {
+        /* display: flex; */
+        /* width: 50%; */
+        min-width: 50em;
+    }
+
     .info-text {
-        /* display: block; */
+        /* display: flex; */
+        display: block;
         font-size: 1em;
         font-weight: normal;
         font-family: Arial, Helvetica, sans-serif;
@@ -757,10 +1008,12 @@
     }        
 
     button.cool-button {
+        display: block;
         background-color: aqua;
         color: blue;
         font-weight: bold;
-        margin-top: .5em;
+        margin-top: 0;
+        margin-bottom: 1em;
         margin-left: auto;
         margin-right: auto;
     }
@@ -940,46 +1193,11 @@
                 {/each}        
             </table>
 
-            <!-- INFO TEXT -->
-            <div class="center unselectable info-text margin-after"> 
-                <!-- Do not remove &nbsp; -->
-                { @html infoText } &nbsp;
-            </div>            
-
-            <!-- WHO PLAYS FIRST radio buttons etc -->
-            <!-- The fade transition messes up with routing, so use currentGame as a bugfix!!! -->
-            <!-- {#if whoPlaysFirst === null && isAlive} -->
-            
             {#if whoPlaysFirst === null && curGame === gameId && globalToBePositioned === 0} 
+                <!-- WHO PLAYS FIRST radio buttons etc -->
+                <!-- The fade transition messes up with routing, so use currentGame as a bugfix!!! -->
                 <WhoPlaysFirst on:whoBegins={handleWhoBegins} />
-                <!--
-                <fieldset id='who-plays-first' transition:fade="{{delay: 100, duration: 500}}"
-                    class="limited-width margin-after {highlighted? 'highlighted': ''}"
-                    on:change={() => oppoTurn = true}    
-                >
-                    <label class="unselectable"> { ui['who_plays_first'][language] } </label>
-                    
-                    <div class="div-inline">
-                        <label for="user-begins" class="unselectable"> 
-                            <input type='radio' bind:group={whoPlaysFirst} 
-                                id='user-begins' name="who-begins" value='user'>
-                            { ui['user_begins'][language] } 
-                        </label>
-
-                        <label for="opponent-begins" class="left-margin unselectable">
-                            <input type='radio' bind:group={whoPlaysFirst} 
-                                id='opponent-begins' name="who-begins" value='opponent'>
-                            { ui['opponent_begins'][language] } 
-                        </label>
-                    </div>
-                </fieldset>
-                -->
             {/if}
-
-            <button class="cool-button" on:click={startGame} 
-                    disabled={globalToBePositioned !== 0 || whoPlaysFirst === null}>
-                { ui['start_game'][language] }
-            </button>            
         </div>
 
         <div>&nbsp;</div>
@@ -992,16 +1210,16 @@
             <!-- TABLE with OPPONENT's SHIPS -->
             <table class="board">
                 <!-- Must use a key in #each loop -->
-                {#each oppoBoard as oppoRow, oppoRowIndex (oppoRowIndex)}
+                {#each oppoBoard as row, rowIndex (rowIndex)}
                     <tr>
                         <!-- Must use a key in #each loop -->
-                        {#each oppoRow as oppoCell, oppoColIndex 
-                            (oppoColIndex * dataHeight + oppoColIndex)}
-                            <td on:click={ () => fire(oppoRowIndex, oppoColIndex) }
-                                class="{getCellClass(oppoRowIndex, oppoColIndex, oppoBoard)}"                         
+                        {#each row as cell, colIndex 
+                            (colIndex * dataHeight + colIndex)}
+                            <td on:click={ () => fire(rowIndex, colIndex) }
+                                class="{getCellClass(rowIndex, colIndex, oppoBoard)}"                         
                             >
-                                { @html oppoRowIndex > 0 && oppoColIndex > 0 
-                                    ? num2char(oppoCell) : oppoCell }
+                                { @html rowIndex > 0 && colIndex > 0
+                                    ? num2char(cell) : cell }
                             </td>
                         {/each}
                     </tr>
@@ -1009,8 +1227,23 @@
             </table>
         </div>
     {/if}
-</div>    
 
+    <div class="buttons-and-info">
+        <!-- BUTTON -->
+        <button class="cool-button" on:click={startGame} 
+                disabled={globalToBePositioned !== 0 || whoPlaysFirst === null}
+        >
+            { ui['start_game'][language] }
+        </button>            
+
+        <!-- INFO TEXT -->
+        <div class="info-text center unselectable margin-after"> 
+            <!-- Do not remove &nbsp; -->
+            { @html infoText } &nbsp;
+        </div>      
+    </div>      
+
+</div>    
 
 
 

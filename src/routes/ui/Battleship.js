@@ -174,7 +174,7 @@ export const uiStrings = {
 
     'position_ships':
     {
-        en: "You need to position all of your ships on the board. <br />" +
+        en: "First, you need to position all of your ships on the board. <br />" +
             "See the table for hints what is missing or excessive.",
         ru: "Для начала разместите все свои корабли на доске. <br />" + 
             "Таблица подскажет, чего не хватает, а что лишнее.",
@@ -186,4 +186,15 @@ export const uiStrings = {
         ru: "Осталось решить, кто сделает первый ход, и начать игру!",
     },    
 
+    'oppo_ship_hit':
+    {
+        en: "Good job! You've hit an enemy ship!",
+        ru: "Отлично, вы попали во вражеский корабль!",
+    },            
+
+    'oppo_ship_sunken':
+    {
+        en: "Great job! You've sunken an enemy ship!",
+        ru: "Превосходно, вы потопили вражеский корабль!",
+    },        
 }
