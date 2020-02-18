@@ -180,11 +180,27 @@ export const uiStrings = {
             "Таблица подскажет, чего не хватает, а что лишнее.",
     },
 
+    'but_who_begins':
+    {
+        en: "You also need to decide who makes the first move.",
+        ru: "Осталось только решить, кто сделает первый ход.",
+    },        
+
     'can_start_now':
     {
-        en: "Now decide who makes the first move, and start playing!",
-        ru: "Осталось решить, кто сделает первый ход, и начать игру!",
+        // en: "Now decide who makes the first move, and start playing!",
+        // ru: "Осталось решить, кто сделает первый ход, и начать игру!",
+        en: "You can start the game now!",
+        ru: "Теперь можно начать игру!",
     },    
+
+    'game_on':
+    {
+        // en: "Now decide who makes the first move, and start playing!",
+        // ru: "Осталось решить, кто сделает первый ход, и начать игру!",
+        en: "The game is on!",
+        ru: "Игра началась!",
+    },        
 
     'oppo_ship_hit':
     {

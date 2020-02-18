@@ -13,7 +13,7 @@
 
     import WhoPlaysFirst from './ui/WhoPlaysFirst.svelte';
 
-    console.log("WhoPlaysFirst =", WhoPlaysFirst);
+    // console.log("whoBegins =", whoBegins);
 
     document.addEventListener('click', updateMousePosition);    
 
@@ -48,11 +48,19 @@
         return Math.floor(Math.random() * Math.floor(n));
     }
 
-    let whoPlaysFirst = null; // Must be *exactly* null, otherwise condition won't work!
+    let isGameOn = false;
+
+    let whoBegins = null; // Must be *exactly* null, otherwise condition won't work!
+
+    // let isUserReady = false;
+    let isUserBoardReady = false;
+    let isOppoBoardReady = false;
 
     function handleWhoBegins(event) {
-        whoPlaysFirst = event.detail.text;
-        console.log("whoPlaysFirst =", whoPlaysFirst);
+        whoBegins = event.detail.text;
+        console.log("whoBegins =", whoBegins);
+        // isUserReady = true;
+        recountUserShips();
     }
 
     let info = 'position_ships';
@@ -190,6 +198,8 @@
 
 
     function fire(rowIndex, colIndex) {
+        if (!isGameOn) return;
+
         // user fires at a opponent board cell
         // 2 = discovered cell containing a damaged ship
         // 3 = discovered cell containing a sunken ship            
@@ -295,21 +305,26 @@
     }
 
     // let isUserShipsPlaced = false;
-    let isReadyToPlay = false;
+    // let isReadyToPlay = false;
     // let isUserShipsPlaced = true;    
 
     // Use fewer ships for development, but more ships for production
-    const ships = [        
+    const ships = [    
+        /*    
         { class: 'battleship', size: 4, totalNumber: 1 },
         { class: 'cruiser',   size: 3, totalNumber: 2 },
         { class: 'destroyer', size: 2, totalNumber: 3 },
         { class: 'motorboat', size: 1, totalNumber: 4 },
+        */
         /*
         { class: 'battleship', size: 4, totalNumber: 1 },
         { class: 'cruiser',   size: 3, totalNumber: 1 },
         { class: 'destroyer', size: 2, totalNumber: 1 },
         { class: 'motorboat', size: 1, totalNumber: 1 },
         */
+        { class: 'destroyer', size: 2, totalNumber: 1 },
+        { class: 'motorboat', size: 1, totalNumber: 1 },
+        
         
         // { class: 'unknown', size: 0, totalNumber: 0 }, // Here both size & totalNumber are dummy values
     ]
@@ -369,7 +384,7 @@
         return (validSizes.indexOf(shipSize) > -1);
     }    
 
-    let isUserReady = false;
+    // isUserReady = false;
 
     function recountUserShips() {
         // To be called each time the user marks/unmarks a cell on the user board
@@ -450,9 +465,28 @@
         globalToBePositioned = curToBePositioned;
         console.log("globalToBePositioned =", globalToBePositioned);
         if (globalToBePositioned === 0) {
-            info = 'can_start_now';
-            console.log("info, infoText = ", info, infoText);
+            // isUserReady = true;
+            isUserBoardReady = true;
+            if (whoBegins === null) {
+                info = "but_who_begins"
+            } else {
+                info = 'can_start_now';
+            }
+            
+            // console.log("info, infoText = ", info, infoText);
+            // console.log("isUserBoardReady, whoBegins =", isUserBoardReady, whoBegins);
+            // console.log("curGame, gameId =", curGame, gameId);
+        } else {
+            // isUserReady = false;
+            isUserBoardReady = false;
+            info = 'position_ships';
         }
+
+        /*
+        if (isUserBoardReady && whoBegins === null && curGame === gameId) {
+            console.log("Condition met!");
+        }
+        */
     }
 
 
@@ -537,7 +571,12 @@
 
     function placeShip(rowIndex, colIndex) {
         // if (cellClicksBlocked) return;
-        if (isReadyToPlay) return;
+        // if (isReadyToPlay) return;
+        // if (isUserReady) return;
+        // if (isUserReady && isOppoBoardReady && whoBegins !== null) return;
+        // if (isUserBoardReady && isOppoBoardReady && whoBegins !== null) return;
+        // if (isUserBoardReady && whoBegins !== null) return;
+        if (isGameOn) return;
 
         if (rowIndex === 0 || colIndex === 0) return; // headers
 
@@ -666,19 +705,19 @@
                 isMisfit = false;
                 // let shipHeadPosition = randomInt(eligibleCellCount);
                 // let shipHeadPosition = randomInt(eligibleCellCount);
-                console.log("=====================================================")
-                console.log("s =", s);
-                console.log("Ship size = ", oppoShipsFlatList[s]);
+                // console.log("=====================================================")
+                // console.log("s =", s);
+                // console.log("Ship size = ", oppoShipsFlatList[s]);
                 shipHeadFlatPos = randomInt(eligibleCellCount); // (0, 1, ... , 99)
-                console.log("shipHeadFlatPos =", shipHeadFlatPos);
+                // console.log("shipHeadFlatPos =", shipHeadFlatPos);
                 // shipHeadRow = shipHeadFlatPos % dataHeight + 1;
                 shipHeadRow = Math.floor(shipHeadFlatPos / dataHeight) + 1;
                 shipHeadCol = shipHeadFlatPos - (shipHeadRow - 1) * dataHeight + 1;
-                console.log("shipHeadRow, shipHeadCol =", shipHeadRow, shipHeadCol);
+                // console.log("shipHeadRow, shipHeadCol =", shipHeadRow, shipHeadCol);
 
                 // 0 = top, 1 = right, 2 = bottom, 3 = left
                 let shipTailDir = randomInt(4);
-                console.log("shipTailDir =", shipTailDir, "(0 = top, 1 = right, 2 = bottom, 3 = left)");
+                // console.log("shipTailDir =", shipTailDir, "(0 = top, 1 = right, 2 = bottom, 3 = left)");
                 // shipTailRow = shipHeadRow
                 if (shipTailDir % 2 === 0) { // top or bottom
                     shipTailRow = shipHeadRow + (shipTailDir === 0 ? -1 : 1) * (oppoShipsFlatList[s] - 1);
@@ -702,8 +741,8 @@
                         isMisfit = true; // Part of the ship is outside the data board 
                     }                    
                 }
-                console.log("shipHeadRow, shipHeadCol =", shipHeadRow, shipHeadCol);
-                console.log("shipTailRow, shipTailCol =", shipTailRow, shipTailCol);
+                // console.log("shipHeadRow, shipHeadCol =", shipHeadRow, shipHeadCol);
+                // console.log("shipTailRow, shipTailCol =", shipTailRow, shipTailCol);
 
                 // let isMisfit = false;
 
@@ -731,14 +770,12 @@
                         isShipNotPositioned = false;                
                     }
                 }
-
-
             }
         }
 
-        console.log("oppoBoard =", oppoBoard);
-
-        isReadyToPlay = true;
+        // console.log("oppoBoard =", oppoBoard);
+        // isReadyToPlay = true;
+        isOppoBoardReady = true;
     }
 
 
@@ -748,11 +785,11 @@
 
         initUserShips();
 
-        if (whoPlaysFirst === "opponent") {
+        if (whoBegins === "opponent") {
             oppoTurn = true;
             info = "opponent_move";
             // oppoMove();
-        } else if (whoPlaysFirst === "user") {
+        } else if (whoBegins === "user") {
             oppoTurn = false;
             info = 'user_move';
         } else {
@@ -766,8 +803,12 @@
 
 
     function startGame() {
+        isGameOn = true;
         initOppoShips();
+
+        info = 'game_on';
     }
+    
 
     let oppoTurn = false;
 
@@ -788,16 +829,25 @@
 
 
 <style>
+    .who-plays-first {
+        display: block;
+        margin-top: 2em;
+        /* min-width: 20em; */
+    }
+
     /* Table with user ships data etc */
     .ship-list {
+        display: block;
         /* display: flex; */
     }
 
     .ship-list-table {        
         margin-top: .5em;
+        margin-bottom: 1em;
         border-collapse: collapse;      
 
         font-size: 1em;
+        min-width: 10em;
     }
 
     .ship-list-data {
@@ -835,6 +885,7 @@
     .board {
         border-collapse: collapse;  
         margin-top: 1em;
+        margin-bottom: 1em;
         background-color: inherit;     
         padding: 0;
     }    
@@ -960,10 +1011,11 @@
     }
 
     .container {
-        display: block;
+        /* display: flex; */
         width: 100%;
-        max-width: 70em;
+        max-width: 60em;
         margin-top: 0.5em;
+        margin-bottom: 1em;
     }
 
     .user-or-opponent {
@@ -973,6 +1025,16 @@
 
     .user, .opponent {
         /* display: flex; */
+        display: block;
+        min-width: 25em;
+    }
+
+    .user {
+        float: left;
+    }
+
+    .opponent {
+        float: right;
     }
 
     /*
@@ -984,12 +1046,14 @@
     .buttons-and-info {
         /* display: flex; */
         /* width: 50%; */
-        min-width: 50em;
+        display: block;
+        clear: both;
+        min-width: 25em;
+        margin-top: 2em;
     }
 
     .info-text {
         /* display: flex; */
-        display: block;
         font-size: 1em;
         font-weight: normal;
         font-family: Arial, Helvetica, sans-serif;
@@ -1012,7 +1076,7 @@
         background-color: aqua;
         color: blue;
         font-weight: bold;
-        margin-top: 0;
+        /* margin-top: 0; */
         margin-bottom: 1em;
         margin-left: auto;
         margin-right: auto;
@@ -1142,32 +1206,10 @@
     </div>
 
     <!-- HERE USER CAN CHECK USER SHIPS POSITIONED ON THE BOARD -->
-    {#if !isReadyToPlay && curGame === gameId}
+    <!-- {#if !isUserBoardReady && whoBegins === null && curGame === gameId} -->
+    <!-- {#if !isUserBoardReady && curGame === gameId} -->
+    {#if !isGameOn && curGame === gameId}
         <div class="ship-list">
-        <!--
-        <div class='ship-select'>
-            <h4 class="small-header">{ ui['select_ship_text'][language] }</h4>
-            -->
-            <!--
-            <label for="ship-select" >                
-            </label>    
-            -->
-
-            <!-- Ship class selector -->
-            <!--
-            <select name="ship-class" 
-                bind:value={selectedShipClass} 
-            >
-                {#each shipOptions as ship, index}
-                    <option value="{index > 0 ? shipOptions[index].class : null}" 
-                        disabled={index === 0}
-                    >
-                        { index > 0 ? ui[ship.class][language] : ui['select_ship'][language] } 
-                    </option> 
-                {/each}
-            </select>
-            -->
-
             <h4 class="small-header">{ ui['user_ships'][language] }</h4>
 
             <!-- TABLE TO DISPLAY HOW MANY USER SHIPS ARE AWAILABLE -->
@@ -1193,18 +1235,26 @@
                 {/each}        
             </table>
 
-            {#if whoPlaysFirst === null && curGame === gameId && globalToBePositioned === 0} 
-                <!-- WHO PLAYS FIRST radio buttons etc -->
-                <!-- The fade transition messes up with routing, so use currentGame as a bugfix!!! -->
-                <WhoPlaysFirst on:whoBegins={handleWhoBegins} />
-            {/if}
         </div>
 
-        <div>&nbsp;</div>
+        <div class="who-plays-first">
+            <!-- WHO PLAYS FIRST radio buttons etc -->
+            <!-- The fade transition messes up with routing, so use currentGame as a bugfix!!! -->
+            <WhoPlaysFirst on:whoBegins={handleWhoBegins} />
+        </div>
+
+
+        <!-- <div>&nbsp;</div> -->
     {/if}
 
-    {#if isReadyToPlay && curGame === gameId}}
-        <div class="opponent" transition:fade="{{delay: 100, duration: 500}}">
+
+
+
+    <!-- {#if isReadyToPlay && curGame === gameId} -->
+    <!-- {#if isUserBoardReady && isOppoBoardReady && whoBegins !== null && curGame === gameId} -->
+    <!-- {#if isUserBoardReady && isOppoBoardReady && whoBegins !== null && curGame === gameId} -->
+    {#if isGameOn && curGame === gameId}
+        <div class="opponent" transition:fade="{ {delay: 100, duration: 500} }">
             <h3 class="user-or-opponent">{ ui["opponent_ships"][language] }</h3>
 
             <!-- TABLE with OPPONENT's SHIPS -->
@@ -1218,8 +1268,7 @@
                             <td on:click={ () => fire(rowIndex, colIndex) }
                                 class="{getCellClass(rowIndex, colIndex, oppoBoard)}"                         
                             >
-                                { @html rowIndex > 0 && colIndex > 0
-                                    ? num2char(cell) : cell }
+                                { @html rowIndex > 0 && colIndex > 0 ? num2char(cell) : cell }
                             </td>
                         {/each}
                     </tr>
@@ -1228,22 +1277,24 @@
         </div>
     {/if}
 
-    <div class="buttons-and-info">
-        <!-- BUTTON -->
-        <button class="cool-button" on:click={startGame} 
-                disabled={globalToBePositioned !== 0 || whoPlaysFirst === null}
-        >
-            { ui['start_game'][language] }
-        </button>            
-
-        <!-- INFO TEXT -->
-        <div class="info-text center unselectable margin-after"> 
-            <!-- Do not remove &nbsp; -->
-            { @html infoText } &nbsp;
-        </div>      
-    </div>      
-
 </div>    
+
+<!-- BUTTON(S) and INFO TEXT -->
+<div class="buttons-and-info">
+    <!-- BUTTON -->
+    <button class="cool-button" on:click={startGame} 
+            disabled={!isUserBoardReady || whoBegins === null || isGameOn}
+    >
+        { ui['start_game'][language] }
+    </button>            
+
+    <!-- INFO TEXT -->
+    <div class="info-text center unselectable margin-after"> 
+        <!-- Do not remove &nbsp; -->
+        { @html infoText } &nbsp;
+    </div>      
+</div>      
+
 
 
 
