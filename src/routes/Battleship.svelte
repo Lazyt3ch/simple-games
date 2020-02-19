@@ -42,6 +42,7 @@
     });    
     
 
+
     // GAME LOGIC HEAD ==============================>
 
     function randomInt(n) {
@@ -88,10 +89,12 @@
     // 4 = empty cell that cannot be used because it touches a ship
     // *********** cells *************
     const EMPTY = 0;
-    const SHIP = 1;
-    const DAMAGED = 2;
+    const SHIP = 1;    
+    const HIT = 2;
     const SUNKEN = 3;
     const EDGE = 4;
+    const WATER = 5;
+    const FOG = 6;
 
     function newEmptyBoard() {
         let board = [];
@@ -119,7 +122,7 @@
         return board;
     }
 
-    function num2char(num) {
+    function userNum2char(num) {
         let char;
 
         if (num === 0) {
@@ -131,6 +134,32 @@
         return char;
     }
 
+    function oppoNum2char(num) {
+        let char;
+
+        if (num === HIT || num === SUNKEN ) {
+            // &#x2573;  // BOX DRAWINGS LIGHT DIAGONAL CROSS in Unicode // use instead of 'x'            
+            char = '&#x2573;';
+        } else if (num === WATER || num === EMPTY) {
+            char = ' ';
+        } else {
+            char = ' ';
+        }
+
+        /*
+        if (num === 0) {
+            char = ' ';
+        } else {
+            char = num.toString();
+        }
+        */
+
+
+
+        return char;
+    }
+
+
     function isShipSunken(rowIndex, colIndex) {
         // 2 = discovered cell containing a damaged ship
         // 3 = discovered cell containing a sunken ship            
@@ -138,54 +167,64 @@
         // let damagedCellsCount = 0;
         let damagedCells = [];
         let curCell;
+        console.log("FUNCTION: isShipSunken;  rowIndex, colIndex, cell_content =", 
+                    rowIndex, colIndex, oppoBoard[rowIndex][colIndex]);
 
         // left
         for (let r = rowIndex; r > 0; r--) {
             curCell = oppoBoard[r][colIndex];
             if (curCell === SHIP) {
                 return false; // some cells of this ship have not been hit yet
-            } else if (curCell === EMPTY) {
+            } else if (curCell === EMPTY || curCell === WATER) {
                 break; // No need to continue checking this direction            
-            } else if (curCell === DAMAGED) {
+            } else if (curCell === HIT) {
                 damagedCells.push([r, colIndex]);
             }
         }
+
+        console.log("Got here! AFTER: left");
 
         // right
         for (let r = rowIndex; r < totalHeight; r++) {
             curCell = oppoBoard[r][colIndex];
             if (curCell === SHIP) {
                 return false; // some cells of this ship have not been hit yet
-            } else if (curCell === EMPTY) {
+            } else if (curCell === EMPTY || curCell === WATER) {
                 break; // No need to continue checking this direction             
-            } else if (curCell === DAMAGED) {
+            } else if (curCell === HIT) {
                 damagedCells.push([r, colIndex]);
             }
         }        
 
+        console.log("Got here! AFTER: right");
+
         // top
-        for (let c = colIndex; c > 0; r--) {
+        for (let c = colIndex; c > 0; c--) {
             curCell = oppoBoard[rowIndex][c];
             if (curCell === SHIP) {
                 return false; // some cells of this ship have not been hit yet
-            } else if (curCell === EMPTY) {
+            } else if (curCell === EMPTY || curCell === WATER) {
                 break; // No need to continue checking this direction             
-            } else if (curCell === DAMAGED) {
+            } else if (curCell === HIT) {
                 damagedCells.push([rowIndex, c]);
             }
         }               
 
+        console.log("Got here! AFTER: top");
+
         // bottom
-        for (let c = colIndex; c < totalWidth; r++) {
+        for (let c = colIndex; c < totalWidth; c++) {
             curCell = oppoBoard[rowIndex][c];
             if (curCell === SHIP) {
                 return false; // some cells of this ship have not been hit yet
-            } else if (curCell === EMPTY) {
+            } else if (curCell === EMPTY || curCell === WATER) {
                 break; // No need to continue checking this direction               
-            } else if (curCell === DAMAGED) {
+            } else if (curCell === HIT) {
                 damagedCells.push([rowIndex, c]);
             }
         }         
+
+        console.log("Got here! AFTER: bottom");
 
         // Marking ship as sunken
         oppoBoard[rowIndex][colIndex] = SUNKEN;
@@ -193,24 +232,50 @@
             oppoBoard[coord[0]][coord[1]] = SUNKEN;
         });
 
+        markAroundSunkenShip(damagedCells);
         return true;
+    }
+
+    function markAroundSunkenShip(damagedCells) {
+        let rowIndex, colIndex;
+
+        damagedCells.forEach(coord => {
+            [rowIndex, colIndex] = [coord[0], coord[1]];
+            for (let r = rowIndex - 1; r <= rowIndex + 1; r++) {
+                for (let c = colIndex - 1; c <= colIndex + 1; c++) {
+                    if (isValidCell(r, c)) {
+                        if (oppoBoard[r][c] === EMPTY) {
+                            oppoBoard[r][c] = WATER;
+                        }
+                    }
+                }
+            }
+        });        
     }
 
 
     function fire(rowIndex, colIndex) {
+        console.log("FUNCTION: fire;  isGameOn =", isGameOn);
         if (!isGameOn) return;
 
         // user fires at a opponent board cell
         // 2 = discovered cell containing a damaged ship
         // 3 = discovered cell containing a sunken ship            
-        if (oppoBoard[rowIndex, colIndex] === SHIP) {            
+        let cell = oppoBoard[rowIndex][colIndex];
+
+        if (cell === EMPTY) {
+            oppoBoard[rowIndex][colIndex] = WATER;
+            info = 'missed';
+        } else if (cell === SHIP) {      
+            oppoBoard[rowIndex][colIndex] = HIT;      
             if (isShipSunken(rowIndex, colIndex)) {
-                info = ui['oppo_ship_sunken'][language];
-            } else {
-                oppoBoard[rowIndex, colIndex] = DAMAGED;
-                info = ui['oppo_ship_hit'][language];
+                info = 'oppo_ship_sunken';
+            } else {                
+                info = 'oppo_ship_hit';
             }
         }
+
+        console.log("oppoBoard[rowIndex][colIndex] =", oppoBoard[rowIndex][colIndex]);
 
     }
 
@@ -281,6 +346,38 @@
     console.log("oppoBoard =", oppoBoard);    
     */
 
+
+
+    function getCellClass(rowIndex, colIndex, someBoard) {      
+        let cellClass;
+
+        cellClass = `
+            board-cell unselectable
+            ${colIndex === 0 && rowIndex === 0 ? 'no-top-left-borders' : ''}
+            ${(colIndex === 0 || rowIndex === 0) && colIndex !== rowIndex ? 'top-and-left-headers' : ''}
+            ${(colIndex === 0 && colIndex === rowIndex) ? 'top-left-header-cell' : ''}
+        `
+
+        if (someBoard === oppoBoard) {
+            cellClass += `
+            ${(rowIndex > 0 && colIndex > 0 && someBoard[rowIndex][colIndex] === EMPTY) ? 'fog-cell' : ''}        
+            ${(rowIndex > 0 && colIndex > 0 && someBoard[rowIndex][colIndex] === SHIP) ? 'fog-cell' : ''}
+            ${(rowIndex > 0 && colIndex > 0 && someBoard[rowIndex][colIndex] === WATER) ? 'water-cell' : ''}
+            ${(rowIndex > 0 && colIndex > 0 && someBoard[rowIndex][colIndex] === HIT) ? 'hit-cell' : ''}
+            ${(rowIndex > 0 && colIndex > 0 && someBoard[rowIndex][colIndex] === SUNKEN) ? 'sunken-cell' : ''}
+            `;
+        } else {
+            cellClass += `
+            ${(rowIndex > 0 && colIndex > 0 && someBoard[rowIndex][colIndex] === 0) ? 'board-data' : ''}        
+            ${(rowIndex > 0 && colIndex > 0 && someBoard[rowIndex][colIndex] === 1) ? 'ship-cell' : ''}
+            `;
+        }
+
+        console.log("rowIndex, colIndex, cellClass =", rowIndex, colIndex, cellClass);
+        return cellClass;
+    }    
+
+   /*
     function getCellClass(rowIndex, colIndex, someBoard) {        
         let cellClass = `
         board-cell unselectable
@@ -293,12 +390,13 @@
         // console.log("cellClass =", cellClass);
         return cellClass;
     }
+    */
 
     function getInfoClass(toBePositioned, totalNumber) {
         let cellClass = `
         ${toBePositioned === 0 ? 'ships-ready' : ''}
         ${toBePositioned < 0 ? 'ships-overlimit' : ''}
-        ${toBePositioned > 0 && toBePositioned < totalNumber ? 'ships-underway' : ''}
+        ${toBePositioned > 0 && toBePositioned < totalNumber ? 'ships-in-process' : ''}
         `;
 
         return cellClass;    
@@ -491,7 +589,7 @@
 
 
     function isValidCell(rowIndex, colIndex) {
-        return (rowIndex > 0 && rowIndex < 11 && colIndex > 0 && colIndex < 11);
+        return (rowIndex > 0 && rowIndex < totalHeight && colIndex > 0 && colIndex < totalWidth);
     }
 
 
@@ -676,7 +774,9 @@
     //
     // flatPos = (rowIndex - 1) * dataHeight + (colIndex - 1)
     //
-    let eligibleCellCount = dataHeight * dataWidth; // cell count
+    // let eligibleCellCount = dataHeight * dataWidth; // cell count
+    let cellCount = dataHeight * dataWidth; // cell count
+    let cellCountAndDirections = cellCount * 4; // cell count multiplied by possible directions
 
     function initOppoBoardFlatList() {
         for (let r = 0; r < totalHeight; r++) {
@@ -687,6 +787,7 @@
     }
 
     function positionOppoShips() {
+        let shipHeadFlatPosAndTailDir;
         let shipHeadFlatPos;
         let shipTailDirection;
         let shipHeadRow, shipHeadCol;
@@ -708,7 +809,9 @@
                 // console.log("=====================================================")
                 // console.log("s =", s);
                 // console.log("Ship size = ", oppoShipsFlatList[s]);
-                shipHeadFlatPos = randomInt(eligibleCellCount); // (0, 1, ... , 99)
+                // shipHeadFlatPos = randomInt(eligibleCellCount); // (0, 1, ... , 99)
+                shipHeadFlatPosAndTailDir = randomInt(cellCountAndDirections); // (0, 1, 396)
+                shipHeadFlatPos = Math.floor(shipHeadFlatPosAndTailDir / 4);
                 // console.log("shipHeadFlatPos =", shipHeadFlatPos);
                 // shipHeadRow = shipHeadFlatPos % dataHeight + 1;
                 shipHeadRow = Math.floor(shipHeadFlatPos / dataHeight) + 1;
@@ -716,7 +819,8 @@
                 // console.log("shipHeadRow, shipHeadCol =", shipHeadRow, shipHeadCol);
 
                 // 0 = top, 1 = right, 2 = bottom, 3 = left
-                let shipTailDir = randomInt(4);
+                // let shipTailDir = randomInt(4);
+                let shipTailDir = shipHeadFlatPosAndTailDir % cellCount;
                 // console.log("shipTailDir =", shipTailDir, "(0 = top, 1 = right, 2 = bottom, 3 = left)");
                 // shipTailRow = shipHeadRow
                 if (shipTailDir % 2 === 0) { // top or bottom
@@ -752,7 +856,7 @@
                     for (let r = shipHeadRow; r <= shipTailRow; r++) {
                         if (isMisfit) break;
                         for (let c = shipHeadCol; c <= shipTailCol; c++) {
-                            if (oppoBoard[r][c] !== 0 ||
+                            if (oppoBoard[r][c] !== EMPTY ||
                                 isUnsafeAtSides(r, c, oppoBoard) || 
                                 isUnsafeAtCorners(r, c, oppoBoard)) {
                                 isMisfit = true;
@@ -764,7 +868,7 @@
                     if (!isMisfit) {
                         for (let r = shipHeadRow; r <= shipTailRow; r++) {
                             for (let c = shipHeadCol; c <= shipTailCol; c++) {
-                                oppoBoard[r][c] = 1;
+                                oppoBoard[r][c] = SHIP;
                             }
                         }
                         isShipNotPositioned = false;                
@@ -807,6 +911,7 @@
         initOppoShips();
 
         info = 'game_on';
+        console.log("oppoBoard =", oppoBoard);
     }
     
 
@@ -829,25 +934,33 @@
 
 
 <style>
+    .ship-list-and-who-plays-first {
+        display: block;        
+        max-width: 25em;
+        float: right;
+    }
+
     .who-plays-first {
         display: block;
         margin-top: 2em;
         /* min-width: 20em; */
+        width: 90%;
+        /* margin-right: 1em; */
     }
 
-    /* Table with user ships data etc */
     .ship-list {
         display: block;
-        /* display: flex; */
+        width: 100%;
+        margin-top: .5em;
+        margin-bottom: 1em;
     }
 
     .ship-list-table {        
         margin-top: .5em;
         margin-bottom: 1em;
         border-collapse: collapse;      
-
         font-size: 1em;
-        min-width: 10em;
+        /* min-width: 10em; */
     }
 
     .ship-list-data {
@@ -893,6 +1006,7 @@
     .board-cell { /* any cells, including header cells */
         width: 2em;
         height: 2em;
+        text-align: center;
         /* width: 30px;
         height: 30px; */
         /*
@@ -902,9 +1016,11 @@
     }
    
     .board-data {
-        /* font-size: 1em; */ /* Use this option in development */
-        font-size: 0; /* Use this option in production */
-        font-weight: 100;
+        font-size: 1em; /* Use this option in development */
+        /* font-size: 0; */ /* Use this option in production */
+        /* font-weight: 100; */
+        font-weight: bolder;
+        font-family: Arial, Helvetica, sans-serif;
 
         height: 2em;
         width: 2em;
@@ -955,7 +1071,21 @@
         font-size: 0;
     }
 
+    .fog-cell {
+        background-color: gray;
+    }
 
+    .water-cell {
+        background-color: blue;
+    }
+
+    .hit-cell {
+        background-color: red;
+    }
+
+    .sunken-cell {
+        background-color: brown;
+    }    
 
 
     .user {
@@ -973,14 +1103,7 @@
         float: right;
     }    
 
-    /* .ship-select { */
-    .ship-list {
-        /* display: inline-block; */
-        margin-top: .5em;
-        float: right;
-        margin-right: 1em;
-        margin-bottom: 1em;
-    }
+
 
     .ships-ready {
         background-color: lightgreen;
@@ -988,7 +1111,7 @@
         font-weight: bold;
     }
 
-    .ships-underway {
+    .ships-in-process {
         background-color: lightblue;
         color: brown;
         font-weight: bold;
@@ -1092,9 +1215,11 @@
         margin-bottom: 1em;
     }
 
+    /*
     .limited-width {
         max-width: 20em;
     }
+    */
 
     /* POPUP HEAD ==================================> */
     /* source: https://www.w3schools.com/howto/tryit.asp?filename=tryhow_js_popup */
@@ -1197,7 +1322,7 @@
                         <td on:click={ () => placeShip(rowIndex, colIndex) }
                             class="{ getCellClass(rowIndex, colIndex, userBoard) }"                                                   
                         >
-                            { @html rowIndex > 0 && colIndex > 0 ? num2char(cell) : cell }
+                            { @html rowIndex > 0 && colIndex > 0 ? userNum2char(cell) : cell }
                         </td>
                     {/each}
                 </tr>
@@ -1209,40 +1334,40 @@
     <!-- {#if !isUserBoardReady && whoBegins === null && curGame === gameId} -->
     <!-- {#if !isUserBoardReady && curGame === gameId} -->
     {#if !isGameOn && curGame === gameId}
-        <div class="ship-list">
-            <h4 class="small-header">{ ui['user_ships'][language] }</h4>
+        <div class="ship-list-and-who-plays-first">
+            <div class="ship-list">
+                <h4 class="small-header">{ ui['user_ships'][language] }</h4>
 
-            <!-- TABLE TO DISPLAY HOW MANY USER SHIPS ARE AWAILABLE -->
-            <table class="ship-list-table">
-                <tr class="content-leftish ship-list-headers">
-                    <th class="ship-list-data"> { ui['class'][language]} </th>
-                    <th class="ship-list-data"> { ui['size'][language]} </th>       
-                    <th class="ship-list-data"> { ui['total_number'][language]} </th>                             
-                    <th class="ship-list-data"> { ui['to_be_positioned'][language]} </th>                             
-                </tr>
-                <!-- Must use a key in #each loop -->
-                {#each userShips as userShip, index (index)}
-                    <tr>
-                        <td class="ship-list-data content-leftish"> { ui[userShip.class][language] } </td>
-                        <td class="ship-list-data content-rightish"> { userShip.size } </td>
-                        <td class="ship-list-data content-rightish"> { userShip.totalNumber } </td>
-                        <td class="ship-list-data content-rightish 
-                            { getInfoClass(userShip.toBePositioned, userShip.totalNumber) }
-                            "> 
-                            { userShip.toBePositioned } 
-                        </td>
+                <!-- TABLE TO DISPLAY HOW MANY USER SHIPS ARE AWAILABLE -->
+                <table class="ship-list-table">
+                    <tr class="content-leftish ship-list-headers">
+                        <th class="ship-list-data"> { ui['class'][language]} </th>
+                        <th class="ship-list-data"> { ui['size'][language]} </th>       
+                        <th class="ship-list-data"> { ui['total_number'][language]} </th>                             
+                        <th class="ship-list-data"> { ui['to_be_positioned'][language]} </th>                             
                     </tr>
-                {/each}        
-            </table>
+                    <!-- Must use a key in #each loop -->
+                    {#each userShips as userShip, index (index)}
+                        <tr>
+                            <td class="ship-list-data content-leftish"> { ui[userShip.class][language] } </td>
+                            <td class="ship-list-data content-rightish"> { userShip.size } </td>
+                            <td class="ship-list-data content-rightish"> { userShip.totalNumber } </td>
+                            <td class="ship-list-data content-rightish 
+                                { getInfoClass(userShip.toBePositioned, userShip.totalNumber) }
+                                "> 
+                                { userShip.toBePositioned } 
+                            </td>
+                        </tr>
+                    {/each}        
+                </table>
+            </div>
 
+            <div class="who-plays-first">
+                <!-- WHO PLAYS FIRST radio buttons etc -->
+                <!-- The fade transition messes up with routing, so use currentGame as a bugfix!!! -->
+                <WhoPlaysFirst on:whoBegins={handleWhoBegins} />
+            </div>
         </div>
-
-        <div class="who-plays-first">
-            <!-- WHO PLAYS FIRST radio buttons etc -->
-            <!-- The fade transition messes up with routing, so use currentGame as a bugfix!!! -->
-            <WhoPlaysFirst on:whoBegins={handleWhoBegins} />
-        </div>
-
 
         <!-- <div>&nbsp;</div> -->
     {/if}
@@ -1263,12 +1388,11 @@
                 {#each oppoBoard as row, rowIndex (rowIndex)}
                     <tr>
                         <!-- Must use a key in #each loop -->
-                        {#each row as cell, colIndex 
-                            (colIndex * dataHeight + colIndex)}
+                        {#each row as cell, colIndex (colIndex * dataHeight + colIndex)}
                             <td on:click={ () => fire(rowIndex, colIndex) }
                                 class="{getCellClass(rowIndex, colIndex, oppoBoard)}"                         
                             >
-                                { @html rowIndex > 0 && colIndex > 0 ? num2char(cell) : cell }
+                                { @html rowIndex > 0 && colIndex > 0 ? oppoNum2char(cell) : cell }
                             </td>
                         {/each}
                     </tr>

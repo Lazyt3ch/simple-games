@@ -25,8 +25,11 @@
 
 <style>
     .limited-width {
+        /*
         max-width: 20em;
         min-width: 15em;
+        */
+        width: 100%;
     }
 
     .margin-after {

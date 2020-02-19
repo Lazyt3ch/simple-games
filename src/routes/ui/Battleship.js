@@ -200,7 +200,13 @@ export const uiStrings = {
         // ru: "Осталось решить, кто сделает первый ход, и начать игру!",
         en: "The game is on!",
         ru: "Игра началась!",
-    },        
+    },       
+    
+    'missed':
+    {
+        en: "Sorry, you missed!",
+        ru: "К сожалению, вы промазали!",
+    },       
 
     'oppo_ship_hit':
     {
