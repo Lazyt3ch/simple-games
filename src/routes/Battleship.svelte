@@ -55,19 +55,22 @@
 
     // let lastHitUserCellRow;
     // let lastHitUserCellCol;
-    let lastHitUserCell; // to be { row: x, col: y }
+    // let lastHitUserCell; // to be { row: x, col: y }
+    let hitUserCells = []; // to be { row: x, col: y }
 
     function handleWhoBegins(event) {
-        whoBegins = event.detail.text;
-        // console.log("whoBegins =", whoBegins);
+        whoBegins = event.detail;
+        console.log("Battleship;  FUNCTION: handleWhoBegins;  event =", event);
+        console.log("Battleship;  FUNCTION: handleWhoBegins;  whoBegins =", whoBegins);
         // isUserReady = true;
         recountUserShips();
     }
 
     let userShipCount, oppoShipCount;
 
-    let info = 'position_ships';
+    // let info = 'position_ships';
     // globalToBePositioned
+    let info;
     let infoText;
 
     $: infoText = ui[info][language];
@@ -94,6 +97,12 @@
     const EDGE = 4;
     const WATER = 5;
     const FOG = 6;
+
+    const IRRELEVANT = 0;
+    const TOP = 1;
+    const RIGHT = 2
+    const BOTTOM = 3
+    const LEFT = 4;
 
     const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 
@@ -234,6 +243,8 @@
     function userFire(rowIndex, colIndex) {
         // user fires at an opponent board cell
         // console.log("FUNCTION: fire;  isGameOn =", isGameOn);
+        let checkResult;
+
         if (!isGameOn) return;
 
         if (oppoTurn) return;
@@ -259,11 +270,12 @@
         }
         // console.log("oppoBoard[rowIndex][colIndex] =", oppoBoard[rowIndex][colIndex]);
         userMoveCount++;
+        oppoTurn = true;
 
         if (oppoShipCount < 1) {
             info = 'user_won';
             // isGameOn = false;
-            oppoTurn = true;
+            // oppoTurn = true;
             return;
         }
 
@@ -275,14 +287,48 @@
 
 
     function oppoFire() {
-        // to be implemented
-        // info = 'opponent_move';
+        // Need to implement: detection of user ship orientation
+        // if two adjacent ship cells are hit!!!
 
         let cellFlatPos;
-        let rowIndex, colIndex;
-        let cell;
+        let rowIndex = -1, colIndex = -1;
+        let cell;        
+        let r, c;
+        let checkResult;
 
-        if (lastHitUserCell === null) {
+        if (hitUserCells) {
+            // Try and finish off a damaged user ship
+            for (let i = 0; i < hitUserCells.length; i++) {
+                // console.log("----------------------------");
+                // console.log("hitUserCells[i] =", hitUserCells[i]);
+                // [r, c] = [hitUserCells[i].row, hitUserCells[i].col];
+                r = hitUserCells[i].row;
+                c = hitUserCells[i].col;
+                // console.log("r, c =", r, c);
+                if (userBoard[r][c] === HIT) {
+                    checkResult = checkIfShipAtSides(r, c, userBoard);
+                    if (checkResult > 0) {
+                        if (checkResult === TOP) {
+                            rowIndex = r - 1;
+                            colIndex = c;
+                        } else if (checkResult === BOTTOM) {
+                            rowIndex = r + 1;
+                            colIndex = c;
+                        } else if (checkResult === LEFT) {
+                            colIndex = c - 1;
+                            rowIndex = r;
+                        } else if (checkResult === RIGHT) {
+                            colIndex = c + 1;
+                            rowIndex = r;
+                        }
+                        cell = userBoard[rowIndex][colIndex];
+                        break;
+                    }
+                }
+            }
+        }
+
+        if (rowIndex === -1 || colIndex === -1) {
             // Fire at a random cell
             while (true) {
                 cellFlatPos = randomInt(cellCount); // (0, 1, ... , 99)
@@ -291,24 +337,19 @@
                 cell = userBoard[rowIndex][colIndex];
                 if (cell === EMPTY || cell === SHIP) break;
             }
-        } else {
-            // Try and finish off a damaged user ship
-
-            // to be implemented...
-
         }
-
-        // cell = userBoard[rowIndex][colIndex];
-
+            
         if (cell === EMPTY) {
             userBoard[rowIndex][colIndex] = WATER;
             info = 'user_ship_missed';
         } else if (cell === SHIP) {        
             userBoard[rowIndex][colIndex] = HIT;      
+            // hitUserCells.push({ row: rowIndex, col: colIndex });
             if (isSunk(rowIndex, colIndex, userBoard)) {
                 info = 'user_ship_sunk';
                 userShipCount--;
             } else {                
+                hitUserCells.push({ row: rowIndex, col: colIndex });
                 info = 'user_ship_hit';
             }
         }
@@ -325,8 +366,36 @@
         setTimeout( () => { 
             info = 'user_move';
             oppoTurn = false;
-        }, 2000);          
+        }, 1500);          
+    }
 
+
+    function checkIfShipAtSides(rowIndex, colIndex, board) {              
+        // top
+        if (isValidCell(rowIndex - 1, colIndex) && 
+            (board[rowIndex - 1][colIndex] === SHIP || board[rowIndex - 1][colIndex] === EMPTY)) {
+            return TOP;
+        }
+
+        // right
+        if (isValidCell(rowIndex, colIndex + 1) && 
+            (board[rowIndex][colIndex + 1] === SHIP || board[rowIndex][colIndex + 1] === EMPTY)) {
+            return RIGHT;
+        }
+
+        // bottom
+        if (isValidCell(rowIndex + 1, colIndex) && 
+            (board[rowIndex + 1][colIndex] === SHIP || board[rowIndex + 1][colIndex] === EMPTY)) {
+            return BOTTOM;
+        }        
+
+        // left
+        if (isValidCell(rowIndex, colIndex - 1) && 
+            (board[rowIndex][colIndex - 1] === SHIP || board[rowIndex][colIndex - 1] === EMPTY)) {
+            return LEFT;
+        }      
+
+        return IRRELEVANT; // 0 == false
     }
 
 
@@ -349,20 +418,7 @@
         }
     }
 
-    let curShipIndex = 0;
-
-
-    /*
-    function isAnythingAround(rowIndex, colIndex) {
-        for (let r = Math.max(1, rowIndex - 1); r < rowIndex + 1 && r < totalWidth; r++) {
-            for (let c = Math.max(1, colIndex - 1); c < colIndex + 1 && c < totalHeight; c++) {
-
-            }
-        }
-
-        return true;
-    }
-    */
+    // let curShipIndex = 0;
 
     let userBoard, oppoBoard;
 
@@ -601,22 +657,22 @@
         // console.log("rowIndex, colIndex =", rowIndex, colIndex);
         
         // top left corner  
-        if (isValidCell(rowIndex - 1, colIndex - 1) && board[rowIndex - 1][colIndex - 1] !== 0) {
+        if (isValidCell(rowIndex - 1, colIndex - 1) && board[rowIndex - 1][colIndex - 1] !== EMPTY) {
             return true;
         }
 
         // top right corner
-        if (isValidCell(rowIndex - 1, colIndex + 1) && board[rowIndex - 1][colIndex + 1] !== 0) {
+        if (isValidCell(rowIndex - 1, colIndex + 1) && board[rowIndex - 1][colIndex + 1] !== EMPTY) {
             return true;
         }
 
         // bottom right corner  
-        if (isValidCell(rowIndex + 1, colIndex + 1) && board[rowIndex + 1][colIndex + 1] !== 0) {
+        if (isValidCell(rowIndex + 1, colIndex + 1) && board[rowIndex + 1][colIndex + 1] !== EMPTY) {
             return true;
         }      
 
         // bottom left corner  
-        if (isValidCell(rowIndex + 1, colIndex - 1) && board[rowIndex + 1][colIndex - 1] !== 0) {
+        if (isValidCell(rowIndex + 1, colIndex - 1) && board[rowIndex + 1][colIndex - 1] !== EMPTY) {
             return true;
         }        
 
@@ -626,27 +682,28 @@
 
     function isUnsafeAtSides(rowIndex, colIndex, board) {              
         // top  
-        if (isValidCell(rowIndex - 1, colIndex) && board[rowIndex - 1][colIndex] !== 0) {
+        if (isValidCell(rowIndex - 1, colIndex) && board[rowIndex - 1][colIndex] !== EMPTY) {
             return true;
         }
 
         // right
-        if (isValidCell(rowIndex, colIndex + 1) && board[rowIndex][colIndex + 1] !== 0) {
+        if (isValidCell(rowIndex, colIndex + 1) && board[rowIndex][colIndex + 1] !== EMPTY) {
             return true;
         }
 
         // bottom  
-        if (isValidCell(rowIndex + 1, colIndex) && board[rowIndex + 1][colIndex] !== 0) {
+        if (isValidCell(rowIndex + 1, colIndex) && board[rowIndex + 1][colIndex] !== EMPTY) {
             return true;
         }        
 
         // left  
-        if (isValidCell(rowIndex, colIndex - 1) && board[rowIndex][colIndex - 1] !== 0) {
+        if (isValidCell(rowIndex, colIndex - 1) && board[rowIndex][colIndex - 1] !== EMPTY) {
             return true;
         }      
 
         return false;
     }
+
 
     let popupText = '';
     let popupVisible = false;
@@ -894,20 +951,11 @@
 
         whoBegins = null;
 
-        /*        if (whoBegins === "opponent") {
-            oppoTurn = true;
-            info = "opponent_move";
-            // oppoMove();
-        } else if (whoBegins === "user") {
-            oppoTurn = false;
-            info = 'user_move';
-        } else {
-            // info = 'lets_play';
-        }
-        */
+        hitUserCells = [];
 
-        // initOppoShips();
-        // startGame();
+        isGameOn = false;
+
+        info = 'position_ships';
     }
 
 
@@ -917,25 +965,26 @@
         userMoveCount = 0;
         oppoMoveCount = 0;
 
-        lastHitUserCell = null;
+        hitUserCells = [];
 
         initOppoShips();
 
         info = 'game_on';
         console.log("oppoBoard =", oppoBoard);
 
-        if (oppoTurn) {
+        if (whoBegins === "opponent") {
+            oppoTurn = true;
             setTimeout( () => { 
                 info = 'opponent_move';
             }, 2000);            
             oppoFire();            
         } else {
+            oppoTurn = false;
             setTimeout( () => { 
                 info = 'user_move';
-            }, 2000);
+            }, 1500);
         }
-    }
-    
+    }    
 
     let oppoTurn = false;
 
@@ -1038,9 +1087,9 @@
         font-size: 1em; /* Use this option in development */
         /* font-size: 0; */ /* Use this option in production */
         /* font-weight: 100; */
-        font-weight: bolder;
-        font-family: Arial, Helvetica, sans-serif;
-
+        /* font-weight: bolder; */
+        /* font-family: Arial, Helvetica, sans-serif; */
+        font-family: 'Lucida Console', 'Courier New', Courier, monospace;
         height: 2em;
         width: 2em;
         vertical-align: center;
@@ -1049,7 +1098,7 @@
 
         border-style: solid;
         border-width: 1px;
-        border-color: gray;
+        border-color: black;
     }
 
     /*
@@ -1085,25 +1134,41 @@
     }
 
     .ship-cell {
-        border-style: none;
+        /* border-style: none; */
         background-color: cadetblue;
         font-size: 0;
     }
 
     .fog-cell {
         background-color: gray;
+
+        border-style: solid;
+        border-width: 1px;
+        border-color: black;
     }
 
     .water-cell {
         background-color: blue;
+
+        border-style: solid;
+        border-width: 1px;
+        border-color: black;        
     }
 
     .hit-cell {
         background-color: red;
+
+        border-style: solid;
+        border-width: 1px;
+        border-color: black;        
     }
 
     .sunk-cell {
         background-color: brown;
+
+        border-style: solid;
+        border-width: 1px;
+        border-color: black;        
     }    
 
 

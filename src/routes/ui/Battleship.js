@@ -230,12 +230,12 @@ export const uiStrings = {
     },       
     'user_ship_hit':
     {
-        en: "The opponent has hit your ship!",
+        en: "The opponent has hit a ship of yours!",
         ru: "Противник попал в ваш корабль!",
     },          
     'user_ship_sunk':
     {
-        en: "The opponent has sunk your ship!",
+        en: "The opponent has sunk a ship of yours!",
         ru: "Противник потопил ваш корабль!",
     },       
     
