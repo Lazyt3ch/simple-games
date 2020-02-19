@@ -63,16 +63,21 @@ export const uiStrings = {
         en: 'The game is on!',
         ru: 'Игра началась!',
     },
+
+    // Battleship-specific!
     'user_move':
     {
-        en: 'Make your move!',
-        ru: 'Делайте ход!',
+        en: "It's your turn to fire.",
+        ru: "Ваша очередь стрелять.",
     },    
+
+    // Battleship-specific!
     'opponent_move':
     {
-        en: "Wait for the opponent's move...",
-        ru: 'Подождите, пока противник сделает ход...',
+        en: "Wait for the opponent to fire...",
+        ru: 'Подождите, пока противник выстрелит...',
     },       
+
     'user_won':
     {
         en: "Congratulations, you've won!",
@@ -202,21 +207,43 @@ export const uiStrings = {
         ru: "Игра началась!",
     },       
     
-    'missed':
+    'oppo_ship_missed':
     {
-        en: "Sorry, you missed!",
-        ru: "К сожалению, вы промазали!",
+        en: "Sorry, you've missed.",
+        ru: "К сожалению, вы промахнулись.",
     },       
-
     'oppo_ship_hit':
     {
         en: "Good job! You've hit an enemy ship!",
         ru: "Отлично, вы попали во вражеский корабль!",
     },            
-
-    'oppo_ship_sunken':
+    'oppo_ship_sunk':
     {
-        en: "Great job! You've sunken an enemy ship!",
-        ru: "Превосходно, вы потопили вражеский корабль!",
+        en: "Excellent! You've sunk an enemy ship!!!",
+        ru: "Превосходно, вы потопили вражеский корабль!!!",
     },        
+
+    'user_ship_missed':
+    {
+        en: "The opponent has fired but missed.",
+        ru: "Противник выстрелил и промахнулся.",
+    },       
+    'user_ship_hit':
+    {
+        en: "The opponent has hit your ship!",
+        ru: "Противник попал в ваш корабль!",
+    },          
+    'user_ship_sunk':
+    {
+        en: "The opponent has sunk your ship!",
+        ru: "Противник потопил ваш корабль!",
+    },       
+    
+    'no_use_firing_here':
+    {
+        en: "It doesn't make sense firing at this cell!",
+        ru: "Нет никакого смысла стрелять в эту ячейку!",
+    },       
+        
+
 }

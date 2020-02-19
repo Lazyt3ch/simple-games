@@ -4,7 +4,6 @@
     import { fade } from 'svelte/transition';
     
     import { languages, gameName, gameId, uiStrings as ui } from './ui/Battleship.js';
-    // import { globalLanguage } from '../stores.js';
 
     // currentGame is a bugfix that disables transitions when routing
     import { globalLanguage, currentGame } from '../stores.js';
@@ -13,23 +12,21 @@
 
     import WhoPlaysFirst from './ui/WhoPlaysFirst.svelte';
 
-    // console.log("whoBegins =", whoBegins);
-
     document.addEventListener('click', updateMousePosition);    
 
     onDestroy(() => {
         console.log('the component is being destroyed');
         document.removeEventListener('click', updateMousePosition);
-        // isAlive = false;
     });    
+
 
     // LANGUAGE HEAD ==============================>
     let language;    
-    console.log("Battleship:  $globalLanguage =", $globalLanguage);
+    // console.log("Battleship:  $globalLanguage =", $globalLanguage);
 
 	const unsubscribe = globalLanguage.subscribe(value => {
         language = value;        
-		console.log("Battleship:  language =", language);
+		// console.log("Battleship:  language =", language);
     });     
     // LANGUAGE TAIL ==============================<
 
@@ -38,9 +35,8 @@
     let curGame;
 	const unsubscribe2 = currentGame.subscribe(value => {
         curGame = value;        
-		console.log("Battleship:  curGame, gameId =", curGame, " &", gameId);
-    });    
-    
+		// console.log("Battleship:  curGame, gameId =", curGame, " &", gameId);
+    });        
 
 
     // GAME LOGIC HEAD ==============================>
@@ -51,18 +47,24 @@
 
     let isGameOn = false;
 
-    let whoBegins = null; // Must be *exactly* null, otherwise condition won't work!
+    let whoBegins = null; // Initially must be *exactly* null, otherwise condition won't work!
 
     // let isUserReady = false;
     let isUserBoardReady = false;
     let isOppoBoardReady = false;
 
+    // let lastHitUserCellRow;
+    // let lastHitUserCellCol;
+    let lastHitUserCell; // to be { row: x, col: y }
+
     function handleWhoBegins(event) {
         whoBegins = event.detail.text;
-        console.log("whoBegins =", whoBegins);
+        // console.log("whoBegins =", whoBegins);
         // isUserReady = true;
         recountUserShips();
     }
+
+    let userShipCount, oppoShipCount;
 
     let info = 'position_ships';
     // globalToBePositioned
@@ -70,12 +72,9 @@
 
     $: infoText = ui[info][language];
     
-    const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-
     // Both User's and Opponent's board size is 10 x 10
-    // But we need to add one column for row letters
-    // and one row for column numbers, so the resulting
-    // size is 11 x 11    
+    // But we need to add one column for row letters and one row for column numbers, 
+    // so the resulting size is 11 x 11    
     const dataHeight = 10;
     const dataWidth = 10;
     let totalHeight = dataHeight + 1;
@@ -91,10 +90,12 @@
     const EMPTY = 0;
     const SHIP = 1;    
     const HIT = 2;
-    const SUNKEN = 3;
+    const SUNK = 3;
     const EDGE = 4;
     const WATER = 5;
     const FOG = 6;
+
+    const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 
     function newEmptyBoard() {
         let board = [];
@@ -118,134 +119,110 @@
             board.push(row);
         }
 
-        console.log("board =", board);
+        // console.log("board =", board);
         return board;
     }
 
-    function userNum2char(num) {
+
+    function num2char(num) {
         let char;
 
-        if (num === 0) {
-            char = ' ';
-        } else {
-            char = num.toString();
-        }
-
-        return char;
-    }
-
-    function oppoNum2char(num) {
-        let char;
-
-        if (num === HIT || num === SUNKEN ) {
+        if (num === HIT || num === SUNK ) {
             // &#x2573;  // BOX DRAWINGS LIGHT DIAGONAL CROSS in Unicode // use instead of 'x'            
             char = '&#x2573;';
-        } else if (num === WATER || num === EMPTY) {
-            char = ' ';
         } else {
             char = ' ';
         }
-
-        /*
-        if (num === 0) {
-            char = ' ';
-        } else {
-            char = num.toString();
-        }
-        */
-
-
 
         return char;
     }
 
 
-    function isShipSunken(rowIndex, colIndex) {
-        // 2 = discovered cell containing a damaged ship
-        // 3 = discovered cell containing a sunken ship            
-        
-        // let damagedCellsCount = 0;
-        let damagedCells = [];
+    function isSunk(rowIndex, colIndex, someBoard) {
+        let hitCells = [];
         let curCell;
-        console.log("FUNCTION: isShipSunken;  rowIndex, colIndex, cell_content =", 
+        /*
+        console.log("FUNCTION: isSunk;  rowIndex, colIndex, cell_content =", 
                     rowIndex, colIndex, oppoBoard[rowIndex][colIndex]);
+        */
 
         // left
         for (let r = rowIndex; r > 0; r--) {
-            curCell = oppoBoard[r][colIndex];
+            curCell = someBoard[r][colIndex];
             if (curCell === SHIP) {
                 return false; // some cells of this ship have not been hit yet
             } else if (curCell === EMPTY || curCell === WATER) {
                 break; // No need to continue checking this direction            
             } else if (curCell === HIT) {
-                damagedCells.push([r, colIndex]);
+                hitCells.push([r, colIndex]);
             }
         }
 
-        console.log("Got here! AFTER: left");
+        // console.log("Got here! AFTER: left");
 
         // right
         for (let r = rowIndex; r < totalHeight; r++) {
-            curCell = oppoBoard[r][colIndex];
+            curCell = someBoard[r][colIndex];
             if (curCell === SHIP) {
                 return false; // some cells of this ship have not been hit yet
             } else if (curCell === EMPTY || curCell === WATER) {
                 break; // No need to continue checking this direction             
             } else if (curCell === HIT) {
-                damagedCells.push([r, colIndex]);
+                hitCells.push([r, colIndex]);
             }
         }        
 
-        console.log("Got here! AFTER: right");
+        // console.log("Got here! AFTER: right");
 
         // top
         for (let c = colIndex; c > 0; c--) {
-            curCell = oppoBoard[rowIndex][c];
+            curCell = someBoard[rowIndex][c];
             if (curCell === SHIP) {
                 return false; // some cells of this ship have not been hit yet
             } else if (curCell === EMPTY || curCell === WATER) {
                 break; // No need to continue checking this direction             
             } else if (curCell === HIT) {
-                damagedCells.push([rowIndex, c]);
+                hitCells.push([rowIndex, c]);
             }
         }               
 
-        console.log("Got here! AFTER: top");
+        // console.log("Got here! AFTER: top");
 
         // bottom
         for (let c = colIndex; c < totalWidth; c++) {
-            curCell = oppoBoard[rowIndex][c];
+            curCell = someBoard[rowIndex][c];
             if (curCell === SHIP) {
                 return false; // some cells of this ship have not been hit yet
             } else if (curCell === EMPTY || curCell === WATER) {
                 break; // No need to continue checking this direction               
             } else if (curCell === HIT) {
-                damagedCells.push([rowIndex, c]);
+                hitCells.push([rowIndex, c]);
             }
         }         
 
-        console.log("Got here! AFTER: bottom");
+        // console.log("Got here! AFTER: bottom");
 
-        // Marking ship as sunken
-        oppoBoard[rowIndex][colIndex] = SUNKEN;
-        damagedCells.forEach(coord => {
-            oppoBoard[coord[0]][coord[1]] = SUNKEN;
+        // Marking ship as sunk
+        someBoard[rowIndex][colIndex] = SUNK;
+        hitCells.forEach(coord => {
+            someBoard[coord[0]][coord[1]] = SUNK;
         });
 
-        markAroundSunkenShip(damagedCells);
+        markAroundSunkShip(hitCells, someBoard);
         return true;
     }
 
-    function markAroundSunkenShip(damagedCells) {
+
+    function markAroundSunkShip(hitCells, someBoard) {
         let rowIndex, colIndex;
 
-        damagedCells.forEach(coord => {
+        hitCells.forEach(coord => {
             [rowIndex, colIndex] = [coord[0], coord[1]];
             for (let r = rowIndex - 1; r <= rowIndex + 1; r++) {
                 for (let c = colIndex - 1; c <= colIndex + 1; c++) {
                     if (isValidCell(r, c)) {
-                        if (oppoBoard[r][c] === EMPTY) {
-                            oppoBoard[r][c] = WATER;
+                        if (someBoard[r][c] === EMPTY) {
+                            someBoard[r][c] = WATER;
                         }
                     }
                 }
@@ -254,28 +231,101 @@
     }
 
 
-    function fire(rowIndex, colIndex) {
-        console.log("FUNCTION: fire;  isGameOn =", isGameOn);
+    function userFire(rowIndex, colIndex) {
+        // user fires at an opponent board cell
+        // console.log("FUNCTION: fire;  isGameOn =", isGameOn);
         if (!isGameOn) return;
 
-        // user fires at a opponent board cell
-        // 2 = discovered cell containing a damaged ship
-        // 3 = discovered cell containing a sunken ship            
+        if (oppoTurn) return;
+
         let cell = oppoBoard[rowIndex][colIndex];
+
+        if (cell === WATER || cell === HIT || cell === SUNK) {
+            showPopup(ui['no_use_firing_here'][language]);
+            return;
+        }
 
         if (cell === EMPTY) {
             oppoBoard[rowIndex][colIndex] = WATER;
-            info = 'missed';
+            info = 'oppo_ship_missed';
         } else if (cell === SHIP) {      
             oppoBoard[rowIndex][colIndex] = HIT;      
-            if (isShipSunken(rowIndex, colIndex)) {
-                info = 'oppo_ship_sunken';
+            if (isSunk(rowIndex, colIndex, oppoBoard)) {
+                info = 'oppo_ship_sunk';
+                oppoShipCount--;
             } else {                
                 info = 'oppo_ship_hit';
             }
         }
+        // console.log("oppoBoard[rowIndex][colIndex] =", oppoBoard[rowIndex][colIndex]);
+        userMoveCount++;
 
-        console.log("oppoBoard[rowIndex][colIndex] =", oppoBoard[rowIndex][colIndex]);
+        if (oppoShipCount < 1) {
+            info = 'user_won';
+            // isGameOn = false;
+            oppoTurn = true;
+            return;
+        }
+
+        setTimeout( () => { 
+            info = 'opponent_move';
+            oppoFire();     
+        }, 2000);            
+    }
+
+
+    function oppoFire() {
+        // to be implemented
+        // info = 'opponent_move';
+
+        let cellFlatPos;
+        let rowIndex, colIndex;
+        let cell;
+
+        if (lastHitUserCell === null) {
+            // Fire at a random cell
+            while (true) {
+                cellFlatPos = randomInt(cellCount); // (0, 1, ... , 99)
+                rowIndex = Math.floor(cellFlatPos / dataHeight) + 1;
+                colIndex = cellFlatPos - (rowIndex - 1) * dataHeight + 1;           
+                cell = userBoard[rowIndex][colIndex];
+                if (cell === EMPTY || cell === SHIP) break;
+            }
+        } else {
+            // Try and finish off a damaged user ship
+
+            // to be implemented...
+
+        }
+
+        // cell = userBoard[rowIndex][colIndex];
+
+        if (cell === EMPTY) {
+            userBoard[rowIndex][colIndex] = WATER;
+            info = 'user_ship_missed';
+        } else if (cell === SHIP) {        
+            userBoard[rowIndex][colIndex] = HIT;      
+            if (isSunk(rowIndex, colIndex, userBoard)) {
+                info = 'user_ship_sunk';
+                userShipCount--;
+            } else {                
+                info = 'user_ship_hit';
+            }
+        }
+        // console.log("userBoard[rowIndex][colIndex] =", userBoard[rowIndex][colIndex]);
+        oppoMoveCount++;
+
+        if (userShipCount < 1) {
+            info = 'opponent_won';
+            // isGameOn = false;
+            oppoTurn = true;
+            return;
+        }
+
+        setTimeout( () => { 
+            info = 'user_move';
+            oppoTurn = false;
+        }, 2000);          
 
     }
 
@@ -286,7 +336,7 @@
         // if (cellClicksBlocked) return;
         mouseX = event.clientX;
         mouseY = event.clientY;
-        console.log("mouseX, mouseY =", mouseX, mouseY);
+        // console.log("mouseX, mouseY =", mouseX, mouseY);
     }
 
 
@@ -300,7 +350,6 @@
     }
 
     let curShipIndex = 0;
-
 
 
     /*
@@ -319,33 +368,16 @@
 
     function clearUserBoard() {
         userBoard = newEmptyBoard();
-        console.log("userBoard =", userBoard);
+        isUserBoardReady = false;
+        // console.log("userBoard =", userBoard);
     }
 
     function clearOppoBoard() {
         // let oppoBoard = newEmptyBoard();
         oppoBoard = JSON.parse(JSON.stringify(userBoard));
-        console.log("oppoBoard =", oppoBoard);
+        isOppoBoardReady = false;
+        // console.log("oppoBoard =", oppoBoard);
     }
-
-
-
-    
-
-    
-
-
-    // initOppoBoard
-
-    /*
-    // For testing purposes only!
-    userBoard[2][1] = 3;
-    oppoBoard[9][0] = 1;
-    console.log("TEST ----------------------");
-    console.log("userBoard =", userBoard);
-    console.log("oppoBoard =", oppoBoard);    
-    */
-
 
 
     function getCellClass(rowIndex, colIndex, someBoard) {      
@@ -356,41 +388,27 @@
             ${colIndex === 0 && rowIndex === 0 ? 'no-top-left-borders' : ''}
             ${(colIndex === 0 || rowIndex === 0) && colIndex !== rowIndex ? 'top-and-left-headers' : ''}
             ${(colIndex === 0 && colIndex === rowIndex) ? 'top-left-header-cell' : ''}
+            ${(rowIndex > 0 && colIndex > 0 && someBoard[rowIndex][colIndex] === HIT) ? 'hit-cell' : ''}
+            ${(rowIndex > 0 && colIndex > 0 && someBoard[rowIndex][colIndex] === SUNK) ? 'sunk-cell' : ''}
+            ${(rowIndex > 0 && colIndex > 0 && someBoard[rowIndex][colIndex] === WATER) ? 'water-cell' : ''}
         `
 
-        if (someBoard === oppoBoard) {
+        if (someBoard === oppoBoard) { // opponent board
             cellClass += `
             ${(rowIndex > 0 && colIndex > 0 && someBoard[rowIndex][colIndex] === EMPTY) ? 'fog-cell' : ''}        
             ${(rowIndex > 0 && colIndex > 0 && someBoard[rowIndex][colIndex] === SHIP) ? 'fog-cell' : ''}
-            ${(rowIndex > 0 && colIndex > 0 && someBoard[rowIndex][colIndex] === WATER) ? 'water-cell' : ''}
-            ${(rowIndex > 0 && colIndex > 0 && someBoard[rowIndex][colIndex] === HIT) ? 'hit-cell' : ''}
-            ${(rowIndex > 0 && colIndex > 0 && someBoard[rowIndex][colIndex] === SUNKEN) ? 'sunken-cell' : ''}
             `;
-        } else {
+        } else { // user board
             cellClass += `
             ${(rowIndex > 0 && colIndex > 0 && someBoard[rowIndex][colIndex] === 0) ? 'board-data' : ''}        
             ${(rowIndex > 0 && colIndex > 0 && someBoard[rowIndex][colIndex] === 1) ? 'ship-cell' : ''}
             `;
         }
 
-        console.log("rowIndex, colIndex, cellClass =", rowIndex, colIndex, cellClass);
+        // console.log("rowIndex, colIndex, cellClass =", rowIndex, colIndex, cellClass);
         return cellClass;
     }    
 
-   /*
-    function getCellClass(rowIndex, colIndex, someBoard) {        
-        let cellClass = `
-        board-cell unselectable
-        ${colIndex === 0 && rowIndex === 0 ? 'no-top-left-borders' : ''}
-        ${(colIndex === 0 || rowIndex === 0) && colIndex !== rowIndex ? 'top-and-left-headers' : ''}
-        ${(colIndex === 0 && colIndex === rowIndex) ? 'top-left-header-cell' : ''}
-        ${(rowIndex > 0 && colIndex > 0 && someBoard[rowIndex][colIndex] === 0) ? 'board-data' : ''}        
-        ${(rowIndex > 0 && colIndex > 0 && someBoard[rowIndex][colIndex] === 1) ? 'ship-cell' : ''}
-        `;
-        // console.log("cellClass =", cellClass);
-        return cellClass;
-    }
-    */
 
     function getInfoClass(toBePositioned, totalNumber) {
         let cellClass = `
@@ -402,29 +420,22 @@
         return cellClass;    
     }
 
-    // let isUserShipsPlaced = false;
-    // let isReadyToPlay = false;
-    // let isUserShipsPlaced = true;    
-
     // Use fewer ships for development, but more ships for production
     const ships = [    
-        /*    
         { class: 'battleship', size: 4, totalNumber: 1 },
         { class: 'cruiser',   size: 3, totalNumber: 2 },
         { class: 'destroyer', size: 2, totalNumber: 3 },
         { class: 'motorboat', size: 1, totalNumber: 4 },
-        */
         /*
         { class: 'battleship', size: 4, totalNumber: 1 },
         { class: 'cruiser',   size: 3, totalNumber: 1 },
         { class: 'destroyer', size: 2, totalNumber: 1 },
         { class: 'motorboat', size: 1, totalNumber: 1 },
         */
+        /*
         { class: 'destroyer', size: 2, totalNumber: 1 },
         { class: 'motorboat', size: 1, totalNumber: 1 },
-        
-        
-        // { class: 'unknown', size: 0, totalNumber: 0 }, // Here both size & totalNumber are dummy values
+        */
     ]
 
     const totalClasses = ships.length;
@@ -441,7 +452,7 @@
     function isValidSize(rowIndex, colIndex) {
         let shipSize = 1;
 
-        // Check left
+        // left
         for (let c = Math.max(colIndex - 1, 1); c > 0; c--) {
             if (c !== colIndex && userBoard[rowIndex][c] === 1) {
                 shipSize++;
@@ -450,7 +461,7 @@
             }
         }
 
-        // Check right
+        // right
         for (let c = Math.min(colIndex + 1, dataWidth); c < totalWidth; c++) {
             if (c !== colIndex && userBoard[rowIndex][c] === 1) {
                 shipSize++;
@@ -459,7 +470,7 @@
             }
         }        
 
-        // Check top
+        // top
         for (let r = Math.max(rowIndex - 1, 1); r > 0; r--) {
             if (r !== rowIndex && userBoard[r][colIndex] === 1) {
                 shipSize++;
@@ -468,7 +479,7 @@
             }
         }
 
-        // Check bottom
+        // bottom
         for (let r = Math.min(rowIndex + 1, dataHeight); r < totalHeight; r++) {
             if (r !== rowIndex && userBoard[r][colIndex] === 1) {
                 shipSize++;
@@ -477,8 +488,7 @@
             }
         }              
 
-        console.log("shipSize =", shipSize);
-
+        // console.log("shipSize =", shipSize);
         return (validSizes.indexOf(shipSize) > -1);
     }    
 
@@ -561,7 +571,7 @@
         // console.log("userShips =", userShips);
 
         globalToBePositioned = curToBePositioned;
-        console.log("globalToBePositioned =", globalToBePositioned);
+        // console.log("globalToBePositioned =", globalToBePositioned);
         if (globalToBePositioned === 0) {
             // isUserReady = true;
             isUserBoardReady = true;
@@ -579,12 +589,6 @@
             isUserBoardReady = false;
             info = 'position_ships';
         }
-
-        /*
-        if (isUserBoardReady && whoBegins === null && curGame === gameId) {
-            console.log("Condition met!");
-        }
-        */
     }
 
 
@@ -680,7 +684,6 @@
 
         if (userBoard[rowIndex][colIndex] === 0) {  // empty cell
             if (isUnsafeAtCorners(rowIndex, colIndex, userBoard)) {
-                // alert("You cannot place a ship here!");
                 showPopup(ui['cannot_position_here'][language]);
                 return;
             }
@@ -701,8 +704,6 @@
     }    
 
 
-
-
     let globalToBePositioned = 0;
 
     function initUserShips() {
@@ -716,7 +717,7 @@
             }
 
             globalToBePositioned += ship.totalNumber;
-            console.log("globalToBePositioned =", globalToBePositioned);
+            // console.log("globalToBePositioned =", globalToBePositioned);
 
             userShips.push(userShip);
         })
@@ -725,7 +726,7 @@
             return b.size - a.size;
         });
 
-        console.log("userShips =", userShips);
+        // console.log("userShips =", userShips);
     }
 
 
@@ -754,7 +755,7 @@
 
         biggestSize = oppoShips[0];
 
-        console.log("oppoShips =", oppoShips);
+        // console.log("oppoShips =", oppoShips);
 
         oppoShips.forEach( ship => {
             for (let s = 0; s < ship.totalNumber; s++) {
@@ -762,8 +763,10 @@
             }
         })
 
-        console.log("oppoShipsFlatList =", oppoShipsFlatList);
+        oppoShipCount = oppoShipsFlatList.length;
+        userShipCount = oppoShipCount;
 
+        // console.log("oppoShipsFlatList =", oppoShipsFlatList);
         positionOppoShips();
     }
     
@@ -775,7 +778,7 @@
     // flatPos = (rowIndex - 1) * dataHeight + (colIndex - 1)
     //
     // let eligibleCellCount = dataHeight * dataWidth; // cell count
-    let cellCount = dataHeight * dataWidth; // cell count
+    let cellCount = dataHeight * dataWidth; // cell count (e.g. 100)
     let cellCountAndDirections = cellCount * 4; // cell count multiplied by possible directions
 
     function initOppoBoardFlatList() {
@@ -889,7 +892,9 @@
 
         initUserShips();
 
-        if (whoBegins === "opponent") {
+        whoBegins = null;
+
+        /*        if (whoBegins === "opponent") {
             oppoTurn = true;
             info = "opponent_move";
             // oppoMove();
@@ -899,31 +904,45 @@
         } else {
             // info = 'lets_play';
         }
+        */
 
         // initOppoShips();
-
-
+        // startGame();
     }
 
 
     function startGame() {
         isGameOn = true;
+
+        userMoveCount = 0;
+        oppoMoveCount = 0;
+
+        lastHitUserCell = null;
+
         initOppoShips();
 
         info = 'game_on';
         console.log("oppoBoard =", oppoBoard);
+
+        if (oppoTurn) {
+            setTimeout( () => { 
+                info = 'opponent_move';
+            }, 2000);            
+            oppoFire();            
+        } else {
+            setTimeout( () => { 
+                info = 'user_move';
+            }, 2000);
+        }
     }
     
 
     let oppoTurn = false;
 
-
-    // let shipOptions = ['Select a ship', ...userShips];
-
     let moveCount = 0;
+    let userMoveCount, oppoMoveCount;
 
     let highlighted = false;
-
 
     // initialization
     restartGame();
@@ -1083,7 +1102,7 @@
         background-color: red;
     }
 
-    .sunken-cell {
+    .sunk-cell {
         background-color: brown;
     }    
 
@@ -1172,6 +1191,7 @@
         display: block;
         clear: both;
         min-width: 25em;
+        max-width: 35em;
         margin-top: 2em;
     }
 
@@ -1194,18 +1214,23 @@
         user-select: none;
     }        
 
-    button.cool-button {
-        display: block;
+    .buttons {
+        margin-left: 2em;
+        margin-right: auto;
+    }
+
+    .cool-button {
+        display: inline;        
         background-color: aqua;
         color: blue;
         font-weight: bold;
         /* margin-top: 0; */
-        margin-bottom: 1em;
-        margin-left: auto;
-        margin-right: auto;
+        /* margin-bottom: 1em; */
+        margin-left: 1em;
+        margin-right: 1em;
     }
 
-    button.cool-button:disabled {
+    .cool-button:disabled {
         background-color: lightgray;
         color: gray;
     }    
@@ -1322,7 +1347,7 @@
                         <td on:click={ () => placeShip(rowIndex, colIndex) }
                             class="{ getCellClass(rowIndex, colIndex, userBoard) }"                                                   
                         >
-                            { @html rowIndex > 0 && colIndex > 0 ? userNum2char(cell) : cell }
+                            { @html rowIndex > 0 && colIndex > 0 ? num2char(cell) : cell }
                         </td>
                     {/each}
                 </tr>
@@ -1331,8 +1356,6 @@
     </div>
 
     <!-- HERE USER CAN CHECK USER SHIPS POSITIONED ON THE BOARD -->
-    <!-- {#if !isUserBoardReady && whoBegins === null && curGame === gameId} -->
-    <!-- {#if !isUserBoardReady && curGame === gameId} -->
     {#if !isGameOn && curGame === gameId}
         <div class="ship-list-and-who-plays-first">
             <div class="ship-list">
@@ -1376,8 +1399,6 @@
 
 
     <!-- {#if isReadyToPlay && curGame === gameId} -->
-    <!-- {#if isUserBoardReady && isOppoBoardReady && whoBegins !== null && curGame === gameId} -->
-    <!-- {#if isUserBoardReady && isOppoBoardReady && whoBegins !== null && curGame === gameId} -->
     {#if isGameOn && curGame === gameId}
         <div class="opponent" transition:fade="{ {delay: 100, duration: 500} }">
             <h3 class="user-or-opponent">{ ui["opponent_ships"][language] }</h3>
@@ -1389,10 +1410,10 @@
                     <tr>
                         <!-- Must use a key in #each loop -->
                         {#each row as cell, colIndex (colIndex * dataHeight + colIndex)}
-                            <td on:click={ () => fire(rowIndex, colIndex) }
+                            <td on:click={ () => userFire(rowIndex, colIndex) }
                                 class="{getCellClass(rowIndex, colIndex, oppoBoard)}"                         
                             >
-                                { @html rowIndex > 0 && colIndex > 0 ? oppoNum2char(cell) : cell }
+                                { @html rowIndex > 0 && colIndex > 0 ? num2char(cell) : cell }
                             </td>
                         {/each}
                     </tr>
@@ -1405,12 +1426,19 @@
 
 <!-- BUTTON(S) and INFO TEXT -->
 <div class="buttons-and-info">
-    <!-- BUTTON -->
-    <button class="cool-button" on:click={startGame} 
-            disabled={!isUserBoardReady || whoBegins === null || isGameOn}
-    >
-        { ui['start_game'][language] }
-    </button>            
+    <div class="buttons">
+        <!-- BUTTON -->
+        <button class="cool-button" on:click={startGame} 
+                disabled={!isUserBoardReady || whoBegins === null || isGameOn}
+        >
+            { ui['start_game'][language] }
+        </button>            
+
+        <!-- BUTTON -->
+        <button class="cool-button" on:click={restartGame}>
+            { ui['restart_game'][language] }
+        </button>            
+    </div>
 
     <!-- INFO TEXT -->
     <div class="info-text center unselectable margin-after"> 
@@ -1422,7 +1450,7 @@
 
 
 
-<p>&nbsp</p> <!-- dummy paragraph -->
+<p>&nbsp</p> <!-- dummy empty paragraph -->
 
 <div id="cell-popup" class="cell-popup popup-{popupVisible ? 'visible' : 'hidden'}"
     style="left: {popupX}px; top: {popupY}px"
