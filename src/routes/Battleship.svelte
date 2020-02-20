@@ -542,7 +542,7 @@
         setTimeout( () => { 
             info = 'user_move';
             oppoTurn = false;
-        }, 1500);          
+        }, 1000);          
     }
 
 
@@ -731,11 +731,13 @@
             cellClass += `
             ${(rowIndex > 0 && colIndex > 0 && someBoard[rowIndex][colIndex] === EMPTY) ? 'fog-cell' : ''}        
             ${(rowIndex > 0 && colIndex > 0 && someBoard[rowIndex][colIndex] === SHIP) ? 'fog-cell' : ''}
+            ${(rowIndex > 0 && colIndex > 0 && isGameOn && !oppoTurn) ? 'whose-turn' : ''}
             `;
         } else { // user board
             cellClass += `
             ${(rowIndex > 0 && colIndex > 0 && someBoard[rowIndex][colIndex] === 0) ? 'board-data' : ''}        
             ${(rowIndex > 0 && colIndex > 0 && someBoard[rowIndex][colIndex] === 1) ? 'ship-cell' : ''}
+            ${(rowIndex > 0 && colIndex > 0 && !isGameOn) ? 'whose-turn' : ''}
             `;
         }
 
@@ -1254,6 +1256,21 @@
         ];     
     }
 
+    $: {
+        if (isGameOn) {
+            userBoard = userBoard;
+            oppoBoard = oppoBoard;
+        }
+    }
+
+    $: {
+        if (!oppoTurn) {
+            // userBoard = userBoard;
+            oppoBoard = oppoBoard; // for reactivity!!!      
+            console.log("oppoTurn =", oppoTurn);
+        }
+    }
+
 
     function startGame() {
         isGameOn = true;
@@ -1270,15 +1287,16 @@
 
         if (whoBegins === "opponent") {
             oppoTurn = true;
+            info = 'opponent_move';
             setTimeout( () => { 
-                info = 'opponent_move';
+                oppoFire();
             }, 2000);            
-            oppoFire();            
+                        
         } else {
             oppoTurn = false;
             setTimeout( () => { 
                 info = 'user_move';
-            }, 1500);
+            }, 1000);
         }
     }    
 
@@ -1368,8 +1386,12 @@
     }    
 
     .board-cell { /* any cells, including header cells */
+        /*
         width: 2em;
         height: 2em;
+        */
+        width: 35px;
+        height: 35px;
         text-align: center;
         /* width: 30px;
         height: 30px; */
@@ -1380,21 +1402,16 @@
     }
    
     .board-data {
-        font-size: 1em; /* Use this option in development */
-        /* font-size: 0; */ /* Use this option in production */
         /* font-weight: 100; */
         /* font-weight: bolder; */
         /* font-family: Arial, Helvetica, sans-serif; */
-        font-family: 'Lucida Console', 'Courier New', Courier, monospace;
-        height: 2em;
-        width: 2em;
-        vertical-align: center;
-        text-align: center;
-        background-color: lightskyblue;
 
-        border-style: solid;
-        border-width: 1px;
-        border-color: black;
+        background-color: lightskyblue;
+    }
+
+    .whose-turn {
+        border-color: greenyellow;
+        border-width: 2px;
     }
 
     /*
@@ -1429,44 +1446,58 @@
         border-style: none;
     }
 
+
+    /* data cells with different content */
     .ship-cell {
-        /* border-style: none; */
         background-color: cadetblue;
-        font-size: 0;
     }
 
     .fog-cell {
         background-color: gray;
-
-        border-style: solid;
-        border-width: 1px;
-        border-color: black;
     }
 
     .water-cell {
         background-color: blue;
-
-        border-style: solid;
-        border-width: 1px;
-        border-color: black;        
     }
 
     .hit-cell {
         background-color: red;
-
-        border-style: solid;
-        border-width: 1px;
-        border-color: black;        
     }
 
     .sunk-cell {
         background-color: brown;
+    }    
+
+    .board-data, .ship-cell, .hit-cell, .sunk-cell, .fog-cell, .water-cell {
+        /* width: 20px;
+        height: 20px; */
 
         border-style: solid;
         border-width: 1px;
-        border-color: black;        
-    }    
+        border-color: black;
 
+        padding: 0;
+        margin: 0;
+        vertical-align: center;
+        text-align: center;       
+
+        font-size: 1em;
+        font-family: 'Lucida Console', 'Courier New', Courier, monospace;
+    }
+
+    /*
+    .board-data:hover, .ship-cell:hover, .fog-cell:hover {
+        border-style: dotted;
+        border-width: 2px;
+        border-color: yellow;
+    }
+    */
+
+    .whose-turn:hover {
+        border-style: dotted;
+        border-width: 2px;
+        border-color: yellow;
+    }
 
     .user {
         /* display: inline-block; */
