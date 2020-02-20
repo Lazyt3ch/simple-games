@@ -15,7 +15,7 @@
     document.addEventListener('click', updateMousePosition);    
 
     onDestroy(() => {
-        console.log('the component is being destroyed');
+        console.log('Battleship: The component is being destroyed');
         document.removeEventListener('click', updateMousePosition);
     });    
 
@@ -100,9 +100,12 @@
 
     const IRRELEVANT = 0;
     const TOP = 1;
-    const RIGHT = 2
-    const BOTTOM = 3
+    const RIGHT = 2;
+    const BOTTOM = 3;
     const LEFT = 4;
+
+    const VERTICAL = 1;
+    const HORIZONTAL = 2;
 
     const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 
@@ -294,37 +297,53 @@
         let rowIndex = -1, colIndex = -1;
         let cell;        
         let r, c;
-        let checkResult;
+        let direction;
+        let head, tail;
+        let dirList = [TOP, RIGHT, BOTTOM, LEFT];
 
-        if (hitUserCells) {
+        if (hitUserCells.length > 0) {
             // Try and finish off a damaged user ship
-            for (let i = 0; i < hitUserCells.length; i++) {
-                // console.log("----------------------------");
-                // console.log("hitUserCells[i] =", hitUserCells[i]);
-                // [r, c] = [hitUserCells[i].row, hitUserCells[i].col];
-                r = hitUserCells[i].row;
-                c = hitUserCells[i].col;
-                // console.log("r, c =", r, c);
-                if (userBoard[r][c] === HIT) {
-                    checkResult = checkIfShipAtSides(r, c, userBoard);
-                    if (checkResult > 0) {
-                        if (checkResult === TOP) {
-                            rowIndex = r - 1;
-                            colIndex = c;
-                        } else if (checkResult === BOTTOM) {
-                            rowIndex = r + 1;
-                            colIndex = c;
-                        } else if (checkResult === LEFT) {
-                            colIndex = c - 1;
-                            rowIndex = r;
-                        } else if (checkResult === RIGHT) {
-                            colIndex = c + 1;
-                            rowIndex = r;
-                        }
-                        cell = userBoard[rowIndex][colIndex];
-                        break;
-                    }
+            console.log("hitUserCells =", hitUserCells); 
+
+            // directions = []
+
+            if (hitUserCells.length > 1) {
+                // get head and tail
+                head = { row: totalHeight, col: totalWidth}; // to be uppermost or leftmost cell
+                tail = { row: -1, col: -1};                  // to be bottommost or rightmost cell
+                for (let i = hitUserCells.length - 1; i >= 0; i--) {
+                    head.row = Math.min(head.row, hitUserCells[i].row);
+                    head.col = Math.min(head.col, hitUserCells[i].col);
+                    tail.row = Math.max(head.row, hitUserCells[i].row);
+                    tail.col = Math.max(head.col, hitUserCells[i].col);
                 }
+
+                if (head.row === tail.row) {
+                    dirList = [RIGHT, LEFT];
+                } else if (head.col === tail.col) {
+                    dirList = [TOP, BOTTOM];
+                }
+            } 
+
+            r = hitUserCells[hitUserCells.length - 1].row;
+            c = hitUserCells[hitUserCells.length - 1].col;
+            console.log("r, c =", r, c);
+            if (userBoard[r][c] === HIT) {
+                direction = checkIfShipOrEmptyAtCellSides(r, c, userBoard, dirList);
+                if (direction === TOP) {
+                    rowIndex = r - 1;
+                    colIndex = c;
+                } else if (direction === BOTTOM) {
+                    rowIndex = r + 1;
+                    colIndex = c;
+                } else if (direction === LEFT) {
+                    colIndex = c - 1;
+                    rowIndex = r;
+                } else if (direction === RIGHT) {
+                    colIndex = c + 1;
+                    rowIndex = r;
+                }
+                // cell = userBoard[rowIndex][colIndex];                
             }
         }
 
@@ -337,6 +356,8 @@
                 cell = userBoard[rowIndex][colIndex];
                 if (cell === EMPTY || cell === SHIP) break;
             }
+        } else {
+            cell = userBoard[rowIndex][colIndex];
         }
             
         if (cell === EMPTY) {
@@ -348,8 +369,12 @@
             if (isSunk(rowIndex, colIndex, userBoard)) {
                 info = 'user_ship_sunk';
                 userShipCount--;
+                hitUserCells = [];
             } else {                
                 hitUserCells.push({ row: rowIndex, col: colIndex });
+                if (hitUserCells.length > 1) {
+                    markCellsAroundAsWater(hitUserCells, userBoard);
+                }
                 info = 'user_ship_hit';
             }
         }
@@ -370,30 +395,86 @@
     }
 
 
-    function checkIfShipAtSides(rowIndex, colIndex, board) {              
-        // top
-        if (isValidCell(rowIndex - 1, colIndex) && 
-            (board[rowIndex - 1][colIndex] === SHIP || board[rowIndex - 1][colIndex] === EMPTY)) {
-            return TOP;
+    function markCellsAroundAsWater(cells, someBoard) {
+        let orient;
+        let r, c;
+
+        if (cells[cells.length - 1].row === cells[cells.length - 2].row) {
+            orient = HORIZONTAL;
+        } else if (cells[cells.length - 1].col === cells[cells.length - 2].col) {
+            orient = VERTICAL;
+        } else {
+            return; // the last two hit cells belong to different ships
         }
 
-        // right
-        if (isValidCell(rowIndex, colIndex + 1) && 
-            (board[rowIndex][colIndex + 1] === SHIP || board[rowIndex][colIndex + 1] === EMPTY)) {
-            return RIGHT;
+        for (let i = cells.length - 1; i >= cells.length - 2; i--) {
+            r = cells[i].row;
+            c = cells[i].col;
+            if (orient === HORIZONTAL) { 
+                // Mark valid empty cells above and below (if any) as water
+                if (isValidCell(r - 1, c) && someBoard[r - 1][c] === EMPTY) {
+                    someBoard[r - 1][c] = WATER;
+                }
+                if (isValidCell(r + 1, c) && someBoard[r + 1][c] === EMPTY) {
+                    someBoard[r + 1][c] = WATER;
+                }       
+            } else {
+                // Mark valid empty cells on the left and on the right (if any) as water
+                if (isValidCell(r, c - 1) && someBoard[r][c - 1] === EMPTY) {
+                    someBoard[r][c - 1] = WATER;
+                }
+                if (isValidCell(r, c + 1) && someBoard[r][c + 1] === EMPTY) {
+                    someBoard[r][c + 1] = WATER;
+                }       
+            }
+        }       
+    }
+
+
+    function checkIfShipOrEmptyAtCellSides(rowIndex, colIndex, board, dirList) {          
+        let r, c;
+        let direction;    
+        let dirPos;
+        // let dirList = [TOP, RIGHT, BOTTOM, LEFT];
+       // let cell;
+        let dirList2 = [...dirList];
+ 
+        while (true) {
+            // direction = randomInt(4) + 1; // 1 = top, 2 = right, 3 = bottom, 4 = left
+            if (dirList2.length > 1) {
+                dirPos = randomInt(dirList2.length);
+                // direction = dirList2[dirPos];
+            } else if (dirList2.length === 1) {
+                dirPos = 0;
+                // direction = dirList2[0];
+            } else {
+                break; // The list has been exhausted
+            }
+
+            direction = dirList2[dirPos];
+            dirList2.splice(dirPos, 1); // remove direction from list
+
+            if (direction === TOP) {
+                r = rowIndex - 1;
+                c = colIndex;
+            } else if (direction === RIGHT) {
+                r = rowIndex;
+                c = colIndex + 1;
+            } else if (direction === BOTTOM) {
+                r = rowIndex + 1;
+                c = colIndex;
+            } else if (direction === LEFT) {
+                r = rowIndex;
+                c = colIndex - 1;
+            }
+
+            if (isValidCell(r, c) && board[r][c] !== WATER) {          
+                // cell = board[r][c];
+                if (board[r][c] === SHIP || board[r][c] === EMPTY) {
+                    return direction;
+                }
+            }
         }
-
-        // bottom
-        if (isValidCell(rowIndex + 1, colIndex) && 
-            (board[rowIndex + 1][colIndex] === SHIP || board[rowIndex + 1][colIndex] === EMPTY)) {
-            return BOTTOM;
-        }        
-
-        // left
-        if (isValidCell(rowIndex, colIndex - 1) && 
-            (board[rowIndex][colIndex - 1] === SHIP || board[rowIndex][colIndex - 1] === EMPTY)) {
-            return LEFT;
-        }      
 
         return IRRELEVANT; // 0 == false
     }
