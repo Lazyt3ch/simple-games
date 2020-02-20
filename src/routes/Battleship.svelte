@@ -94,7 +94,7 @@
     const SHIP = 1;    
     const HIT = 2;
     const SUNK = 3;
-    const EDGE = 4;
+    // const EDGE = 4;
     const WATER = 5;
     const FOG = 6;
 
@@ -244,6 +244,85 @@
     }
 
 
+    function markCorners(rowIndex, colIndex, someBoard) {
+        // top right corner
+        if (isValidCell(rowIndex - 1, colIndex + 1)) {
+            someBoard[rowIndex - 1][colIndex + 1] === WATER;
+        }
+
+        // bottom right corner
+        if (isValidCell(rowIndex + 1, colIndex + 1)) {
+            someBoard[rowIndex + 1][colIndex + 1] === WATER;
+        }
+
+        // bottom left corner
+        if (isValidCell(rowIndex + 1, colIndex - 1)) {
+            someBoard[rowIndex + 1][colIndex - 1] === WATER;
+        }
+
+        // top left corner
+        if (isValidCell(rowIndex - 1, colIndex - 1)) {
+            someBoard[rowIndex - 1][colIndex - 1] === WATER;
+        }
+    }
+
+
+    function markWaterAroundHitCells() {
+        // Marks hit cells (but not sunk ships) on oppoBoard 
+        // to prevent User from firing to no avail.
+
+        let hitSize;
+        
+        // let hitPartsHorizontal = [];
+        // let hitPartsVertical = [];
+
+        // Marking water around consequtive hit cells in horizontal ships
+        for (let r = 1; r < totalHeight; r++) {
+            hitSize = 1;
+            for (let c = 2; c < totalWidth; c++) {
+                if (oppoBoard[r][c] === HIT && oppoBoard[r][c - 1] === HIT) {
+                    hitSize++;
+                } else if (hitSize > 1 && (c === dataWidth || oppoBoard[r][c] !== HIT)) {
+                    // for (let c2 = Math.max(1, c - 1); c2 < c; c++) {
+                    for (let c2 = Math.max(1, c - hitSize - 1); c2 <= c; c2++) {
+                        if (r > 1) {
+                            oppoBoard[r - 1][c2] = WATER;
+                        }
+
+                        if (r < dataHeight) {
+                            oppoBoard[r + 1][c2] = WATER;
+                        }
+                    }
+                    hitSize = 1;
+                }
+            }
+        }
+
+        // Marking water around consequtive hit cells in vertical ships
+        for (let c = 1; c < totalWidth; c++) {
+            hitSize = 1;
+            for (let r = 2; r < totalHeight; r++) {
+                if (oppoBoard[r][c] === HIT && oppoBoard[r - 1][c] === HIT) {
+                    hitSize++;
+                } else if (hitSize > 1 && (r === dataHeight || oppoBoard[r][c] !== HIT)) {
+                    // for (let c2 = Math.max(1, c - 1); c2 < c; c++) {
+                    for (let r2 = Math.max(1, r - hitSize - 1); r2 <= r; r2++) {
+                        if (c > 1) {
+                            oppoBoard[r2][c - 1] = WATER;
+                        }
+
+                        if (c < dataWidth) {
+                            oppoBoard[r2][c + 1] = WATER;
+                        }
+                    }
+                    hitSize = 1;
+                }
+            }
+        }
+
+    }
+
+
     function userFire(rowIndex, colIndex) {
         // user fires at an opponent board cell
         // console.log("FUNCTION: fire;  isGameOn =", isGameOn);
@@ -270,6 +349,8 @@
                 oppoShipCount--;
             } else {                
                 info = 'oppo_ship_hit';
+                // markCorners(rowIndex, colIndex, oppoBoard);      
+                markWaterAroundHitCells();         
             }
         }
         // console.log("oppoBoard[rowIndex][colIndex] =", oppoBoard[rowIndex][colIndex]);
@@ -442,6 +523,8 @@
                     cells = getHeadAndTail(hitUserCells);
                     orient = getOrient(cells);
                     markCellsNearbyAsWater(cells, userBoard, orient);
+                } else {
+                    markCorners(rowIndex, colIndex, oppoBoard);
                 }
                 info = 'user_ship_hit';
             }
