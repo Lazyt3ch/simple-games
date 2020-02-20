@@ -106,6 +106,7 @@
 
     const VERTICAL = 1;
     const HORIZONTAL = 2;
+    const BAD_ORIENT = 0;
 
     const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 
@@ -289,6 +290,39 @@
     }
 
 
+    function getHeadAndTail(hitUserCells) {
+        let cells = [
+            { row: totalHeight, col: totalWidth},   // to be uppermost or leftmost cell
+            { row: -1, col: -1},                    // to be bottommost or rightmost cell
+        ];                
+
+        // get head and tail
+        for (let i = hitUserCells.length - 1; i >= 0; i--) {
+            cells[0].row = Math.min(cells[0].row, hitUserCells[i].row); // head
+            cells[0].col = Math.min(cells[0].col, hitUserCells[i].col); // head
+            cells[1].row = Math.max(cells[1].row, hitUserCells[i].row); // tail
+            cells[1].col = Math.max(cells[1].col, hitUserCells[i].col); // tail
+        }
+
+        return cells;
+    }
+
+
+    function getOrient(cells) {
+        let orient;
+
+        if (cells[0].row === cells[1].row) {
+            orient = HORIZONTAL;
+        } else if (cells[0].col === cells[1].col) {
+            orient = VERTICAL;
+        } else {
+            orient = BAD_ORIENT;
+        }
+        
+        return orient;
+    }
+
+
     function oppoFire() {
         // Need to implement: detection of user ship orientation
         // if two adjacent ship cells are hit!!!
@@ -298,7 +332,9 @@
         let cell;        
         let r, c;
         let direction;
-        let head, tail;
+        // let head, tail;
+        let cells;
+        let orient;
         let dirList = [TOP, RIGHT, BOTTOM, LEFT];
 
         if (hitUserCells.length > 0) {
@@ -308,43 +344,72 @@
             // directions = []
 
             if (hitUserCells.length > 1) {
-                // get head and tail
-                head = { row: totalHeight, col: totalWidth}; // to be uppermost or leftmost cell
-                tail = { row: -1, col: -1};                  // to be bottommost or rightmost cell
-                for (let i = hitUserCells.length - 1; i >= 0; i--) {
-                    head.row = Math.min(head.row, hitUserCells[i].row);
-                    head.col = Math.min(head.col, hitUserCells[i].col);
-                    tail.row = Math.max(head.row, hitUserCells[i].row);
-                    tail.col = Math.max(head.col, hitUserCells[i].col);
-                }
+                cells = getHeadAndTail(hitUserCells);
 
-                if (head.row === tail.row) {
-                    dirList = [RIGHT, LEFT];
-                } else if (head.col === tail.col) {
-                    dirList = [TOP, BOTTOM];
+                if (cells[0].row === cells[1].row) {
+                    dirList = [LEFT, RIGHT]; // The order is important!
+                    orient = HORIZONTAL;
+                    if (isValidCell(cells[0].row, cells[0].col - 1) && 
+                        userBoard[cells[0].row][cells[0].col - 1] === WATER) {
+                        dirList = [RIGHT];
+                    } else if (isValidCell(cells[0].row, cells[0].col + 1) && 
+                        userBoard[cells[0].row][cells[0].col + 1] === WATER) {
+                        dirList = [LEFT];
+                    }
+                } else if (cells[0].col === cells[1].col) {
+                    dirList = [TOP, BOTTOM]; // The order is important!
+                    orient = VERTICAL;
+                    if (isValidCell(cells[0].row - 1, cells[0].col) && 
+                        userBoard[cells[0].row - 1][cells[0].col] === WATER) {
+                        dirList = [BOTTOM];
+                    } else if (isValidCell(cells[0].row + 1, cells[0].col) && 
+                        userBoard[cells[0].row + 1][cells[0].col] === WATER) {
+                        dirList = [TOP];
+                    }                    
                 }
-            } 
-
-            r = hitUserCells[hitUserCells.length - 1].row;
-            c = hitUserCells[hitUserCells.length - 1].col;
-            console.log("r, c =", r, c);
-            if (userBoard[r][c] === HIT) {
-                direction = checkIfShipOrEmptyAtCellSides(r, c, userBoard, dirList);
-                if (direction === TOP) {
-                    rowIndex = r - 1;
-                    colIndex = c;
-                } else if (direction === BOTTOM) {
-                    rowIndex = r + 1;
-                    colIndex = c;
-                } else if (direction === LEFT) {
-                    colIndex = c - 1;
-                    rowIndex = r;
-                } else if (direction === RIGHT) {
-                    colIndex = c + 1;
-                    rowIndex = r;
-                }
-                // cell = userBoard[rowIndex][colIndex];                
+            } else {
+                // only 1 cell, so we need to check all of its sides
+                dirList = [TOP, RIGHT, BOTTOM, LEFT];
+                cells = [{ 
+                    row: hitUserCells[hitUserCells.length - 1].row, 
+                    col: hitUserCells[hitUserCells.length - 1].col,
+                }];
             }
+
+            for (let i = 0; i < cells.length; i++) { // either 1 or 2 iterations
+                r = cells[i].row;
+                c = cells[i].col;
+
+                if (cells.length === 1) { 
+                    dirList = [TOP, RIGHT, BOTTOM, LEFT];       // check 4 cells
+                } else { // head (top or left) or tail (right or bottom)
+                    if (dirList.length === 2) {
+                        dirList = [dirList[i]];                     // check 1 cell only
+                    }
+                    console.log("dirList =", dirList);
+                    // orient = getOrient(cells);                    
+                }
+
+                direction = checkIfShipOrEmptyAtCellSides(r, c, userBoard, dirList);
+                if (direction !== IRRELEVANT) {
+                    if (direction === TOP) {
+                        rowIndex = r - 1;
+                        colIndex = c;
+                    } else if (direction === BOTTOM) {
+                        rowIndex = r + 1;
+                        colIndex = c;
+                    } else if (direction === LEFT) {
+                        colIndex = c - 1;
+                        rowIndex = r;
+                    } else if (direction === RIGHT) {
+                        colIndex = c + 1;
+                        rowIndex = r;
+                    }
+                    break;
+                }
+            // cell = userBoard[rowIndex][colIndex];                     
+            }               
+            // }
         }
 
         if (rowIndex === -1 || colIndex === -1) {
@@ -373,7 +438,10 @@
             } else {                
                 hitUserCells.push({ row: rowIndex, col: colIndex });
                 if (hitUserCells.length > 1) {
-                    markCellsAroundAsWater(hitUserCells, userBoard);
+                    // markCellsAroundAsWater(hitUserCells, userBoard);
+                    cells = getHeadAndTail(hitUserCells);
+                    orient = getOrient(cells);
+                    markCellsNearbyAsWater(cells, userBoard, orient);
                 }
                 info = 'user_ship_hit';
             }
@@ -395,6 +463,51 @@
     }
 
 
+    function markCellsNearbyAsWater(headAndTail, someBoard, orient) {
+        let partSize;
+        let startRow, startCol, endRow, endCol;
+
+        if (orient === HORIZONTAL) {
+            // partSize = headAndTail[1].col - headAndTail[0].col + 1;
+
+            startCol = Math.max(1, headAndTail[0].col - 1);
+            endCol = Math.min(dataWidth, headAndTail[1].col + 1);
+
+            startRow = headAndTail[0].row;
+            // endRow = startRow;
+
+            for (let c = startCol; c <= endCol; c++) {
+                if (isValidCell(startRow - 1, c)) {
+                    someBoard[startRow - 1][c] = WATER;
+                }
+
+                if (isValidCell(startRow + 1, c)) {
+                    someBoard[startRow + 1][c] = WATER;
+                }                
+            }            
+
+        } else { // VERTICAL
+            // partSize = headAndTail[1].row - headAndTail[0].row + 1;
+
+            startRow = Math.max(1, headAndTail[0].row - 1);
+            endRow = Math.min(dataHeight, headAndTail[1].row + 1);
+
+            startCol = headAndTail[0].col;
+            // endCol = startCol;
+
+            for (let r = startRow; r <= endRow; r++) {
+                if (isValidCell(r, startCol - 1)) {
+                    someBoard[r][startCol - 1] = WATER;
+                }
+
+                if (isValidCell(r, startCol + 1)) {
+                    someBoard[r][startCol + 1] = WATER;
+                }               
+            }                   
+        }
+    }
+
+
     function markCellsAroundAsWater(cells, someBoard) {
         let orient;
         let r, c;
@@ -406,6 +519,7 @@
         } else {
             return; // the last two hit cells belong to different ships
         }
+
 
         for (let i = cells.length - 1; i >= cells.length - 2; i--) {
             r = cells[i].row;
@@ -1037,6 +1151,24 @@
         isGameOn = false;
 
         info = 'position_ships';
+
+        testPositionUserShips(); // for test purposes only
+    }
+
+    function testPositionUserShips() {
+        userBoard = [
+            [" ", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10"],
+            ["A", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            ["B", 0, 0, 1, 0, 0, 0, 1, 0, 0, 0],
+            ["C", 0, 0, 1, 0, 0, 0, 0, 0, 1, 0],
+            ["D", 0, 0, 1, 0, 0, 0, 0, 0, 0, 0],
+            ["E", 0, 0, 0, 0, 0, 1, 1, 1, 1, 0],
+            ["F", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            ["G", 0, 0, 1, 0, 0, 0, 0, 0, 0, 0],
+            ["H", 1, 0, 1, 0, 1, 1, 0, 1, 1, 0],
+            ["I", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            ["J", 0, 1, 0, 0, 0, 1, 1, 1, 0, 0],
+        ];     
     }
 
 
