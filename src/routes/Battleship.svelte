@@ -8,16 +8,16 @@
     // currentGame is a bugfix that disables transitions when routing
     import { globalLanguage, currentGame } from '../stores.js';
 
-    import { onDestroy } from 'svelte';
+    // import { onDestroy } from 'svelte';
 
     import WhoPlaysFirst from './ui/WhoPlaysFirst.svelte';
 
-    document.addEventListener('click', updateMousePosition);    
+    // document.addEventListener('click', updateMousePosition);    
 
-    onDestroy(() => {
-        console.log('Battleship: The component is being destroyed');
-        document.removeEventListener('click', updateMousePosition);
-    });    
+    // onDestroy(() => {
+    //     console.log('Battleship: The component is being destroyed');
+    //     // document.removeEventListener('click', updateMousePosition);
+    // });    
 
 
     // LANGUAGE HEAD ==============================>
@@ -45,6 +45,12 @@
         return Math.floor(Math.random() * Math.floor(n));
     }
 
+    let oppoTurn = false;
+
+    // let moveCount = 0;
+    let userMoveCount, oppoMoveCount;
+
+    let highlighted = false;
     let isGameOn = false;
 
     let whoBegins = null; // Initially must be *exactly* null, otherwise condition won't work!
@@ -96,7 +102,6 @@
     const SHIP = 1;    
     const HIT = 2;
     const SUNK = 3;
-    // const EDGE = 4;
     const WATER = 5;
     const FOG = 6;
     const HIT1 = 21;
@@ -252,26 +257,35 @@
     }
 
 
-    function markCorners(rowIndex, colIndex, someBoard) {
+    function markCorners(rowIndex, colIndex, someBoard, boardId) {
+        console.log("FUNCTION: markCorners");
+
         // top right corner
         if (isValidCell(rowIndex - 1, colIndex + 1)) {
-            someBoard[rowIndex - 1][colIndex + 1] === WATER;
+            someBoard[rowIndex - 1][colIndex + 1] = WATER;
         }
 
         // bottom right corner
         if (isValidCell(rowIndex + 1, colIndex + 1)) {
-            someBoard[rowIndex + 1][colIndex + 1] === WATER;
+            someBoard[rowIndex + 1][colIndex + 1] = WATER;
         }
 
         // bottom left corner
         if (isValidCell(rowIndex + 1, colIndex - 1)) {
-            someBoard[rowIndex + 1][colIndex - 1] === WATER;
+            someBoard[rowIndex + 1][colIndex - 1] = WATER;
         }
 
         // top left corner
         if (isValidCell(rowIndex - 1, colIndex - 1)) {
-            someBoard[rowIndex - 1][colIndex - 1] === WATER;
+            someBoard[rowIndex - 1][colIndex - 1] = WATER;
         }
+
+        // for reactivity
+        if (boardId === OPPOBOARD) {
+            oppoBoard = oppoBoard;
+        } else {
+            userBoard = userBoard;
+        } 
     }
 
 
@@ -335,6 +349,8 @@
 
         console.log("FUNCTION: flashOnHit");
 
+        let flashingDelay = 100;
+
         flashing = {row: rowIndex, col: colIndex, boardId: boardId, class: 'hit-cell-1'};
         // for reactivity
         if (boardId === USERBOARD) {
@@ -351,7 +367,7 @@
             } else {
                 oppoBoard = oppoBoard;
             }
-        }, 300);
+        }, flashingDelay);
 
         setTimeout( () => { 
             flashing.class = 'hit-cell-3';
@@ -361,7 +377,7 @@
             } else {
                 oppoBoard = oppoBoard;
             }
-        }, 600);
+        }, flashingDelay * 2);
        
         setTimeout( () => { 
             flashing = null;
@@ -371,7 +387,7 @@
             } else {
                 oppoBoard = oppoBoard;
             }
-        }, 900);
+        }, flashingDelay * 3);
     }
 
 
@@ -384,10 +400,12 @@
 
         if (oppoTurn) return;
 
+        updateMousePosition();
+
         let cell = oppoBoard[rowIndex][colIndex];
 
         if (cell === WATER || cell === HIT || cell === SUNK) {
-            showPopup(ui['no_use_firing_here'][language]);
+            showPopup(ui['no_use_firing_here'][language], rowIndex, colIndex);
             return;
         }
 
@@ -402,12 +420,12 @@
                 oppoShipCount--;
             } else {                
                 info = 'oppo_ship_hit';
-                // markCorners(rowIndex, colIndex, oppoBoard);      
+                markCorners(rowIndex, colIndex, oppoBoard, OPPOBOARD);      
                 markWaterAroundHitCells();         
             }
         }
         // console.log("oppoBoard[rowIndex][colIndex] =", oppoBoard[rowIndex][colIndex]);
-        userMoveCount++;
+        // userMoveCount++;
         oppoTurn = true;
 
         if (oppoShipCount < 1) {
@@ -578,7 +596,7 @@
                     orient = getOrient(cells);
                     markCellsNearbyAsWater(cells, userBoard, orient);
                 } else {
-                    markCorners(rowIndex, colIndex, oppoBoard);
+                    markCorners(rowIndex, colIndex, userBoard, USERBOARD);
                 }
                 info = 'user_ship_hit';
             }
@@ -734,15 +752,12 @@
     let mouseX = 0, mouseY = 0; // mouse position
 
     function updateMousePosition() {
-        // if (cellClicksBlocked) return;
-        mouseX = event.clientX;
-        mouseY = event.clientY;
-        // console.log("mouseX, mouseY =", mouseX, mouseY);
+        mouseX = event.pageX;
+        mouseY = event.pageY;
     }
 
 
     let selectedShipClass = null;
-    // let selectedShipClass = ui['select_ship'][language];
 
     $: {
         if (selectedShipClass) {
@@ -750,12 +765,11 @@
         }
     }
 
-    // let curShipIndex = 0;
-
     let userBoard, oppoBoard;
 
     function clearUserBoard() {
         userBoard = newEmptyBoard();
+        userBoard = userBoard; // for reactivity
         isUserBoardReady = false;
         // console.log("userBoard =", userBoard);
     }
@@ -1042,27 +1056,40 @@
         return false;
     }
 
+    function pxToNum(pixels) {
+        if (pixels.endsWith('px')) {
+            return parseInt(pixels.slice(0, pixels.length - 2));
+        }
+    }
+
 
     let popupText = '';
-    let popupVisible = false;
-    let cellClicksBlocked = false;
+    let isPopupVisible = false;
+    let isCellClickBlocked = false;
     let popupX = 0, popupY = 0;
+    // let popupWidth = 0;
+    // let popupElement
 
-    function showPopup(textToShow) {
+    function showPopup(textToShow, rowIndex, colIndex) {
         popupText = textToShow;
-        popupVisible = true;
-        cellClicksBlocked = true;
-        // popupX = Math.max(20, mouseX - 50);
-        // popupY = mouseY - 50;
-        popupX = mouseX;
-        popupY = mouseY;
-        console.log("mouseX, mouseY, popupX, popupY =", mouseX, mouseY, popupX, popupY);
+        isPopupVisible = true;
+        isCellClickBlocked = true;
 
-        // style="left: {Math.max(20, mouseX - 50)}px; top: {mouseY - 50}px"
+        popupY = mouseY;
+
+        // Need to prevent popup from going to the right outside the board!
+        popupX = mouseX;
+        // console.log(document.getElementById('cell-popup').offsetWidth);
+        if (dataWidth - colIndex < 5) {
+            popupX -= (document.getElementById('cell-popup').offsetWidth + 10);
+        } 
+
+        // console.log("rowIndex, colIndex =", rowIndex, colIndex);
+        // console.log("mouseX, mouseY, popupX, popupY =", mouseX, mouseY, popupX, popupY);
 
         setTimeout( () => {
-            popupVisible = false;
-            cellClicksBlocked = false;
+            isPopupVisible = false;
+            isCellClickBlocked = false;
         }, 2000);
     }
 
@@ -1071,14 +1098,16 @@
 
         if (rowIndex === 0 || colIndex === 0) return; // headers
 
+        updateMousePosition();
+
         if (userBoard[rowIndex][colIndex] === 0) {  // empty cell
             if (isUnsafeAtCorners(rowIndex, colIndex, userBoard)) {
-                showPopup(ui['cannot_position_here'][language]);
+                showPopup(ui['cannot_position_here'][language], rowIndex, colIndex);
                 return;
             }
 
             if (!isValidSize(rowIndex, colIndex)) {
-                showPopup(ui['invalid_ship_size'][language]);
+                showPopup(ui['invalid_ship_size'][language], rowIndex, colIndex);
                 return;
             }
 
@@ -1119,7 +1148,7 @@
     }
 
 
-    let oppoShipsFlatList = [];
+    let oppoShipsFlatList;
     let biggestSize;
 
     function initOppoShips() {
@@ -1261,10 +1290,21 @@
     function restartGame() {
         // Need to debug: If run more than once, causes web browser to hang up  :(
 
+        oppoShipsFlatList = [];
+
         clearUserBoard();
         clearOppoBoard();
 
-        initUserShips();
+        let isUserBoardReady = false;
+        let isOppoBoardReady = false;
+
+        initUserShips();        
+
+        let oppoTurn = true;
+
+        // let userMoveCount, oppoMoveCount;
+
+        highlighted = false;        
 
         flashing = null;
 
@@ -1276,8 +1316,12 @@
 
         info = 'position_ships';
 
-        testPositionUserShips(); // for test purposes only
+        // userShips = [];
+        // globalToBePositioned = 0;
+
+        // testPositionUserShips(); // for test purposes only
     }
+
 
     function testPositionUserShips() {
         userBoard = [
@@ -1339,12 +1383,12 @@
         }
     }    
 
-    let oppoTurn = false;
+    // let oppoTurn = false;
 
-    let moveCount = 0;
-    let userMoveCount, oppoMoveCount;
+    // // let moveCount = 0;
+    // let userMoveCount, oppoMoveCount;
 
-    let highlighted = false;
+    // let highlighted = false;
 
     // initialization
     restartGame();
@@ -1491,32 +1535,34 @@
 
     .water-cell {
         background-color: blue;
+        transition: color 800ms linear 50ms;
     }
+
 
     .sunk-cell {
         background-color: brown;
-        transition: color 200ms ease-out 50ms;
     }    
 
     .hit-cell {
         background-color: red;
-        transition: color 200ms ease-out 50ms;
     }
 
     .hit-cell-1 {
         background-color: yellow;
-        transition: color 200ms ease-out 50ms;
     }
 
     .hit-cell-2 {
         background-color: rgb(255, 196, 0);
-        transition: color 200ms ease-out 50ms;
     }
 
     .hit-cell-3 {
         background-color: orange;
-        transition: color 200ms ease-out 50ms;
     }
+
+    .sunk-cell, .hit-cell, .hit-cell-1, .hit-cell-2, .hit-cell-3 {
+        transition: color 100ms linear 50ms;
+    }
+
 
     .board-data, .ship-cell, .hit-cell, .sunk-cell, .fog-cell, .water-cell {
         border-style: solid;
@@ -1675,14 +1721,17 @@
         padding: 0.5em;        
         border-radius: 5px;
         font-size: .8em;
+        transition: opacity 1s ease-in-out;
     }
 
     .popup-hidden {
         visibility: hidden;
+        opacity: 1;
     }
 
     .popup-visible {
         visibility: visible;
+        opacity: 0;
     }
 
 </style>
@@ -1747,7 +1796,7 @@
             <div class="who-plays-first">
                 <!-- WHO PLAYS FIRST radio buttons etc -->
                 <!-- The fade transition messes up with routing, so use currentGame as a bugfix!!! -->
-                <WhoPlaysFirst on:whoBegins={handleWhoBegins} />
+                <WhoPlaysFirst on:whoBegins={handleWhoBegins} whoBegins="{whoBegins}" />
             </div>
         </div>
 
@@ -1810,7 +1859,7 @@
 
 <p>&nbsp</p> <!-- dummy empty paragraph -->
 
-<div id="cell-popup" class="cell-popup popup-{popupVisible ? 'visible' : 'hidden'}"
+<div id="cell-popup" class="cell-popup popup-{isPopupVisible ? 'visible' : 'hidden'}"
     style="left: {popupX}px; top: {popupY}px"
 >
     { popupText }

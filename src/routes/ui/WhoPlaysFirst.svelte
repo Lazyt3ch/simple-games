@@ -2,7 +2,10 @@
     import { createEventDispatcher } from 'svelte';
     import { fade } from 'svelte/transition';
     import { languages, uiStrings as ui } from './whoPlaysFirst.js';    
-    import { globalLanguage } from '../../stores.js';    
+    import { globalLanguage } from '../../stores.js';
+    
+    export let whoBegins;    
+    // let whoBegins;
 
     let language;
 	const unsubscribe = globalLanguage.subscribe(value => {
@@ -10,7 +13,6 @@
 		console.log("whoBegins:  language =", language);
     });     
 
-    let whoBegins;
 
     let highlighted = false;
 
@@ -24,6 +26,11 @@
 
 
 <style>
+    .who-plays-first {
+        border-width: 1px;
+        border-color: black;
+    }
+
     .limited-width {
         /*
         max-width: 20em;
@@ -54,7 +61,7 @@
 <!-- WHO PLAYS FIRST radio buttons etc -->
 <!-- on:change={() => oppoTurn = true}  -->
 <fieldset id='who-plays-first' transition:fade="{{delay: 100, duration: 500}}"
-    class="limited-width margin-after {highlighted? 'highlighted': ''}"
+    class="who-plays-first limited-width margin-after {highlighted? 'highlighted': ''}"
     on:change={handleWhoBegins}    
 >
     <label class="unselectable"> { ui['who_plays_first'][language] } </label>
