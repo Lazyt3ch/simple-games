@@ -53,6 +53,8 @@
     let isUserBoardReady = false;
     let isOppoBoardReady = false;
 
+    let flashing = null;
+
     // let lastHitUserCellRow;
     // let lastHitUserCellCol;
     // let lastHitUserCell; // to be { row: x, col: y }
@@ -97,6 +99,12 @@
     // const EDGE = 4;
     const WATER = 5;
     const FOG = 6;
+    const HIT1 = 21;
+    const HIT2 = 22;
+    const HIT3 = 23;
+
+    const USERBOARD = 1;
+    const OPPOBOARD = 2;
 
     const IRRELEVANT = 0;
     const TOP = 1;
@@ -319,7 +327,51 @@
                 }
             }
         }
+    }
 
+
+    function flashOnHit(rowIndex, colIndex, someBoard, boardId) {        
+        // Adds flashing effect, which is applied to the hit cell
+
+        console.log("FUNCTION: flashOnHit");
+
+        flashing = {row: rowIndex, col: colIndex, boardId: boardId, class: 'hit-cell-1'};
+        // for reactivity
+        if (boardId === USERBOARD) {
+            userBoard = userBoard;
+        } else {
+            oppoBoard = oppoBoard;
+        }
+
+        setTimeout( () => { 
+            flashing.class = 'hit-cell-2';
+            // for reactivity
+            if (boardId === USERBOARD) {
+                userBoard = userBoard;
+            } else {
+                oppoBoard = oppoBoard;
+            }
+        }, 300);
+
+        setTimeout( () => { 
+            flashing.class = 'hit-cell-3';
+            // for reactivity
+            if (boardId === USERBOARD) {
+                userBoard = userBoard;
+            } else {
+                oppoBoard = oppoBoard;
+            }
+        }, 600);
+       
+        setTimeout( () => { 
+            flashing = null;
+            // for reactivity
+            if (boardId === USERBOARD) {
+                userBoard = userBoard;
+            } else {
+                oppoBoard = oppoBoard;
+            }
+        }, 900);
     }
 
 
@@ -344,6 +396,7 @@
             info = 'oppo_ship_missed';
         } else if (cell === SHIP) {      
             oppoBoard[rowIndex][colIndex] = HIT;      
+            flashOnHit(rowIndex, colIndex, oppoBoard, OPPOBOARD);
             if (isSunk(rowIndex, colIndex, oppoBoard)) {
                 info = 'oppo_ship_sunk';
                 oppoShipCount--;
@@ -511,6 +564,7 @@
             info = 'user_ship_missed';
         } else if (cell === SHIP) {        
             userBoard[rowIndex][colIndex] = HIT;      
+            flashOnHit(rowIndex, colIndex, userBoard, USERBOARD);            
             // hitUserCells.push({ row: rowIndex, col: colIndex });
             if (isSunk(rowIndex, colIndex, userBoard)) {
                 info = 'user_ship_sunk';
@@ -714,30 +768,34 @@
     }
 
 
-    function getCellClass(rowIndex, colIndex, someBoard) {      
+    function getCellClass(rowIndex, colIndex, someBoard, boardId) {      
         let cellClass;
+        let isDataCell = (rowIndex > 0 && colIndex > 0);
+        let isFlashing = (flashing && rowIndex === flashing.row && colIndex === flashing.col);
 
         cellClass = `
             board-cell unselectable
             ${colIndex === 0 && rowIndex === 0 ? 'no-top-left-borders' : ''}
             ${(colIndex === 0 || rowIndex === 0) && colIndex !== rowIndex ? 'top-and-left-headers' : ''}
             ${(colIndex === 0 && colIndex === rowIndex) ? 'top-left-header-cell' : ''}
-            ${(rowIndex > 0 && colIndex > 0 && someBoard[rowIndex][colIndex] === HIT) ? 'hit-cell' : ''}
-            ${(rowIndex > 0 && colIndex > 0 && someBoard[rowIndex][colIndex] === SUNK) ? 'sunk-cell' : ''}
-            ${(rowIndex > 0 && colIndex > 0 && someBoard[rowIndex][colIndex] === WATER) ? 'water-cell' : ''}
+            ${(isDataCell && someBoard[rowIndex][colIndex] === SUNK) ? 'sunk-cell' : ''}
+            ${(isDataCell && someBoard[rowIndex][colIndex] === WATER) ? 'water-cell' : ''}
+            ${(isDataCell && someBoard[rowIndex][colIndex] === HIT) ? 'hit-cell' : ''}
         `
 
-        if (someBoard === oppoBoard) { // opponent board
+        if (boardId === OPPOBOARD) { // opponent board
             cellClass += `
-            ${(rowIndex > 0 && colIndex > 0 && someBoard[rowIndex][colIndex] === EMPTY) ? 'fog-cell' : ''}        
-            ${(rowIndex > 0 && colIndex > 0 && someBoard[rowIndex][colIndex] === SHIP) ? 'fog-cell' : ''}
-            ${(rowIndex > 0 && colIndex > 0 && isGameOn && !oppoTurn) ? 'whose-turn' : ''}
+            ${(isDataCell && someBoard[rowIndex][colIndex] === EMPTY) ? 'fog-cell' : ''}        
+            ${(isDataCell && someBoard[rowIndex][colIndex] === SHIP) ? 'fog-cell' : ''}
+            ${(isDataCell && isGameOn && !oppoTurn) ? 'whose-turn' : ''}
+            ${(isDataCell && isFlashing && flashing.boardId === boardId) ? flashing.class : ''}
             `;
         } else { // user board
             cellClass += `
-            ${(rowIndex > 0 && colIndex > 0 && someBoard[rowIndex][colIndex] === 0) ? 'board-data' : ''}        
-            ${(rowIndex > 0 && colIndex > 0 && someBoard[rowIndex][colIndex] === 1) ? 'ship-cell' : ''}
-            ${(rowIndex > 0 && colIndex > 0 && !isGameOn) ? 'whose-turn' : ''}
+            ${(isDataCell && someBoard[rowIndex][colIndex] === EMPTY) ? 'board-data' : ''}        
+            ${(isDataCell && someBoard[rowIndex][colIndex] === SHIP) ? 'ship-cell' : ''}
+            ${(isDataCell && !isGameOn) ? 'whose-turn' : ''}
+            ${(isDataCell && isFlashing && flashing.boardId === boardId) ? flashing.class : ''}
             `;
         }
 
@@ -1009,12 +1067,6 @@
     }
 
     function placeShip(rowIndex, colIndex) {
-        // if (cellClicksBlocked) return;
-        // if (isReadyToPlay) return;
-        // if (isUserReady) return;
-        // if (isUserReady && isOppoBoardReady && whoBegins !== null) return;
-        // if (isUserBoardReady && isOppoBoardReady && whoBegins !== null) return;
-        // if (isUserBoardReady && whoBegins !== null) return;
         if (isGameOn) return;
 
         if (rowIndex === 0 || colIndex === 0) return; // headers
@@ -1080,9 +1132,6 @@
                 toBePositioned: ship.totalNumber,         
             };
 
-            // globalToBePositioned += ship.totalNumber;
-            // console.log("globalToBePositioned =", globalToBePositioned);
-
             oppoShips.push(oppoShip);
         })
 
@@ -1091,8 +1140,6 @@
         });
 
         biggestSize = oppoShips[0];
-
-        // console.log("oppoShips =", oppoShips);
 
         oppoShips.forEach( ship => {
             for (let s = 0; s < ship.totalNumber; s++) {
@@ -1103,7 +1150,6 @@
         oppoShipCount = oppoShipsFlatList.length;
         userShipCount = oppoShipCount;
 
-        // console.log("oppoShipsFlatList =", oppoShipsFlatList);
         positionOppoShips();
     }
     
@@ -1113,10 +1159,10 @@
     // Note that board size is 11 x 11 (to include left header and top header)
     //
     // flatPos = (rowIndex - 1) * dataHeight + (colIndex - 1)
-    //
-    // let eligibleCellCount = dataHeight * dataWidth; // cell count
+
     let cellCount = dataHeight * dataWidth; // cell count (e.g. 100)
     let cellCountAndDirections = cellCount * 4; // cell count multiplied by possible directions
+
 
     function initOppoBoardFlatList() {
         for (let r = 0; r < totalHeight; r++) {
@@ -1125,6 +1171,7 @@
             }
         }
     }
+
 
     function positionOppoShips() {
         let shipHeadFlatPosAndTailDir;
@@ -1144,28 +1191,16 @@
             
             while (isShipNotPositioned) {
                 isMisfit = false;
-                // let shipHeadPosition = randomInt(eligibleCellCount);
-                // let shipHeadPosition = randomInt(eligibleCellCount);
-                // console.log("=====================================================")
-                // console.log("s =", s);
-                // console.log("Ship size = ", oppoShipsFlatList[s]);
-                // shipHeadFlatPos = randomInt(eligibleCellCount); // (0, 1, ... , 99)
                 shipHeadFlatPosAndTailDir = randomInt(cellCountAndDirections); // (0, 1, 396)
                 shipHeadFlatPos = Math.floor(shipHeadFlatPosAndTailDir / 4);
-                // console.log("shipHeadFlatPos =", shipHeadFlatPos);
-                // shipHeadRow = shipHeadFlatPos % dataHeight + 1;
                 shipHeadRow = Math.floor(shipHeadFlatPos / dataHeight) + 1;
                 shipHeadCol = shipHeadFlatPos - (shipHeadRow - 1) * dataHeight + 1;
-                // console.log("shipHeadRow, shipHeadCol =", shipHeadRow, shipHeadCol);
 
                 // 0 = top, 1 = right, 2 = bottom, 3 = left
                 // let shipTailDir = randomInt(4);
                 let shipTailDir = shipHeadFlatPosAndTailDir % cellCount;
-                // console.log("shipTailDir =", shipTailDir, "(0 = top, 1 = right, 2 = bottom, 3 = left)");
-                // shipTailRow = shipHeadRow
                 if (shipTailDir % 2 === 0) { // top or bottom
                     shipTailRow = shipHeadRow + (shipTailDir === 0 ? -1 : 1) * (oppoShipsFlatList[s] - 1);
-                    // [shipHeadRow, shipTailRow] = [Math.max(shipHeadRow, shipTailRow)]
                     if (shipTailRow < shipHeadRow) {
                         [shipTailRow, shipHeadRow] = [shipHeadRow, shipTailRow]; // now tail > head
                     } // right or left
@@ -1224,10 +1259,14 @@
 
 
     function restartGame() {
+        // Need to debug: If run more than once, causes web browser to hang up  :(
+
         clearUserBoard();
         clearOppoBoard();
 
         initUserShips();
+
+        flashing = null;
 
         whoBegins = null;
 
@@ -1393,12 +1432,6 @@
         width: 35px;
         height: 35px;
         text-align: center;
-        /* width: 30px;
-        height: 30px; */
-        /*
-        padding: 0;
-        margin: 0;
-        */
     }
    
     .board-data {
@@ -1447,7 +1480,7 @@
     }
 
 
-    /* data cells with different content */
+    /* data cells with different content or in different external context */
     .ship-cell {
         background-color: cadetblue;
     }
@@ -1460,18 +1493,32 @@
         background-color: blue;
     }
 
-    .hit-cell {
-        background-color: red;
-    }
-
     .sunk-cell {
         background-color: brown;
+        transition: color 200ms ease-out 50ms;
     }    
 
-    .board-data, .ship-cell, .hit-cell, .sunk-cell, .fog-cell, .water-cell {
-        /* width: 20px;
-        height: 20px; */
+    .hit-cell {
+        background-color: red;
+        transition: color 200ms ease-out 50ms;
+    }
 
+    .hit-cell-1 {
+        background-color: yellow;
+        transition: color 200ms ease-out 50ms;
+    }
+
+    .hit-cell-2 {
+        background-color: rgb(255, 196, 0);
+        transition: color 200ms ease-out 50ms;
+    }
+
+    .hit-cell-3 {
+        background-color: orange;
+        transition: color 200ms ease-out 50ms;
+    }
+
+    .board-data, .ship-cell, .hit-cell, .sunk-cell, .fog-cell, .water-cell {
         border-style: solid;
         border-width: 1px;
         border-color: black;
@@ -1485,13 +1532,6 @@
         font-family: 'Lucida Console', 'Courier New', Courier, monospace;
     }
 
-    /*
-    .board-data:hover, .ship-cell:hover, .fog-cell:hover {
-        border-style: dotted;
-        border-width: 2px;
-        border-color: yellow;
-    }
-    */
 
     .whose-turn:hover {
         border-style: dotted;
@@ -1508,7 +1548,6 @@
     }
 
     .opponent {
-        /* display: inline-block; */
         margin-left: 1em;
         margin-top: 0;
         float: right;
@@ -1545,7 +1584,6 @@
     }
 
     .container {
-        /* display: flex; */
         width: 100%;
         max-width: 60em;
         margin-top: 0.5em;
@@ -1558,7 +1596,6 @@
     }
 
     .user, .opponent {
-        /* display: flex; */
         display: block;
         min-width: 25em;
     }
@@ -1616,8 +1653,6 @@
         background-color: aqua;
         color: blue;
         font-weight: bold;
-        /* margin-top: 0; */
-        /* margin-bottom: 1em; */
         margin-left: 1em;
         margin-right: 1em;
     }
@@ -1631,74 +1666,6 @@
     .margin-after {
         margin-bottom: 1em;
     }
-
-    /*
-    .limited-width {
-        max-width: 20em;
-    }
-    */
-
-    /* POPUP HEAD ==================================> */
-    /* source: https://www.w3schools.com/howto/tryit.asp?filename=tryhow_js_popup */
-
-    /* Popup container - can be anything you want 
-    .popup {
-        position: relative;
-        display: inline-block;
-        cursor: pointer;
-        -webkit-user-select: none;
-        -moz-user-select: none;
-        -ms-user-select: none;
-        user-select: none;
-    } */
-
-    /* The actual popup 
-    .popup .popuptext {
-        visibility: hidden;
-        width: 160px;
-        background-color: #555;
-        color: #fff;
-        text-align: center;
-        border-radius: 6px;
-        padding: 8px 0;
-        position: absolute;
-        z-index: 1;
-        bottom: 125%;
-        left: 50%;
-        margin-left: -80px;
-    } */
-
-    /* Popup arrow 
-    .popup .popuptext::after {
-        content: "";
-        position: absolute;
-        top: 100%;
-        left: 50%;
-        margin-left: -5px;
-        border-width: 5px;
-        border-style: solid;
-        border-color: #555 transparent transparent transparent;
-    } */
-
-    /* Toggle this class - hide and show the popup 
-    .popup .show {
-        visibility: visible;
-        -webkit-animation: fadeIn 1s;
-        animation: fadeIn 1s;
-    } */
-
-    /* Add animation (fade in the popup) 
-    @-webkit-keyframes fadeIn {
-        from {opacity: 0;} 
-        to {opacity: 1;}
-    } */
-
-    /*
-    @keyframes fadeIn {
-        from {opacity: 0;}
-        to {opacity:1 ;}
-    } */
-    /* POPUP TAIL ==================================< */
 
     .cell-popup {
         position: absolute;
@@ -1737,7 +1704,7 @@
                     <!-- Must use a key in #each loop -->
                     {#each row as cell, colIndex (colIndex * dataHeight + colIndex)}
                         <td on:click={ () => placeShip(rowIndex, colIndex) }
-                            class="{ getCellClass(rowIndex, colIndex, userBoard) }"                                                   
+                            class="{ getCellClass(rowIndex, colIndex, userBoard, USERBOARD) }"                                                   
                         >
                             { @html rowIndex > 0 && colIndex > 0 ? num2char(cell) : cell }
                         </td>
@@ -1790,7 +1757,6 @@
 
 
 
-    <!-- {#if isReadyToPlay && curGame === gameId} -->
     {#if isGameOn && curGame === gameId}
         <div class="opponent" transition:fade="{ {delay: 100, duration: 500} }">
             <h3 class="user-or-opponent">{ ui["opponent_ships"][language] }</h3>
@@ -1803,7 +1769,7 @@
                         <!-- Must use a key in #each loop -->
                         {#each row as cell, colIndex (colIndex * dataHeight + colIndex)}
                             <td on:click={ () => userFire(rowIndex, colIndex) }
-                                class="{getCellClass(rowIndex, colIndex, oppoBoard)}"                         
+                                class="{getCellClass(rowIndex, colIndex, oppoBoard, OPPOBOARD)}"                         
                             >
                                 { @html rowIndex > 0 && colIndex > 0 ? num2char(cell) : cell }
                             </td>
