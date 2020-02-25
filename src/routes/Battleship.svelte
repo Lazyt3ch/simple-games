@@ -64,7 +64,9 @@
     // let lastHitUserCellRow;
     // let lastHitUserCellCol;
     // let lastHitUserCell; // to be { row: x, col: y }
-    let hitUserCells = []; // to be { row: x, col: y }
+    let hitUserCells; // to be [{ row: x, col: y }, {row: x2, col: y2}, ... ]
+    let hitUserShipOrient; // to be VERTICAL or HORIZONTAL
+    let hitChecked; // either { head: false } or { tail: false }
 
     function handleWhoBegins(event) {
         whoBegins = event.detail;
@@ -164,97 +166,134 @@
     }
 
 
-    function isSunk(rowIndex, colIndex, someBoard) {
-        let hitCells = [];
-        let curCell;
-        /*
-        console.log("FUNCTION: isSunk;  rowIndex, colIndex, cell_content =", 
-                    rowIndex, colIndex, oppoBoard[rowIndex][colIndex]);
-        */
+    function isSingleCell(rowIndex, colIndex, someBoard) {
+        let edges = 0;
+        let r, c;
+        let cells = [
+            {row: rowIndex - 1, col: colIndex},
+            {row: rowIndex + 1, col: colIndex},
+            {row: rowIndex, col: colIndex - 1},
+            {row: rowIndex, col: colIndex + 1},
+        ]
 
-        // left
-        for (let r = rowIndex; r > 0; r--) {
-            curCell = someBoard[r][colIndex];
-            if (curCell === SHIP) {
-                return false; // some cells of this ship have not been hit yet
-            } else if (curCell === EMPTY || curCell === WATER) {
-                break; // No need to continue checking this direction            
-            } else if (curCell === HIT) {
-                hitCells.push([r, colIndex]);
+        for (let i = 0; i < 4; i++) {
+            r = cells[i].row;
+            c = cells[i].col;
+            if (!isValidCell(r, c) || someBoard[r][c] === EMPTY || someBoard[r][c] === WATER) {
+                edges++;                    
             }
         }
 
-        // console.log("Got here! AFTER: left");
+        console.log("edges =", edges);
 
-        // right
-        for (let r = rowIndex; r < totalHeight; r++) {
-            curCell = someBoard[r][colIndex];
-            if (curCell === SHIP) {
-                return false; // some cells of this ship have not been hit yet
-            } else if (curCell === EMPTY || curCell === WATER) {
-                break; // No need to continue checking this direction             
-            } else if (curCell === HIT) {
-                hitCells.push([r, colIndex]);
-            }
-        }        
-
-        // console.log("Got here! AFTER: right");
-
-        // top
-        for (let c = colIndex; c > 0; c--) {
-            curCell = someBoard[rowIndex][c];
-            if (curCell === SHIP) {
-                return false; // some cells of this ship have not been hit yet
-            } else if (curCell === EMPTY || curCell === WATER) {
-                break; // No need to continue checking this direction             
-            } else if (curCell === HIT) {
-                hitCells.push([rowIndex, c]);
-            }
-        }               
-
-        // console.log("Got here! AFTER: top");
-
-        // bottom
-        for (let c = colIndex; c < totalWidth; c++) {
-            curCell = someBoard[rowIndex][c];
-            if (curCell === SHIP) {
-                return false; // some cells of this ship have not been hit yet
-            } else if (curCell === EMPTY || curCell === WATER) {
-                break; // No need to continue checking this direction               
-            } else if (curCell === HIT) {
-                hitCells.push([rowIndex, c]);
-            }
-        }         
-
-        // console.log("Got here! AFTER: bottom");
-
-        // Marking ship as sunk
-        someBoard[rowIndex][colIndex] = SUNK;
-        hitCells.forEach(coord => {
-            someBoard[coord[0]][coord[1]] = SUNK;
-        });
-
-        markAroundSunkShip(hitCells, someBoard);
-        return true;
+        if (edges === 4) {
+            markAroundSunkShip([{row: rowIndex, col: colIndex}], someBoard);
+            return true;
+        } else {
+            return false;
+        }
     }
 
 
+    function isSunk(rowIndex, colIndex, someBoard, boardId) {
+        // let hitCells = [];
+        let curCell;
+        let orient = null;
+        let limit;
+        // let hitCells = [[rowIndex, colIndex]];
+        let hitCells = [{row: rowIndex, col: colIndex}];
+        // let countSides = 0;
+        // if (isCellAtEdge(rowIndex, colIndex)) countSides = 1;
+        // let edges;
+        // edges = countEdges(rowIndex, colIndex);
+
+        for (let i = -1; i <= 1; i += 2) {
+            // left, right
+            limit = (i < 0 ? 0 : totalHeight);
+            for (let r = rowIndex + i; r !== limit; r += i) {
+                curCell = someBoard[r][colIndex];
+                if (curCell === SHIP) {
+                    return false; // some cells of this ship have not been hit yet
+                } else if (curCell === HIT) {
+                    orient = HORIZONTAL;
+                    // hitCells.push([r, colIndex]);
+                    hitCells.push({row: r, col: colIndex});
+                } else if (curCell === EMPTY || curCell === WATER) {
+                    // edges++;
+                    break; // This direction has been checked
+                }
+            }            
+        }
+
+        if (orient !== HORIZONTAL) {
+            for (let i = -1; i <= 1; i += 2) {
+                // top, bottom
+                limit = (i < 0 ? 0 : totalWidth);
+                for (let c = colIndex + i; c !== limit; c += i) {
+                    curCell = someBoard[rowIndex][c];
+                    if (curCell === SHIP) {
+                        return false; // some cells of this ship have not been hit yet
+                    } else if (curCell === HIT) {
+                        // orient = VERTICAL;
+                        // hitCells.push([rowIndex, c]);
+                        hitCells.push({row: rowIndex, col: c});
+                    } else if (curCell === EMPTY || curCell === WATER) {
+                        // edges++;
+                        break; // This direction has been checked
+                    }
+                }            
+            }
+        }
+
+        // console.log("edges =", edges);
+        console.log("hitCells =", hitCells);
+
+        // Marking ship as sunk
+        // someBoard[rowIndex][colIndex] = SUNK;
+        hitCells.forEach(coord => {
+            someBoard[coord.row][coord.col] = SUNK;
+        });
+
+        markAroundSunkShip(hitCells, someBoard);
+        console.log("SHIP IS SUNK! rowIndex, colIndex =", rowIndex, colIndex);
+
+        return true;
+    }
+
+    
+    function markAroundSunkShip(hitCells, someBoard) {
+        let headAndTail = getHeadAndTail(hitCells);
+        console.log("headAndTail =", headAndTail);
+
+        let rowStart = Math.max(1, headAndTail[0].row - 1);
+        let rowEnd = Math.min(dataHeight, headAndTail[1].row + 1);
+        let colStart = Math.max(1, headAndTail[0].col - 1);
+        let colEnd = Math.min(dataWidth, headAndTail[1].col + 1);
+
+        for (let r = rowStart; r <= rowEnd; r++) {
+            for (let c = colStart; c <= colEnd; c++) {
+                console.log("r, c =", r, c);
+                if (isValidCell(r, c) && someBoard[r][c] === EMPTY) {
+                    someBoard[r][c] = WATER;
+                }                
+            }
+        }
+    }
+    /*
     function markAroundSunkShip(hitCells, someBoard) {
         let rowIndex, colIndex;
 
-        hitCells.forEach(coord => {
-            [rowIndex, colIndex] = [coord[0], coord[1]];
+        hitCells.forEach((rowIndex, colIndex) => {
             for (let r = rowIndex - 1; r <= rowIndex + 1; r++) {
                 for (let c = colIndex - 1; c <= colIndex + 1; c++) {
-                    if (isValidCell(r, c)) {
-                        if (someBoard[r][c] === EMPTY) {
-                            someBoard[r][c] = WATER;
-                        }
+                    if (isValidCell(r, c) && someBoard[r][c] === EMPTY) {
+                        someBoard[r][c] = WATER;
                     }
                 }
             }
         });        
     }
+    */
 
 
     function markCorners(rowIndex, colIndex, someBoard, boardId) {
@@ -279,13 +318,85 @@
         if (isValidCell(rowIndex - 1, colIndex - 1)) {
             someBoard[rowIndex - 1][colIndex - 1] = WATER;
         }
+    }
 
-        // for reactivity
-        if (boardId === OPPOBOARD) {
-            oppoBoard = oppoBoard;
-        } else {
-            userBoard = userBoard;
-        } 
+    function markCellsAsWater(rowIndex, colIndex, directions, someBoard) {
+        let r;
+        let c;
+
+        directions.forEach(direction => {
+            r = rowIndex;
+            c = colIndex;
+
+            if (direction === LEFT) {
+                c--;
+            } else if (direction === RIGHT) {
+                c++;
+            } else if (direction === TOP) {
+                r--;
+            } else if (direction === BOTTOM) {
+                r++;
+            }
+
+            if (isValidCell(r, c)) {
+                someBoard[r][c] = WATER;
+            }
+        })
+    }
+
+
+    function markAroundHit(rowIndex, colIndex, someBoard) {
+        // bigSize effectively constricts the search area size.
+        // Maybe optimize later (though that is probably unnecessary).
+
+        let hitSize = 1;
+        let orient = null;
+        let limit;
+
+        // TOP 
+        for (let r = Math.max(1, rowIndex - 1); r >= 1; r--) {
+            if (someBoard[r][colIndex] === HIT) {
+                orient = VERTICAL;
+                markCellsAsWater(r, colIndex, [LEFT, RIGHT], someBoard);
+            } else {
+                break;
+            }
+        }
+
+        // BOTTOM 
+        for (let r = Math.min(dataHeight, rowIndex + 1); r <= dataHeight; r++) {
+            if (someBoard[r][colIndex] === HIT) {
+                orient = VERTICAL;
+                markCellsAsWater(r, colIndex, [LEFT, RIGHT], someBoard);
+            } else {
+                break;
+            }
+        }        
+
+        if (orient === VERTICAL) {
+            markCellsAsWater(rowIndex, colIndex, [LEFT, RIGHT], someBoard);
+            return; // No need to check if the ship is horizontal
+        }
+
+        // LEFT 
+        for (let c = Math.max(1, colIndex - 1); c >= 1; c--) {
+            if (someBoard[rowIndex][c] === HIT) {
+                orient = HORIZONTAL;
+                markCellsAsWater(rowIndex, c, [TOP, BOTTOM], someBoard);
+            }
+        }
+
+        // RIGHT 
+        for (let c = Math.min(dataWidth, colIndex + 1); c <= dataWidth; c++) {
+            if (someBoard[rowIndex][c] === HIT) {
+                orient = HORIZONTAL;
+                markCellsAsWater(rowIndex, c, [TOP, BOTTOM], someBoard);
+            }
+        }        
+
+        if (orient === HORIZONTAL) {
+            markCellsAsWater(rowIndex, colIndex, [TOP, BOTTOM], someBoard);
+        }
     }
 
 
@@ -344,6 +455,15 @@
     }
 
 
+    function makeReactive(boardId) { // for reactivity
+        if (boardId === USERBOARD) {
+            userBoard = userBoard;
+        } else {
+            oppoBoard = oppoBoard;
+        }
+    }
+
+
     function flashOnHit(rowIndex, colIndex, someBoard, boardId) {        
         // Adds flashing effect, which is applied to the hit cell
 
@@ -352,49 +472,33 @@
         let flashingDelay = 100;
 
         flashing = {row: rowIndex, col: colIndex, boardId: boardId, class: 'hit-cell-1'};
-        // for reactivity
-        if (boardId === USERBOARD) {
-            userBoard = userBoard;
-        } else {
-            oppoBoard = oppoBoard;
-        }
+
+        makeReactive(boardId);
 
         setTimeout( () => { 
             flashing.class = 'hit-cell-2';
-            // for reactivity
-            if (boardId === USERBOARD) {
-                userBoard = userBoard;
-            } else {
-                oppoBoard = oppoBoard;
-            }
+            makeReactive(boardId);
         }, flashingDelay);
 
         setTimeout( () => { 
             flashing.class = 'hit-cell-3';
-            // for reactivity
-            if (boardId === USERBOARD) {
-                userBoard = userBoard;
-            } else {
-                oppoBoard = oppoBoard;
-            }
+            makeReactive(boardId);
         }, flashingDelay * 2);
        
         setTimeout( () => { 
             flashing = null;
-            // for reactivity
-            if (boardId === USERBOARD) {
-                userBoard = userBoard;
-            } else {
-                oppoBoard = oppoBoard;
-            }
+            makeReactive(boardId);
         }, flashingDelay * 3);
     }
 
 
-    function userFire(rowIndex, colIndex) {
+    function fireAtOppoBoard(rowIndex, colIndex) {
+        // Need to debug: 
+        // Single-cell ships located at top, bottom, left, or right board side
+        // are marked as HIT, not as SUNK, when hit (and sunk). 
+
         // user fires at an opponent board cell
         // console.log("FUNCTION: fire;  isGameOn =", isGameOn);
-        let checkResult;
 
         if (!isGameOn) return;
 
@@ -412,21 +516,34 @@
         if (cell === EMPTY) {
             oppoBoard[rowIndex][colIndex] = WATER;
             info = 'oppo_ship_missed';
+            makeReactive(OPPOBOARD);
         } else if (cell === SHIP) {      
-            oppoBoard[rowIndex][colIndex] = HIT;      
-            flashOnHit(rowIndex, colIndex, oppoBoard, OPPOBOARD);
-            if (isSunk(rowIndex, colIndex, oppoBoard)) {
+            oppoBoard[rowIndex][colIndex] = HIT;    
+            // hitCells.push([rowIndex, colIndex]);
+            if (isSingleCell(rowIndex, colIndex, oppoBoard)) {
+                oppoBoard[rowIndex][rowIndex] = SUNK;
                 info = 'oppo_ship_sunk';
                 oppoShipCount--;
+                markAroundSunkShip([{row: rowIndex, col: colIndex}], oppoBoard);
+                flashOnHit(rowIndex, colIndex, oppoBoard, OPPOBOARD);
+            } else if (isSunk(rowIndex, colIndex, oppoBoard, OPPOBOARD)) {
+                info = 'oppo_ship_sunk';
+                oppoShipCount--;
+                flashOnHit(rowIndex, colIndex, oppoBoard, OPPOBOARD);
             } else {                
-                info = 'oppo_ship_hit';
+                info = 'oppo_ship_hit';                
                 markCorners(rowIndex, colIndex, oppoBoard, OPPOBOARD);      
-                markWaterAroundHitCells();         
+                // markWaterAroundHitCells();         
+                markAroundHit(rowIndex, colIndex, oppoBoard);
+                flashOnHit(rowIndex, colIndex, oppoBoard, OPPOBOARD);             
             }
         }
+
+        // makeReactive(OPPOBOARD);
+
         // console.log("oppoBoard[rowIndex][colIndex] =", oppoBoard[rowIndex][colIndex]);
         // userMoveCount++;
-        oppoTurn = true;
+        oppoTurn = true; // causes reaction!!!
 
         if (oppoShipCount < 1) {
             info = 'user_won';
@@ -437,26 +554,25 @@
 
         setTimeout( () => { 
             info = 'opponent_move';
-            oppoFire();     
+            fireAtUserBoard();     
         }, 2000);            
     }
 
 
-    function getHeadAndTail(hitUserCells) {
-        let cells = [
-            { row: totalHeight, col: totalWidth},   // to be uppermost or leftmost cell
-            { row: -1, col: -1},                    // to be bottommost or rightmost cell
+    function getHeadAndTail(hitCells) {
+        let headAndTail = [
+            { row: dataHeight, col: dataWidth}, // either uppermost or leftmost cell of ship/frag
+            { row: 1, col: 1},                  // either bottommost or rightmost cell of ship/frag
         ];                
 
-        // get head and tail
-        for (let i = hitUserCells.length - 1; i >= 0; i--) {
-            cells[0].row = Math.min(cells[0].row, hitUserCells[i].row); // head
-            cells[0].col = Math.min(cells[0].col, hitUserCells[i].col); // head
-            cells[1].row = Math.max(cells[1].row, hitUserCells[i].row); // tail
-            cells[1].col = Math.max(cells[1].col, hitUserCells[i].col); // tail
+        for (let i = hitCells.length - 1; i >= 0; i--) {
+            headAndTail[0].row = Math.min(headAndTail[0].row, hitCells[i].row); // head
+            headAndTail[0].col = Math.min(headAndTail[0].col, hitCells[i].col); // head
+            headAndTail[1].row = Math.max(headAndTail[1].row, hitCells[i].row); // tail
+            headAndTail[1].col = Math.max(headAndTail[1].col, hitCells[i].col); // tail
         }
 
-        return cells;
+        return headAndTail;
     }
 
 
@@ -474,19 +590,21 @@
         return orient;
     }
 
+    function isCellInvalidOrWater(rowIndex, colIndex, someBoard) {
+        if (!isValidCell(rowIndex, colIndex)) return true;
+        return (someBoard[rowIndex][colIndex] === WATER);
+    }
 
-    function oppoFire() {
-        // Need to implement: detection of user ship orientation
-        // if two adjacent ship cells are hit!!!
 
+    function fireAtUserBoard() {
         let cellFlatPos;
         let rowIndex = -1, colIndex = -1;
         let cell;        
         let r, c;
         let direction;
-        // let head, tail;
+        let head, tail;
         let cells;
-        let orient;
+        // let orient;
         let dirList = [TOP, RIGHT, BOTTOM, LEFT];
 
         if (hitUserCells.length > 0) {
@@ -496,35 +614,41 @@
             // directions = []
 
             if (hitUserCells.length > 1) {
-                cells = getHeadAndTail(hitUserCells);
+                cells = getHeadAndTail(hitUserCells); // either head.row < tail.row, or head.col < tail.col
+                head = cells[0];
+                tail = cells[1];
 
-                if (cells[0].row === cells[1].row) {
-                    dirList = [LEFT, RIGHT]; // The order is important!
-                    orient = HORIZONTAL;
-                    if (isValidCell(cells[0].row, cells[0].col - 1) && 
-                        userBoard[cells[0].row][cells[0].col - 1] === WATER) {
+                if (head.row === tail.row) {
+                    hitUserShipOrient = HORIZONTAL;
+                    if (isCellInvalidOrWater(head.row, head.col - 1, userBoard)) {
                         dirList = [RIGHT];
-                    } else if (isValidCell(cells[0].row, cells[0].col + 1) && 
-                        userBoard[cells[0].row][cells[0].col + 1] === WATER) {
+                        hitChecked.head = true;
+                    } else if (isCellInvalidOrWater(tail.row, tail.col + 1, userBoard)) {
                         dirList = [LEFT];
-                    }
-                } else if (cells[0].col === cells[1].col) {
-                    dirList = [TOP, BOTTOM]; // The order is important!
-                    orient = VERTICAL;
-                    if (isValidCell(cells[0].row - 1, cells[0].col) && 
-                        userBoard[cells[0].row - 1][cells[0].col] === WATER) {
+                        hitChecked.tail = true;
+                    } else {
+                        dirList = [LEFT, RIGHT];
+                    }                    
+                } else if (head.col === tail.col) {
+                    hitUserShipOrient = VERTICAL;                    
+                    if (isCellInvalidOrWater(head.row - 1, head.col, userBoard)) {
                         dirList = [BOTTOM];
-                    } else if (isValidCell(cells[0].row + 1, cells[0].col) && 
-                        userBoard[cells[0].row + 1][cells[0].col] === WATER) {
+                        hitChecked.head = true;
+                    } else if (isCellInvalidOrWater(tail.row + 1, tail.col, userBoard)) {
                         dirList = [TOP];
+                        hitChecked.tail = true;
+                    } else {
+                        dirList = [TOP, BOTTOM]; // The order is important!
                     }                    
                 }
             } else {
                 // only 1 cell, so we need to check all of its sides
                 dirList = [TOP, RIGHT, BOTTOM, LEFT];
                 cells = [{ 
-                    row: hitUserCells[hitUserCells.length - 1].row, 
-                    col: hitUserCells[hitUserCells.length - 1].col,
+                    // row: hitUserCells[hitUserCells.length - 1].row, 
+                    // col: hitUserCells[hitUserCells.length - 1].col,
+                    row: hitUserCells[0].row, 
+                    col: hitUserCells[0].col,
                 }];
             }
 
@@ -532,12 +656,17 @@
                 r = cells[i].row;
                 c = cells[i].col;
 
-                if (cells.length === 1) { 
-                    dirList = [TOP, RIGHT, BOTTOM, LEFT];       // check 4 cells
-                } else { // head (top or left) or tail (right or bottom)
-                    if (dirList.length === 2) {
-                        dirList = [dirList[i]];                     // check 1 cell only
+                if (cells.length > 1 && dirList.length === 2) {
+                    // head (top or left) or tail (right or bottom)
+                    // dirList = [dirList[i]];                     // check 1 cell only
+                    if (i === 0) { 
+                        if (hitChecked.head) continue;
+                        hitChecked.head = true;
+                    } else if (i === 1) {
+                        if (hitChecked.tail) continue;
+                        hitChecked.tail = true;                            
                     }
+                    dirList = [dirList[i]];  // check 1 cell only                        
                     console.log("dirList =", dirList);
                     // orient = getOrient(cells);                    
                 }
@@ -580,27 +709,41 @@
         if (cell === EMPTY) {
             userBoard[rowIndex][colIndex] = WATER;
             info = 'user_ship_missed';
+            makeReactive(USERBOARD);
         } else if (cell === SHIP) {        
-            userBoard[rowIndex][colIndex] = HIT;      
-            flashOnHit(rowIndex, colIndex, userBoard, USERBOARD);            
+            userBoard[rowIndex][colIndex] = HIT; 
+            // hitCells.push([rowIndex, colIndex]);                             
             // hitUserCells.push({ row: rowIndex, col: colIndex });
-            if (isSunk(rowIndex, colIndex, userBoard)) {
+            if (isSingleCell(rowIndex, colIndex, userBoard)) {
+                userBoard[rowIndex][rowIndex] = SUNK;
+                info = 'oppo_ship_sunk';
+                userShipCount--;
+                flashOnHit(rowIndex, colIndex, userBoard, USERBOARD);
+            } else if (isSunk(rowIndex, colIndex, userBoard, USERBOARD)) {
                 info = 'user_ship_sunk';
                 userShipCount--;
                 hitUserCells = [];
+                hitUserShipOrient = null;
+                hitChecked = { head: false, tail: false };
+                // markAroundSunkShip(hitUserCells, oppoBoard);
+                flashOnHit(rowIndex, colIndex, userBoard, USERBOARD);
             } else {                
                 hitUserCells.push({ row: rowIndex, col: colIndex });
                 if (hitUserCells.length > 1) {
                     // markCellsAroundAsWater(hitUserCells, userBoard);
                     cells = getHeadAndTail(hitUserCells);
-                    orient = getOrient(cells);
-                    markCellsNearbyAsWater(cells, userBoard, orient);
+                    hitUserShipOrient = getOrient(cells);
+                    markCellsNearbyAsWater(cells, userBoard, hitUserShipOrient);
                 } else {
                     markCorners(rowIndex, colIndex, userBoard, USERBOARD);
                 }
+                flashOnHit(rowIndex, colIndex, userBoard, USERBOARD);
                 info = 'user_ship_hit';
             }
         }
+
+        // userBoard = userBoard; // for reactivity
+
         // console.log("userBoard[rowIndex][colIndex] =", userBoard[rowIndex][colIndex]);
         oppoMoveCount++;
 
@@ -1004,6 +1147,20 @@
         return (rowIndex > 0 && rowIndex < totalHeight && colIndex > 0 && colIndex < totalWidth);
     }
 
+    /*
+    function isCellAtEdge(rowIndex, colIndex) {
+        return (rowIndex === 1 || rowIndex === dataHeight || colIndex === 1 || colIndex === dataWidth);
+    }
+    */
+
+    function countEdges(rowIndex, colIndex) {
+        // return (rowIndex === 1 || rowIndex === dataHeight || colIndex === 1 || colIndex === dataWidth);
+        let edges = 0; // corner cell has two edges, other border cells have one edge
+        if (rowIndex === 1 || rowIndex === dataHeight) edges++;
+        if (colIndex === 1 || colIndex === dataWidth) edges++;
+        return edges;
+    }
+
 
     function isUnsafeAtCorners(rowIndex, colIndex, board) {      
         // console.log("rowIndex, colIndex =", rowIndex, colIndex);
@@ -1149,7 +1306,7 @@
 
 
     let oppoShipsFlatList;
-    let biggestSize;
+    let bigSize;
 
     function initOppoShips() {
         let oppoShips = [];
@@ -1168,7 +1325,7 @@
             return b.size - a.size;
         });
 
-        biggestSize = oppoShips[0];
+        bigSize = oppoShips[0];
 
         oppoShips.forEach( ship => {
             for (let s = 0; s < ship.totalNumber; s++) {
@@ -1311,6 +1468,8 @@
         whoBegins = null;
 
         hitUserCells = [];
+        hitUserShipOrient = null;
+        hitChecked = { head: false, tail: false };
 
         isGameOn = false;
 
@@ -1349,7 +1508,7 @@
     $: {
         if (!oppoTurn) {
             // userBoard = userBoard;
-            oppoBoard = oppoBoard; // for reactivity!!!      
+            oppoBoard = oppoBoard; // for reactivity!!! *** IMPORTANT ***
             console.log("oppoTurn =", oppoTurn);
         }
     }
@@ -1372,7 +1531,7 @@
             oppoTurn = true;
             info = 'opponent_move';
             setTimeout( () => { 
-                oppoFire();
+                fireAtUserBoard();
             }, 2000);            
                         
         } else {
@@ -1799,12 +1958,8 @@
                 <WhoPlaysFirst on:whoBegins={handleWhoBegins} whoBegins="{whoBegins}" />
             </div>
         </div>
-
         <!-- <div>&nbsp;</div> -->
-    {/if}
-
-
-
+    {/if}    
 
     {#if isGameOn && curGame === gameId}
         <div class="opponent" transition:fade="{ {delay: 100, duration: 500} }">
@@ -1817,7 +1972,7 @@
                     <tr>
                         <!-- Must use a key in #each loop -->
                         {#each row as cell, colIndex (colIndex * dataHeight + colIndex)}
-                            <td on:click={ () => userFire(rowIndex, colIndex) }
+                            <td on:click={ () => fireAtOppoBoard(rowIndex, colIndex) }
                                 class="{getCellClass(rowIndex, colIndex, oppoBoard, OPPOBOARD)}"                         
                             >
                                 { @html rowIndex > 0 && colIndex > 0 ? num2char(cell) : cell }

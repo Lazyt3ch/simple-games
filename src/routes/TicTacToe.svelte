@@ -1,6 +1,4 @@
 <script>    
-    // import { onDestroy } from 'svelte';
-
     import { fade } from 'svelte/transition';
     
     import { languages, gameName, gameId, uiStrings as ui } from './ui/TicTacToe.js';
@@ -8,29 +6,22 @@
     // currentGame is a bugfix that disables transitions when routing
     import { globalLanguage, currentGame } from '../stores.js';
 
-    /*
-    let isAlive = true;
-
-    onDestroy(() => {
-        console.log('the component is being destroyed');
-        isAlive = false;
-    });
-    */
+    import WhoPlaysFirst from './ui/WhoPlaysFirst.svelte';
 
     let language;
     
-    console.log("TicTacToe:  $globalLanguage =", $globalLanguage);
+    // console.log("TicTacToe:  $globalLanguage =", $globalLanguage);
 
 	const unsubscribe = globalLanguage.subscribe(value => {
         language = value;        
-		console.log("TicTacToe:  language =", language);
+		// console.log("TicTacToe:  language =", language);
     });    
     
     // currentGame is a bugfix that disables transitions when routing
     let curGame;
 	const unsubscribe2 = currentGame.subscribe(value => {
         curGame = value;        
-		console.log("TicTacToe:  curGame, gameId =", curGame, " &", gameId);
+		// console.log("TicTacToe:  curGame, gameId =", curGame, " &", gameId);
 	});    
 
     let moveCount = 0;
@@ -39,7 +30,8 @@
 
     let oppoTurn = false;
 
-    let info = 'lets_play';
+    // let info = 'lets_play';
+    let info;
     let infoText;
 
     let lastUserCell = null;
@@ -62,7 +54,15 @@
         [0, 0, 0],
     ];
 
-    let whoPlaysFirst = null;  // "user" if user plays first, otherwise "opponent"
+    // let whoPlaysFirst = null;  // "user" if user plays first, otherwise "opponent"
+    let whoBegins = null;  // "user" if user plays first, otherwise "opponent"
+
+    function handleWhoBegins(event) {
+        whoBegins = event.detail;
+        // console.log("TicTacToe;  FUNCTION: handleWhoBegins;  event =", event);
+        // console.log("TicTacToe;  FUNCTION: handleWhoBegins;  whoBegins =", whoBegins);
+        // isUserReady = true;
+    }    
 
     let board = null;
 
@@ -71,13 +71,15 @@
     let streak = null;
 
     $: {
-        userNum = whoPlaysFirst === null ? 0 : (whoPlaysFirst === 'user' ? 1 : -1);
+        // userNum = whoPlaysFirst === null ? 0 : (whoPlaysFirst === 'user' ? 1 : -1);
+        userNum = whoBegins === null ? 0 : (whoBegins === 'user' ? 1 : -1);
         oppoNum = -userNum;
     }
 
     $: {
         if (moveCount === 9) {
-            whoPlaysFirst = null;
+            // whoPlaysFirst = null;
+            whoBegins = null;
         }        
     }
 
@@ -192,33 +194,45 @@
         return Math.floor(Math.random() * Math.floor(n));
     }
 
-    function restartGame() {        
-        board = JSON.parse(JSON.stringify(emptyBoard));
 
+    function clearBoard() {
+        board = JSON.parse(JSON.stringify(emptyBoard));
         moveCount = 0;
         streak = null; 
+        info = 'lets_play';       
+    }
 
-        if (whoPlaysFirst === "opponent") {
+    function restartGame() {        
+        clearBoard();        
+        whoBegins = null;
+    }  
+
+
+    function startGame() {       
+        clearBoard();
+
+        if (whoBegins === "opponent") {
             oppoTurn = true;
             info = "opponent_move";
             oppoMove();
-        } else if (whoPlaysFirst === "user") {
+        } else if (whoBegins === "user") {
             oppoTurn = false;
             info = 'user_move';
         } else {
             info = 'lets_play';
-        }
-    }  
+        }        
+    }
+
 
     function userMove(rowIndex, colIndex) {
-        if (whoPlaysFirst === null) { 
+        if (whoBegins === null) { 
             highlighted = true;
             setTimeout( () => highlighted = false, 1000 );            
             return;
         }
 
         if (oppoTurn) return;        
-        if (moveCount === 0 && whoPlaysFirst === "opponent") return;
+        if (moveCount === 0 && whoBegins === "opponent") return;
 
         if (board[rowIndex][colIndex] === 0) {
             board[rowIndex][colIndex] = userNum;  
@@ -228,14 +242,14 @@
             if (isWinnerFound()) {                
                 info = 'user_won';
                 oppoTurn = true; // To block X/O marking by user
-                whoPlaysFirst = null;
+                whoBegins = null;
                 return;
             }            
 
             if (moveCount === 9) { 
                 // Nobody won, and no more empty cells are left
                 info = 'score_draw';
-                whoPlaysFirst = null;
+                whoBegins = null;
             } else {
                 oppoTurn = true;
                 info = 'opponent_move';                
@@ -314,7 +328,7 @@
         console.log("c0, c1, c2 =", c0, c1, c2);
         if (Math.abs(c0 + c1 + c2) === 3) {
             info = (c0 === oppoNum ? "opponent_won" : "user_won");
-            whoPlaysFirst = null;
+            whoBegins = null;
             return true;
         }        
         
@@ -369,7 +383,7 @@
                 if (board[r][c] === 0) {
                     board[r][c] = oppoNum;
                     info = isWinnerFound() ? "opponent_won" : "score_draw";
-                    whoPlaysFirst = null;
+                    whoBegins = null;
                 }
             }
         }        
@@ -388,7 +402,7 @@
                             console.log("winner found!");
                             oppoTurn = true;
                             info = 'opponent_won';
-                            whoPlaysFirst = null;                                    
+                            whoBegins = null;                                    
                         } else {
                             info = 'user_move'; 
                             oppoTurn = false;                                                              
@@ -451,7 +465,7 @@
                 if (isWinnerFound()) {
                     oppoTurn = true;
                     info = 'opponent_won';
-                    whoPlaysFirst = null;
+                    whoBegins = null;
                     return;
                 }
 
@@ -497,7 +511,7 @@
                 // Look for opportunity to try and build a streak
                 if (isStreakAttemptOkay()) return;
             } else {
-                whoPlaysFirst = null;
+                whoBegins = null;
                 return;
             }
 
@@ -574,25 +588,23 @@
         color: gray;
     }        
 
-    fieldset {
-        margin-left: auto;
-        margin-right: auto;
-        max-width: 40%;
-    }
-
+    /*
     .highlighted {
         background: yellow;
         color: blue;
     }
+    */
 
     button:disabled {
         background-color: #cccccc;
         color: #666666;        
     }
 
+    /*
     .left-margin {
         margin-left: 5%;
     }
+    */
 
     .unselectable {
         -moz-user-select: -moz-none;
@@ -600,6 +612,14 @@
         -webkit-user-select: none;
         -o-user-select: none;
         user-select: none;
+    }    
+
+    .who-plays-first {
+        display: block;
+        margin-top: 2em;
+        width: 60%;
+        margin-left: auto;
+        margin-right: auto;
     }    
 </style>
 
@@ -624,11 +644,11 @@
 
 <!-- BUTTONS -->
 <div class="center margin-after">
-    <button class="cool-button" on:click={restartGame} disabled={whoPlaysFirst === null}>
+    <button class="cool-button" on:click={startGame} disabled={whoBegins === null}>
         { ui['start_game'][language] }
     </button>
 
-    <button class="cool-button" on:click={restartGame} disabled={whoPlaysFirst === null}>
+    <button class="cool-button" on:click={restartGame} disabled={whoBegins === null}>
         { ui['restart_game'][language] }
     </button>
 </div>
@@ -639,29 +659,10 @@
     { infoText } &nbsp;
 </h2>
 
-<!-- WHO PLAYS FIRST radio buttons etc -->
-<!-- The fade transition messes up with routing, so use currentGame as a bugfix!!! -->
-<!-- {#if whoPlaysFirst === null && isAlive} -->
-{#if whoPlaysFirst === null && curGame === gameId} 
-    <fieldset id='who-plays-first' transition:fade="{{delay: 100, duration: 500}}"
-        class="limited-width margin-after {highlighted? 'highlighted': ''}"
-        on:change={() => oppoTurn = true}    
-    >
-        <label class="unselectable"> { ui['who_plays_first'][language] } </label>
-        
-        <div class="div-inline">
-            <label for="user-begins" class="unselectable"> 
-                <input type='radio' bind:group={whoPlaysFirst} 
-                    id='user-begins' name="who-begins" value='user'>
-                { ui['user_begins'][language] } 
-            </label>
-
-            <label for="opponent-begins" class="left-margin unselectable">
-                <input type='radio' bind:group={whoPlaysFirst} 
-                    id='opponent-begins' name="who-begins" value='opponent'>
-                { ui['opponent_begins'][language] } 
-            </label>
-        </div>
-    </fieldset>
-{/if}
-
+<div class="who-plays-first limited-width">
+    {#if whoBegins === null && curGame === gameId} 
+        <!-- WHO PLAYS FIRST radio buttons etc -->
+        <!-- The fade transition messes up with routing, so use currentGame as a bugfix!!! -->
+        <WhoPlaysFirst on:whoBegins={handleWhoBegins} whoBegins="{whoBegins}" />
+    {/if}
+</div>
