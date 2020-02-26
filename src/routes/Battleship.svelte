@@ -12,6 +12,8 @@
 
     import WhoPlaysFirst from './ui/WhoPlaysFirst.svelte';
 
+    import { randomInt } from '../lib.js';
+
     // document.addEventListener('click', updateMousePosition);    
 
     // onDestroy(() => {
@@ -41,9 +43,11 @@
 
     // GAME LOGIC HEAD ==============================>
 
+    /*
     function randomInt(n) {
         return Math.floor(Math.random() * Math.floor(n));
     }
+    */
 
     let oppoTurn = false;
 
@@ -166,35 +170,56 @@
     }
 
 
-    function isSingleCell(rowIndex, colIndex, someBoard) {
-        let edges = 0;
-        let r, c;
-        let cells = [
-            {row: rowIndex - 1, col: colIndex},
-            {row: rowIndex + 1, col: colIndex},
-            {row: rowIndex, col: colIndex - 1},
-            {row: rowIndex, col: colIndex + 1},
-        ]
+    function isSunk(rowIndex, colIndex, someBoard, boardId) {
+        let curCell;
+        let hitCells = [{row: rowIndex, col: colIndex}];
+        let sidesClear = 0;
 
-        for (let i = 0; i < 4; i++) {
-            r = cells[i].row;
-            c = cells[i].col;
-            if (!isValidCell(r, c) || someBoard[r][c] === EMPTY || someBoard[r][c] === WATER) {
-                edges++;                    
-            }
-        }
+        let steps = [
+            { r: 0, c: -1 },    // left
+            { r: 1, c: 0 },     // bottom
+            { r: 0, c: 1 },     // right
+            { r: -1, c: 0 },    // top
+        ];
 
-        console.log("edges =", edges);
+        steps.forEach(step => {
+            for (let r = rowIndex + step.r, c = colIndex + step.c; ; r += step.r, c += step.c) {
+                console.log("r, c =", r, c);
+                if (isValidCell(r, c)) {
+                    curCell = someBoard[r][c];
+                    if (curCell === EMPTY || curCell === WATER) {
+                        sidesClear++;
+                        break; // This direction has been checked
+                    } else if (curCell === SHIP) {
+                        return false; // some cells of this ship have not been hit yet
+                    } else if (curCell === HIT) {
+                        hitCells.push({row: r, col: c});
+                    }
+                } else {
+                    sidesClear++;
+                    break; // This direction has been checked
+                }
+            }         
+        })
 
-        if (edges === 4) {
-            markAroundSunkShip([{row: rowIndex, col: colIndex}], someBoard);
-            return true;
-        } else {
-            return false;
-        }
+        console.log("hitCells =", hitCells);
+
+        // Marking ship as sunk
+        // someBoard[rowIndex][colIndex] = SUNK;
+
+        if (sidesClear < 4) return false;
+
+        hitCells.forEach(cell => {
+            someBoard[cell.row][cell.col] = SUNK;
+        });
+
+        markAroundSunkShip(hitCells, someBoard);
+        console.log("SHIP IS SUNK! rowIndex, colIndex =", rowIndex, colIndex);
+
+        return true;
     }
 
-
+    /*
     function isSunk(rowIndex, colIndex, someBoard, boardId) {
         // let hitCells = [];
         let curCell;
@@ -206,28 +231,32 @@
         // if (isCellAtEdge(rowIndex, colIndex)) countSides = 1;
         // let edges;
         // edges = countEdges(rowIndex, colIndex);
+        let sidesClear = 0;
+        // hitSizeLimit = bigSize - 1;
 
-        for (let i = -1; i <= 1; i += 2) {
-            // left, right
-            limit = (i < 0 ? 0 : totalHeight);
-            for (let r = rowIndex + i; r !== limit; r += i) {
-                curCell = someBoard[r][colIndex];
-                if (curCell === SHIP) {
-                    return false; // some cells of this ship have not been hit yet
-                } else if (curCell === HIT) {
-                    orient = HORIZONTAL;
-                    // hitCells.push([r, colIndex]);
-                    hitCells.push({row: r, col: colIndex});
-                } else if (curCell === EMPTY || curCell === WATER) {
-                    // edges++;
+        for (let i = -1; i <= 1; i += 2) { // either -1 or 1, for top or bottom
+            for (let r = rowIndex + i; ; r += i) {
+                if (isValidCell(r, colIndex)) {
+                    curCell = someBoard[r][colIndex];
+                    if (curCell === EMPTY || curCell === WATER) {
+                        sidesClear++;
+                        break; // This direction has been checked
+                    } else if (curCell === SHIP) {
+                        return false; // some cells of this ship have not been hit yet
+                    } else if (curCell === HIT) {
+                        orient = VERTICAL;
+                        hitCells.push({row: r, col: colIndex});
+                    }
+                } else {
+                    sidesClear++;
                     break; // This direction has been checked
                 }
             }            
         }
 
-        if (orient !== HORIZONTAL) {
-            for (let i = -1; i <= 1; i += 2) {
-                // top, bottom
+        // if (orient !== HORIZONTAL) {
+        if (orient !== VERTICAL) { // either horizontal ship or single-cell ship
+            for (let i = -1; i <= 1; i += 2) { // either -1 or 1, for left or right
                 limit = (i < 0 ? 0 : totalWidth);
                 for (let c = colIndex + i; c !== limit; c += i) {
                     curCell = someBoard[rowIndex][c];
@@ -239,6 +268,7 @@
                         hitCells.push({row: rowIndex, col: c});
                     } else if (curCell === EMPTY || curCell === WATER) {
                         // edges++;
+                        sides++;
                         break; // This direction has been checked
                     }
                 }            
@@ -259,6 +289,7 @@
 
         return true;
     }
+    */
 
     
     function markAroundSunkShip(hitCells, someBoard) {
@@ -520,13 +551,7 @@
         } else if (cell === SHIP) {      
             oppoBoard[rowIndex][colIndex] = HIT;    
             // hitCells.push([rowIndex, colIndex]);
-            if (isSingleCell(rowIndex, colIndex, oppoBoard)) {
-                oppoBoard[rowIndex][rowIndex] = SUNK;
-                info = 'oppo_ship_sunk';
-                oppoShipCount--;
-                markAroundSunkShip([{row: rowIndex, col: colIndex}], oppoBoard);
-                flashOnHit(rowIndex, colIndex, oppoBoard, OPPOBOARD);
-            } else if (isSunk(rowIndex, colIndex, oppoBoard, OPPOBOARD)) {
+            if (isSunk(rowIndex, colIndex, oppoBoard, OPPOBOARD)) {
                 info = 'oppo_ship_sunk';
                 oppoShipCount--;
                 flashOnHit(rowIndex, colIndex, oppoBoard, OPPOBOARD);
@@ -714,12 +739,7 @@
             userBoard[rowIndex][colIndex] = HIT; 
             // hitCells.push([rowIndex, colIndex]);                             
             // hitUserCells.push({ row: rowIndex, col: colIndex });
-            if (isSingleCell(rowIndex, colIndex, userBoard)) {
-                userBoard[rowIndex][rowIndex] = SUNK;
-                info = 'oppo_ship_sunk';
-                userShipCount--;
-                flashOnHit(rowIndex, colIndex, userBoard, USERBOARD);
-            } else if (isSunk(rowIndex, colIndex, userBoard, USERBOARD)) {
+            if (isSunk(rowIndex, colIndex, userBoard, USERBOARD)) {
                 info = 'user_ship_sunk';
                 userShipCount--;
                 hitUserCells = [];

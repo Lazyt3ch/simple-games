@@ -8,6 +8,8 @@
 
     import WhoPlaysFirst from './ui/WhoPlaysFirst.svelte';
 
+    import { randomInt } from '../lib.js';
+
     let language;
     
     // console.log("TicTacToe:  $globalLanguage =", $globalLanguage);
@@ -190,10 +192,11 @@
         return false;        
     }
 
+    /*
     function randomInt(n) {
         return Math.floor(Math.random() * Math.floor(n));
     }
-
+    */
 
     function clearBoard() {
         board = JSON.parse(JSON.stringify(emptyBoard));
