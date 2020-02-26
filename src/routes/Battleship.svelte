@@ -12,7 +12,9 @@
 
     import WhoPlaysFirst from './ui/WhoPlaysFirst.svelte';
 
-    import { randomInt } from '../lib.js';
+    // import { randomInt, pxToNum } from '../lib.js';
+    // import { randomInt } from '../lib.js';
+    import { randomInt, alphabet } from '../lib.js';
 
     // document.addEventListener('click', updateMousePosition);    
 
@@ -43,6 +45,23 @@
 
     // GAME LOGIC HEAD ==============================>
 
+    // Can be used in more than one function!!!
+    const corners = [
+        { r: -1, c: -1},
+        { r: -1, c: 1},
+        { r: 1, c: -1},
+        { r: 1, c: 1},
+    ]
+
+    // Can be used in more than one function!!!
+    const sideSteps = [
+        { r: 0, c: -1 },    // left
+        { r: 1, c: 0 },     // bottom
+        { r: 0, c: 1 },     // right
+        { r: -1, c: 0 },    // top
+    ];
+
+
     let oppoTurn = false;
 
     // let moveCount = 0;
@@ -56,6 +75,8 @@
     // let isUserReady = false;
     let isUserBoardReady = false;
     let isOppoBoardReady = false;
+
+    let globalToBePositioned;
 
     let flashing = null;
 
@@ -115,7 +136,7 @@
     const HORIZONTAL = 2;
     // const BAD_ORIENT = 0;
 
-    const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    // const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 
     function newEmptyBoard() {
         let board = [];
@@ -157,13 +178,6 @@
         return char;
     }
 
-    // Used in more than one function!!!
-    const sideSteps = [
-        { r: 0, c: -1 },    // left
-        { r: 1, c: 0 },     // bottom
-        { r: 0, c: 1 },     // right
-        { r: -1, c: 0 },    // top
-    ];
 
     function isSunk(rowIndex, colIndex, someBoard, boardId) {
         let curCell;
@@ -172,7 +186,7 @@
 
         sideSteps.forEach(step => {
             for (let r = rowIndex + step.r, c = colIndex + step.c; ; r += step.r, c += step.c) {
-                console.log("r, c =", r, c);
+                // console.log("r, c =", r, c);
                 if (isValidCell(r, c)) {
                     curCell = someBoard[r][c];
                     if (curCell === EMPTY || curCell === WATER) {
@@ -198,7 +212,7 @@
         });
 
         markAroundShip(hitCells, someBoard);
-        console.log("SHIP IS SUNK! rowIndex, colIndex =", rowIndex, colIndex);
+        // console.log("SHIP IS SUNK! rowIndex, colIndex =", rowIndex, colIndex);
         return true;
     }
 
@@ -221,6 +235,27 @@
                 }                
             }
         }
+    }
+
+
+    function markCornersAsWater(rowIndex, colIndex, someBoard, boardId) {
+        // console.log("FUNCTION: markCornersAsWater");
+        let r, c;
+
+        let corners = [
+            { r: -1, c: 1},     // top right corner
+            { r: 1, c: 1},      // bottom right corner
+            { r: 1, c: -1},     // bottom left corner
+            { r: -1, c: -1},    // top left corner
+        ]
+
+        corners.forEach(corner => {
+            r = rowIndex + corner.r;
+            c = colIndex + corner.c;
+            if (isValidCell(r, c) && someBoard[r][c] === EMPTY) {
+                someBoard[r][c] = WATER;
+            }
+        })        
     }
 
 
@@ -289,8 +324,8 @@
                 flashOnHit(rowIndex, colIndex, oppoBoard, OPPOBOARD);
             } else {                
                 info = 'oppo_ship_hit';                
-                // markCornersAsWater(rowIndex, colIndex, oppoBoard, OPPOBOARD);      
-                markAroundShip([{row: rowIndex, col: colIndex}], oppoBoard);
+                markCornersAsWater(rowIndex, colIndex, oppoBoard, OPPOBOARD);      
+                // markAroundShip([{row: rowIndex, col: colIndex}], oppoBoard);
                 // markWaterAroundHitCells();         
                 // markAroundHit(rowIndex, colIndex, oppoBoard);
                 flashOnHit(rowIndex, colIndex, oppoBoard, OPPOBOARD);             
@@ -487,8 +522,9 @@
                     cells = getHeadAndTail(hitUserCells);
                     hitUserShipOrient = getOrient(cells);
                 } else {
-                    markAroundShip([{row: rowIndex, col: colIndex}], userBoard);
+                    // markAroundShip([{row: rowIndex, col: colIndex}], userBoard);
                 }
+                markCornersAsWater(rowIndex, colIndex, userBoard, USERBOARD);
                 flashOnHit(rowIndex, colIndex, userBoard, USERBOARD);
                 info = 'user_ship_hit';
             }
@@ -779,8 +815,7 @@
                 info = "but_who_begins"
             } else {
                 info = 'can_start_now';
-            }
-            
+            }            
             // console.log("info, infoText = ", info, infoText);
             // console.log("isUserBoardReady, whoBegins =", isUserBoardReady, whoBegins);
             // console.log("curGame, gameId =", curGame, gameId);
@@ -795,14 +830,6 @@
     function isValidCell(rowIndex, colIndex) {
         return (rowIndex > 0 && rowIndex < totalHeight && colIndex > 0 && colIndex < totalWidth);
     }
-
-
-    const corners = [
-        { r: -1, c: -1},
-        { r: -1, c: 1},
-        { r: 1, c: -1},
-        { r: 1, c: 1},
-    ]
 
 
     function isUnsafeAtCorners(rowIndex, colIndex, someBoard) {      
@@ -839,13 +866,6 @@
         }
 
         return false;
-    }
-    
-
-    function pxToNum(pixels) {
-        if (pixels.endsWith('px')) {
-            return parseInt(pixels.slice(0, pixels.length - 2));
-        }
     }
 
 
@@ -911,7 +931,7 @@
     }    
 
 
-    let globalToBePositioned = 0;
+    // let globalToBePositioned = 0;
 
     function initUserShips() {
         userShips = [];
@@ -925,14 +945,12 @@
 
             globalToBePositioned += ship.totalNumber;
             // console.log("globalToBePositioned =", globalToBePositioned);
-
             userShips.push(userShip);
         })
 
         userShips.sort(function(a, b) {
             return b.size - a.size;
         });
-
         // console.log("userShips =", userShips);
     }
 
@@ -973,8 +991,8 @@
     
 
     let oppoBoardFlatList = [];
-    // this array begin with [1, 1] and ends with [10, 10] 
-    // Note that board size is 11 x 11 (to include left header and top header)
+    // This array begins with [1, 1] and ends with [10, 10] for a 10 x 10 board.
+    // Note that board size is 11 x 11 (to include left header and top header).
     //
     // flatPos = (rowIndex - 1) * dataHeight + (colIndex - 1)
 
@@ -1002,7 +1020,7 @@
         let oppoShipsToPosition = oppoShipsFlatList.length;
         let isShipNotPositioned;
 
-        console.log("oppoShipsFlatList =", oppoShipsFlatList);
+        // console.log("oppoShipsFlatList =", oppoShipsFlatList);
 
         for (let s = 0; s < oppoShipsToPosition; s++) {
             isShipNotPositioned = true;
@@ -1077,8 +1095,6 @@
 
 
     function restartGame() {
-        // Need to debug: If run more than once, causes web browser to hang up  :(
-
         oppoShipsFlatList = [];
 
         clearUserBoard();
@@ -1102,6 +1118,8 @@
         hitUserCells = [];
         hitUserShipOrient = null;
         hitChecked = { head: false, tail: false };
+
+        globalToBePositioned = 0;
 
         isGameOn = false;
 
@@ -1141,7 +1159,7 @@
         if (!oppoTurn) {
             // userBoard = userBoard;
             oppoBoard = oppoBoard; // for reactivity!!! *** IMPORTANT ***
-            console.log("oppoTurn =", oppoTurn);
+            // console.log("oppoTurn =", oppoTurn);
         }
     }
 
@@ -1157,7 +1175,7 @@
         initOppoShips();
 
         info = 'game_on';
-        console.log("oppoBoard =", oppoBoard);
+        // console.log("oppoBoard =", oppoBoard);
 
         if (whoBegins === "opponent") {
             oppoTurn = true;
@@ -1173,13 +1191,6 @@
             }, 1000);
         }
     }    
-
-    // let oppoTurn = false;
-
-    // // let moveCount = 0;
-    // let userMoveCount, oppoMoveCount;
-
-    // let highlighted = false;
 
     // initialization
     restartGame();
@@ -1640,9 +1651,6 @@
         { @html infoText } &nbsp;
     </div>      
 </div>      
-
-
-
 
 <p>&nbsp</p> <!-- dummy empty paragraph -->
 
