@@ -192,11 +192,6 @@
         return false;        
     }
 
-    /*
-    function randomInt(n) {
-        return Math.floor(Math.random() * Math.floor(n));
-    }
-    */
 
     function clearBoard() {
         board = JSON.parse(JSON.stringify(emptyBoard));

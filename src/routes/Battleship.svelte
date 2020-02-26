@@ -43,12 +43,6 @@
 
     // GAME LOGIC HEAD ==============================>
 
-    /*
-    function randomInt(n) {
-        return Math.floor(Math.random() * Math.floor(n));
-    }
-    */
-
     let oppoTurn = false;
 
     // let moveCount = 0;
@@ -74,8 +68,8 @@
 
     function handleWhoBegins(event) {
         whoBegins = event.detail;
-        console.log("Battleship;  FUNCTION: handleWhoBegins;  event =", event);
-        console.log("Battleship;  FUNCTION: handleWhoBegins;  whoBegins =", whoBegins);
+        // console.log("Battleship;  FUNCTION: handleWhoBegins;  event =", event);
+        // console.log("Battleship;  FUNCTION: handleWhoBegins;  whoBegins =", whoBegins);
         // isUserReady = true;
         recountUserShips();
     }
@@ -89,20 +83,14 @@
 
     $: infoText = ui[info][language];
     
-    // Both User's and Opponent's board size is 10 x 10
+    // Both User's and Opponent's board size is 10 x 10 (other sizes are possible).
     // But we need to add one column for row letters and one row for column numbers, 
-    // so the resulting size is 11 x 11    
+    // so the resulting size is 11 x 11.
     const dataHeight = 10;
     const dataWidth = 10;
     let totalHeight = dataHeight + 1;
     let totalWidth = dataWidth + 1;
 
-    // 9 = unused cell (the upper left corner cell)
-    // 0 = empty cell    
-    // 1 = undiscovered cell containing a ship
-    // 2 = discovered cell containing a damaged ship
-    // 3 = discovered cell containing a sunken ship
-    // 4 = empty cell that cannot be used because it touches a ship
     // *********** cells *************
     const EMPTY = 0;
     const SHIP = 1;    
@@ -125,7 +113,7 @@
 
     const VERTICAL = 1;
     const HORIZONTAL = 2;
-    const BAD_ORIENT = 0;
+    // const BAD_ORIENT = 0;
 
     const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 
@@ -169,20 +157,20 @@
         return char;
     }
 
+    // Used in more than one function!!!
+    const sideSteps = [
+        { r: 0, c: -1 },    // left
+        { r: 1, c: 0 },     // bottom
+        { r: 0, c: 1 },     // right
+        { r: -1, c: 0 },    // top
+    ];
 
     function isSunk(rowIndex, colIndex, someBoard, boardId) {
         let curCell;
         let hitCells = [{row: rowIndex, col: colIndex}];
         let sidesClear = 0;
 
-        let steps = [
-            { r: 0, c: -1 },    // left
-            { r: 1, c: 0 },     // bottom
-            { r: 0, c: 1 },     // right
-            { r: -1, c: 0 },    // top
-        ];
-
-        steps.forEach(step => {
+        sideSteps.forEach(step => {
             for (let r = rowIndex + step.r, c = colIndex + step.c; ; r += step.r, c += step.c) {
                 console.log("r, c =", r, c);
                 if (isValidCell(r, c)) {
@@ -202,285 +190,35 @@
             }         
         })
 
-        console.log("hitCells =", hitCells);
-
-        // Marking ship as sunk
-        // someBoard[rowIndex][colIndex] = SUNK;
-
+        // console.log("hitCells =", hitCells);
         if (sidesClear < 4) return false;
 
         hitCells.forEach(cell => {
             someBoard[cell.row][cell.col] = SUNK;
         });
 
-        markAroundSunkShip(hitCells, someBoard);
+        markAroundShip(hitCells, someBoard);
         console.log("SHIP IS SUNK! rowIndex, colIndex =", rowIndex, colIndex);
-
         return true;
     }
-
-    /*
-    function isSunk(rowIndex, colIndex, someBoard, boardId) {
-        // let hitCells = [];
-        let curCell;
-        let orient = null;
-        let limit;
-        // let hitCells = [[rowIndex, colIndex]];
-        let hitCells = [{row: rowIndex, col: colIndex}];
-        // let countSides = 0;
-        // if (isCellAtEdge(rowIndex, colIndex)) countSides = 1;
-        // let edges;
-        // edges = countEdges(rowIndex, colIndex);
-        let sidesClear = 0;
-        // hitSizeLimit = bigSize - 1;
-
-        for (let i = -1; i <= 1; i += 2) { // either -1 or 1, for top or bottom
-            for (let r = rowIndex + i; ; r += i) {
-                if (isValidCell(r, colIndex)) {
-                    curCell = someBoard[r][colIndex];
-                    if (curCell === EMPTY || curCell === WATER) {
-                        sidesClear++;
-                        break; // This direction has been checked
-                    } else if (curCell === SHIP) {
-                        return false; // some cells of this ship have not been hit yet
-                    } else if (curCell === HIT) {
-                        orient = VERTICAL;
-                        hitCells.push({row: r, col: colIndex});
-                    }
-                } else {
-                    sidesClear++;
-                    break; // This direction has been checked
-                }
-            }            
-        }
-
-        // if (orient !== HORIZONTAL) {
-        if (orient !== VERTICAL) { // either horizontal ship or single-cell ship
-            for (let i = -1; i <= 1; i += 2) { // either -1 or 1, for left or right
-                limit = (i < 0 ? 0 : totalWidth);
-                for (let c = colIndex + i; c !== limit; c += i) {
-                    curCell = someBoard[rowIndex][c];
-                    if (curCell === SHIP) {
-                        return false; // some cells of this ship have not been hit yet
-                    } else if (curCell === HIT) {
-                        // orient = VERTICAL;
-                        // hitCells.push([rowIndex, c]);
-                        hitCells.push({row: rowIndex, col: c});
-                    } else if (curCell === EMPTY || curCell === WATER) {
-                        // edges++;
-                        sides++;
-                        break; // This direction has been checked
-                    }
-                }            
-            }
-        }
-
-        // console.log("edges =", edges);
-        console.log("hitCells =", hitCells);
-
-        // Marking ship as sunk
-        // someBoard[rowIndex][colIndex] = SUNK;
-        hitCells.forEach(coord => {
-            someBoard[coord.row][coord.col] = SUNK;
-        });
-
-        markAroundSunkShip(hitCells, someBoard);
-        console.log("SHIP IS SUNK! rowIndex, colIndex =", rowIndex, colIndex);
-
-        return true;
-    }
-    */
 
     
-    function markAroundSunkShip(hitCells, someBoard) {
+    function markAroundShip(hitCells, someBoard) {
+        // console.log("FUNCTION:  markAroundShip");
         let headAndTail = getHeadAndTail(hitCells);
-        console.log("headAndTail =", headAndTail);
+        // console.log("headAndTail =", headAndTail);
 
-        let rowStart = Math.max(1, headAndTail[0].row - 1);
-        let rowEnd = Math.min(dataHeight, headAndTail[1].row + 1);
-        let colStart = Math.max(1, headAndTail[0].col - 1);
-        let colEnd = Math.min(dataWidth, headAndTail[1].col + 1);
+        let startRow = Math.max(1, headAndTail[0].row - 1);
+        let endRow = Math.min(dataHeight, headAndTail[1].row + 1);
+        let startCol = Math.max(1, headAndTail[0].col - 1);
+        let endCol = Math.min(dataWidth, headAndTail[1].col + 1);
 
-        for (let r = rowStart; r <= rowEnd; r++) {
-            for (let c = colStart; c <= colEnd; c++) {
-                console.log("r, c =", r, c);
+        for (let r = startRow; r <= endRow; r++) {
+            for (let c = startCol; c <= endCol; c++) {
+                // console.log("r, c =", r, c);
                 if (isValidCell(r, c) && someBoard[r][c] === EMPTY) {
                     someBoard[r][c] = WATER;
                 }                
-            }
-        }
-    }
-    /*
-    function markAroundSunkShip(hitCells, someBoard) {
-        let rowIndex, colIndex;
-
-        hitCells.forEach((rowIndex, colIndex) => {
-            for (let r = rowIndex - 1; r <= rowIndex + 1; r++) {
-                for (let c = colIndex - 1; c <= colIndex + 1; c++) {
-                    if (isValidCell(r, c) && someBoard[r][c] === EMPTY) {
-                        someBoard[r][c] = WATER;
-                    }
-                }
-            }
-        });        
-    }
-    */
-
-
-    function markCorners(rowIndex, colIndex, someBoard, boardId) {
-        console.log("FUNCTION: markCorners");
-
-        // top right corner
-        if (isValidCell(rowIndex - 1, colIndex + 1)) {
-            someBoard[rowIndex - 1][colIndex + 1] = WATER;
-        }
-
-        // bottom right corner
-        if (isValidCell(rowIndex + 1, colIndex + 1)) {
-            someBoard[rowIndex + 1][colIndex + 1] = WATER;
-        }
-
-        // bottom left corner
-        if (isValidCell(rowIndex + 1, colIndex - 1)) {
-            someBoard[rowIndex + 1][colIndex - 1] = WATER;
-        }
-
-        // top left corner
-        if (isValidCell(rowIndex - 1, colIndex - 1)) {
-            someBoard[rowIndex - 1][colIndex - 1] = WATER;
-        }
-    }
-
-    function markCellsAsWater(rowIndex, colIndex, directions, someBoard) {
-        let r;
-        let c;
-
-        directions.forEach(direction => {
-            r = rowIndex;
-            c = colIndex;
-
-            if (direction === LEFT) {
-                c--;
-            } else if (direction === RIGHT) {
-                c++;
-            } else if (direction === TOP) {
-                r--;
-            } else if (direction === BOTTOM) {
-                r++;
-            }
-
-            if (isValidCell(r, c)) {
-                someBoard[r][c] = WATER;
-            }
-        })
-    }
-
-
-    function markAroundHit(rowIndex, colIndex, someBoard) {
-        // bigSize effectively constricts the search area size.
-        // Maybe optimize later (though that is probably unnecessary).
-
-        let hitSize = 1;
-        let orient = null;
-        let limit;
-
-        // TOP 
-        for (let r = Math.max(1, rowIndex - 1); r >= 1; r--) {
-            if (someBoard[r][colIndex] === HIT) {
-                orient = VERTICAL;
-                markCellsAsWater(r, colIndex, [LEFT, RIGHT], someBoard);
-            } else {
-                break;
-            }
-        }
-
-        // BOTTOM 
-        for (let r = Math.min(dataHeight, rowIndex + 1); r <= dataHeight; r++) {
-            if (someBoard[r][colIndex] === HIT) {
-                orient = VERTICAL;
-                markCellsAsWater(r, colIndex, [LEFT, RIGHT], someBoard);
-            } else {
-                break;
-            }
-        }        
-
-        if (orient === VERTICAL) {
-            markCellsAsWater(rowIndex, colIndex, [LEFT, RIGHT], someBoard);
-            return; // No need to check if the ship is horizontal
-        }
-
-        // LEFT 
-        for (let c = Math.max(1, colIndex - 1); c >= 1; c--) {
-            if (someBoard[rowIndex][c] === HIT) {
-                orient = HORIZONTAL;
-                markCellsAsWater(rowIndex, c, [TOP, BOTTOM], someBoard);
-            }
-        }
-
-        // RIGHT 
-        for (let c = Math.min(dataWidth, colIndex + 1); c <= dataWidth; c++) {
-            if (someBoard[rowIndex][c] === HIT) {
-                orient = HORIZONTAL;
-                markCellsAsWater(rowIndex, c, [TOP, BOTTOM], someBoard);
-            }
-        }        
-
-        if (orient === HORIZONTAL) {
-            markCellsAsWater(rowIndex, colIndex, [TOP, BOTTOM], someBoard);
-        }
-    }
-
-
-    function markWaterAroundHitCells() {
-        // Marks hit cells (but not sunk ships) on oppoBoard 
-        // to prevent User from firing to no avail.
-
-        let hitSize;
-        
-        // let hitPartsHorizontal = [];
-        // let hitPartsVertical = [];
-
-        // Marking water around consequtive hit cells in horizontal ships
-        for (let r = 1; r < totalHeight; r++) {
-            hitSize = 1;
-            for (let c = 2; c < totalWidth; c++) {
-                if (oppoBoard[r][c] === HIT && oppoBoard[r][c - 1] === HIT) {
-                    hitSize++;
-                } else if (hitSize > 1 && (c === dataWidth || oppoBoard[r][c] !== HIT)) {
-                    // for (let c2 = Math.max(1, c - 1); c2 < c; c++) {
-                    for (let c2 = Math.max(1, c - hitSize - 1); c2 <= c; c2++) {
-                        if (r > 1) {
-                            oppoBoard[r - 1][c2] = WATER;
-                        }
-
-                        if (r < dataHeight) {
-                            oppoBoard[r + 1][c2] = WATER;
-                        }
-                    }
-                    hitSize = 1;
-                }
-            }
-        }
-
-        // Marking water around consequtive hit cells in vertical ships
-        for (let c = 1; c < totalWidth; c++) {
-            hitSize = 1;
-            for (let r = 2; r < totalHeight; r++) {
-                if (oppoBoard[r][c] === HIT && oppoBoard[r - 1][c] === HIT) {
-                    hitSize++;
-                } else if (hitSize > 1 && (r === dataHeight || oppoBoard[r][c] !== HIT)) {
-                    // for (let c2 = Math.max(1, c - 1); c2 < c; c++) {
-                    for (let r2 = Math.max(1, r - hitSize - 1); r2 <= r; r2++) {
-                        if (c > 1) {
-                            oppoBoard[r2][c - 1] = WATER;
-                        }
-
-                        if (c < dataWidth) {
-                            oppoBoard[r2][c + 1] = WATER;
-                        }
-                    }
-                    hitSize = 1;
-                }
             }
         }
     }
@@ -496,10 +234,8 @@
 
 
     function flashOnHit(rowIndex, colIndex, someBoard, boardId) {        
-        // Adds flashing effect, which is applied to the hit cell
-
-        console.log("FUNCTION: flashOnHit");
-
+        // Adds flashing effect, which is applied to the hit cell        
+        // console.log("FUNCTION: flashOnHit");
         let flashingDelay = 100;
 
         flashing = {row: rowIndex, col: colIndex, boardId: boardId, class: 'hit-cell-1'};
@@ -524,11 +260,7 @@
 
 
     function fireAtOppoBoard(rowIndex, colIndex) {
-        // Need to debug: 
-        // Single-cell ships located at top, bottom, left, or right board side
-        // are marked as HIT, not as SUNK, when hit (and sunk). 
-
-        // user fires at an opponent board cell
+        // User fires at an opponent board cell
         // console.log("FUNCTION: fire;  isGameOn =", isGameOn);
 
         if (!isGameOn) return;
@@ -557,9 +289,10 @@
                 flashOnHit(rowIndex, colIndex, oppoBoard, OPPOBOARD);
             } else {                
                 info = 'oppo_ship_hit';                
-                markCorners(rowIndex, colIndex, oppoBoard, OPPOBOARD);      
+                // markCornersAsWater(rowIndex, colIndex, oppoBoard, OPPOBOARD);      
+                markAroundShip([{row: rowIndex, col: colIndex}], oppoBoard);
                 // markWaterAroundHitCells();         
-                markAroundHit(rowIndex, colIndex, oppoBoard);
+                // markAroundHit(rowIndex, colIndex, oppoBoard);
                 flashOnHit(rowIndex, colIndex, oppoBoard, OPPOBOARD);             
             }
         }
@@ -608,12 +341,13 @@
             orient = HORIZONTAL;
         } else if (cells[0].col === cells[1].col) {
             orient = VERTICAL;
-        } else {
-            orient = BAD_ORIENT;
+        // } else {
+        //     orient = BAD_ORIENT;
         }
         
         return orient;
     }
+
 
     function isCellInvalidOrWater(rowIndex, colIndex, someBoard) {
         if (!isValidCell(rowIndex, colIndex)) return true;
@@ -633,8 +367,8 @@
         let dirList = [TOP, RIGHT, BOTTOM, LEFT];
 
         if (hitUserCells.length > 0) {
-            // Try and finish off a damaged user ship
-            console.log("hitUserCells =", hitUserCells); 
+            // Try and finish off a hit user ship
+            // console.log("hitUserCells =", hitUserCells); 
 
             // directions = []
 
@@ -692,7 +426,7 @@
                         hitChecked.tail = true;                            
                     }
                     dirList = [dirList[i]];  // check 1 cell only                        
-                    console.log("dirList =", dirList);
+                    // console.log("dirList =", dirList);
                     // orient = getOrient(cells);                    
                 }
 
@@ -745,17 +479,15 @@
                 hitUserCells = [];
                 hitUserShipOrient = null;
                 hitChecked = { head: false, tail: false };
-                // markAroundSunkShip(hitUserCells, oppoBoard);
+                // markAroundShip(hitUserCells, oppoBoard);
                 flashOnHit(rowIndex, colIndex, userBoard, USERBOARD);
             } else {                
                 hitUserCells.push({ row: rowIndex, col: colIndex });
                 if (hitUserCells.length > 1) {
-                    // markCellsAroundAsWater(hitUserCells, userBoard);
                     cells = getHeadAndTail(hitUserCells);
                     hitUserShipOrient = getOrient(cells);
-                    markCellsNearbyAsWater(cells, userBoard, hitUserShipOrient);
                 } else {
-                    markCorners(rowIndex, colIndex, userBoard, USERBOARD);
+                    markAroundShip([{row: rowIndex, col: colIndex}], userBoard);
                 }
                 flashOnHit(rowIndex, colIndex, userBoard, USERBOARD);
                 info = 'user_ship_hit';
@@ -778,88 +510,6 @@
             info = 'user_move';
             oppoTurn = false;
         }, 1000);          
-    }
-
-
-    function markCellsNearbyAsWater(headAndTail, someBoard, orient) {
-        let partSize;
-        let startRow, startCol, endRow, endCol;
-
-        if (orient === HORIZONTAL) {
-            // partSize = headAndTail[1].col - headAndTail[0].col + 1;
-
-            startCol = Math.max(1, headAndTail[0].col - 1);
-            endCol = Math.min(dataWidth, headAndTail[1].col + 1);
-
-            startRow = headAndTail[0].row;
-            // endRow = startRow;
-
-            for (let c = startCol; c <= endCol; c++) {
-                if (isValidCell(startRow - 1, c)) {
-                    someBoard[startRow - 1][c] = WATER;
-                }
-
-                if (isValidCell(startRow + 1, c)) {
-                    someBoard[startRow + 1][c] = WATER;
-                }                
-            }            
-
-        } else { // VERTICAL
-            // partSize = headAndTail[1].row - headAndTail[0].row + 1;
-
-            startRow = Math.max(1, headAndTail[0].row - 1);
-            endRow = Math.min(dataHeight, headAndTail[1].row + 1);
-
-            startCol = headAndTail[0].col;
-            // endCol = startCol;
-
-            for (let r = startRow; r <= endRow; r++) {
-                if (isValidCell(r, startCol - 1)) {
-                    someBoard[r][startCol - 1] = WATER;
-                }
-
-                if (isValidCell(r, startCol + 1)) {
-                    someBoard[r][startCol + 1] = WATER;
-                }               
-            }                   
-        }
-    }
-
-
-    function markCellsAroundAsWater(cells, someBoard) {
-        let orient;
-        let r, c;
-
-        if (cells[cells.length - 1].row === cells[cells.length - 2].row) {
-            orient = HORIZONTAL;
-        } else if (cells[cells.length - 1].col === cells[cells.length - 2].col) {
-            orient = VERTICAL;
-        } else {
-            return; // the last two hit cells belong to different ships
-        }
-
-
-        for (let i = cells.length - 1; i >= cells.length - 2; i--) {
-            r = cells[i].row;
-            c = cells[i].col;
-            if (orient === HORIZONTAL) { 
-                // Mark valid empty cells above and below (if any) as water
-                if (isValidCell(r - 1, c) && someBoard[r - 1][c] === EMPTY) {
-                    someBoard[r - 1][c] = WATER;
-                }
-                if (isValidCell(r + 1, c) && someBoard[r + 1][c] === EMPTY) {
-                    someBoard[r + 1][c] = WATER;
-                }       
-            } else {
-                // Mark valid empty cells on the left and on the right (if any) as water
-                if (isValidCell(r, c - 1) && someBoard[r][c - 1] === EMPTY) {
-                    someBoard[r][c - 1] = WATER;
-                }
-                if (isValidCell(r, c + 1) && someBoard[r][c + 1] === EMPTY) {
-                    someBoard[r][c + 1] = WATER;
-                }       
-            }
-        }       
     }
 
 
@@ -924,7 +574,7 @@
 
     $: {
         if (selectedShipClass) {
-            console.log("selectedShipClass =", selectedShipClass);
+            // console.log("selectedShipClass =", selectedShipClass);
         }
     }
 
@@ -1020,50 +670,29 @@
 
     let userShips = [];
 
+
     function isValidSize(rowIndex, colIndex) {
+        // Used for userBoard only
         let shipSize = 1;
 
-        // left
-        for (let c = Math.max(colIndex - 1, 1); c > 0; c--) {
-            if (c !== colIndex && userBoard[rowIndex][c] === 1) {
-                shipSize++;
-            } else {
-                break;
+        sideSteps.forEach(step => {
+            for (let r = rowIndex + step.r, c = colIndex + step.c; ; r += step.r, c += step.c) {
+                if (isValidCell(r, c)) {
+                    if (userBoard[r][c] === SHIP) {
+                        shipSize++;
+                    } else {
+                        break;
+                    }
+                } else {
+                    break;
+                }
             }
-        }
-
-        // right
-        for (let c = Math.min(colIndex + 1, dataWidth); c < totalWidth; c++) {
-            if (c !== colIndex && userBoard[rowIndex][c] === 1) {
-                shipSize++;
-            } else {
-                break;
-            }
-        }        
-
-        // top
-        for (let r = Math.max(rowIndex - 1, 1); r > 0; r--) {
-            if (r !== rowIndex && userBoard[r][colIndex] === 1) {
-                shipSize++;
-            } else {
-                break;
-            }
-        }
-
-        // bottom
-        for (let r = Math.min(rowIndex + 1, dataHeight); r < totalHeight; r++) {
-            if (r !== rowIndex && userBoard[r][colIndex] === 1) {
-                shipSize++;
-            } else {
-                break;
-            }
-        }              
+        })
 
         // console.log("shipSize =", shipSize);
         return (validSizes.indexOf(shipSize) > -1);
     }    
 
-    // isUserReady = false;
 
     function recountUserShips() {
         // To be called each time the user marks/unmarks a cell on the user board
@@ -1167,71 +796,51 @@
         return (rowIndex > 0 && rowIndex < totalHeight && colIndex > 0 && colIndex < totalWidth);
     }
 
-    /*
-    function isCellAtEdge(rowIndex, colIndex) {
-        return (rowIndex === 1 || rowIndex === dataHeight || colIndex === 1 || colIndex === dataWidth);
-    }
-    */
 
-    function countEdges(rowIndex, colIndex) {
-        // return (rowIndex === 1 || rowIndex === dataHeight || colIndex === 1 || colIndex === dataWidth);
-        let edges = 0; // corner cell has two edges, other border cells have one edge
-        if (rowIndex === 1 || rowIndex === dataHeight) edges++;
-        if (colIndex === 1 || colIndex === dataWidth) edges++;
-        return edges;
-    }
+    const corners = [
+        { r: -1, c: -1},
+        { r: -1, c: 1},
+        { r: 1, c: -1},
+        { r: 1, c: 1},
+    ]
 
 
-    function isUnsafeAtCorners(rowIndex, colIndex, board) {      
+    function isUnsafeAtCorners(rowIndex, colIndex, someBoard) {      
         // console.log("rowIndex, colIndex =", rowIndex, colIndex);
-        
-        // top left corner  
-        if (isValidCell(rowIndex - 1, colIndex - 1) && board[rowIndex - 1][colIndex - 1] !== EMPTY) {
-            return true;
+        let r, c;
+
+        // Remember: it's not so easy to break a *forEach* loop, so use a *for* loop!!!
+        for (let i = 0; i < 4; i++) {
+            r = rowIndex + corners[i].r;
+            c = colIndex + corners[i].c;
+            // console.log("FUNCTION: isUnsafeAtCorners;  r, c =", r, c);
+            if (isValidCell(r, c) && someBoard[r][c] === SHIP) {
+                // console.log("someBoard[r][c] =", someBoard[r][c]);
+                return true;
+            }
         }
-
-        // top right corner
-        if (isValidCell(rowIndex - 1, colIndex + 1) && board[rowIndex - 1][colIndex + 1] !== EMPTY) {
-            return true;
-        }
-
-        // bottom right corner  
-        if (isValidCell(rowIndex + 1, colIndex + 1) && board[rowIndex + 1][colIndex + 1] !== EMPTY) {
-            return true;
-        }      
-
-        // bottom left corner  
-        if (isValidCell(rowIndex + 1, colIndex - 1) && board[rowIndex + 1][colIndex - 1] !== EMPTY) {
-            return true;
-        }        
 
         return false;
     }
     
 
-    function isUnsafeAtSides(rowIndex, colIndex, board) {              
-        // top  
-        if (isValidCell(rowIndex - 1, colIndex) && board[rowIndex - 1][colIndex] !== EMPTY) {
-            return true;
+    function isUnsafeAtSides(rowIndex, colIndex, someBoard) {    
+        let r, c;
+
+        // Remember: it's not so easy to break a *forEach* loop, so use a *for* loop!!!
+        for (let i = 0; i < 4; i++) {
+            r = rowIndex + sideSteps[i].r;
+            c = colIndex + sideSteps[i].c;
+            // console.log("FUNCTION: isUnsafeAtCorners;  r, c =", r, c);
+            if (isValidCell(r, c) && someBoard[r][c] === SHIP) {
+                // console.log("someBoard[r][c] =", someBoard[r][c]);
+                return true;
+            }
         }
-
-        // right
-        if (isValidCell(rowIndex, colIndex + 1) && board[rowIndex][colIndex + 1] !== EMPTY) {
-            return true;
-        }
-
-        // bottom  
-        if (isValidCell(rowIndex + 1, colIndex) && board[rowIndex + 1][colIndex] !== EMPTY) {
-            return true;
-        }        
-
-        // left  
-        if (isValidCell(rowIndex, colIndex - 1) && board[rowIndex][colIndex - 1] !== EMPTY) {
-            return true;
-        }      
 
         return false;
     }
+    
 
     function pxToNum(pixels) {
         if (pixels.endsWith('px')) {
@@ -1270,6 +879,7 @@
         }, 2000);
     }
 
+
     function placeShip(rowIndex, colIndex) {
         if (isGameOn) return;
 
@@ -1277,20 +887,22 @@
 
         updateMousePosition();
 
-        if (userBoard[rowIndex][colIndex] === 0) {  // empty cell
+        if (userBoard[rowIndex][colIndex] === EMPTY) {  
             if (isUnsafeAtCorners(rowIndex, colIndex, userBoard)) {
+                // updateMousePosition();
                 showPopup(ui['cannot_position_here'][language], rowIndex, colIndex);
                 return;
             }
 
             if (!isValidSize(rowIndex, colIndex)) {
+                // updateMousePosition();
                 showPopup(ui['invalid_ship_size'][language], rowIndex, colIndex);
                 return;
             }
 
-            userBoard[rowIndex][colIndex] = 1; // ship-containing cell            
-        } else if (userBoard[rowIndex][colIndex] === 1) { // ship-containing cell
-            userBoard[rowIndex][colIndex] = 0;  // empty cell
+            userBoard[rowIndex][colIndex] = SHIP;          
+        } else if (userBoard[rowIndex][colIndex] === SHIP) { // ship-containing cell
+            userBoard[rowIndex][colIndex] = EMPTY;  
         }
 
         userBoard = userBoard;
