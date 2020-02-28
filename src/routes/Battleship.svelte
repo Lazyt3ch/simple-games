@@ -92,7 +92,7 @@
         // console.log("Battleship;  FUNCTION: handleWhoBegins;  event =", event);
         // console.log("Battleship;  FUNCTION: handleWhoBegins;  whoBegins =", whoBegins);
         // isUserReady = true;
-        recountUserShips();
+        // recountUserShips();
     }
 
     let userShipCount, oppoShipCount;
@@ -113,6 +113,7 @@
     let totalWidth = dataWidth + 1;
 
     // *********** cells *************
+    const OUTSIDE = -1;
     const EMPTY = 0;
     const SHIP = 1;    
     const HIT = 2;
@@ -121,7 +122,7 @@
     const FOG = 6;
     const HIT1 = 21;
     const HIT2 = 22;
-    const HIT3 = 23;
+    const HIT3 = 23;    
 
     const USERBOARD = 1;
     const OPPOBOARD = 2;
@@ -140,24 +141,24 @@
 
     function newEmptyBoard() {
         let board = [];
-        let row;
+        let rowContent;
 
         for (let r = 0; r < totalHeight; r++) {
             if (r === 0) { // top-header row
-                row = [' ']; // top left header corner cell
+                rowContent = [' ']; // top left header corner cell
             } else {
-                row = [alphabet.slice(r - 1, r)]; // row header ('A', 'B', 'C', ...)
+                rowContent = [alphabet.slice(r - 1, r)]; // row header ('A', 'B', 'C', ...)
             }
 
             for (let c = 0; c < dataWidth; c++) {
                 if (r === 0) { // top-header row 
-                    row.push((c + 1).toString()); // column header ('1', '2', '3', ...)
+                    rowContent.push((c + 1).toString()); // column header ('1', '2', '3', ...)
                 } else {
-                    row.push(0);
+                    rowContent.push(0);
                 }                
             }
 
-            board.push(row);
+            board.push(rowContent);
         }
 
         // console.log("board =", board);
@@ -179,13 +180,13 @@
     }
 
 
-    function isSunk(rowIndex, colIndex, someBoard, boardId) {
+    function isSunk(row, col, someBoard, boardId) {
         let curCell;
-        let hitCells = [{row: rowIndex, col: colIndex}];
+        let hitCells = [{row: row, col: col}];
         let sidesClear = 0;
 
         sideSteps.forEach(step => {
-            for (let r = rowIndex + step.r, c = colIndex + step.c; ; r += step.r, c += step.c) {
+            for (let r = row + step.r, c = col + step.c; ; r += step.r, c += step.c) {
                 // console.log("r, c =", r, c);
                 if (isValidCell(r, c)) {
                     curCell = someBoard[r][c];
@@ -212,7 +213,7 @@
         });
 
         markAroundShip(hitCells, someBoard);
-        // console.log("SHIP IS SUNK! rowIndex, colIndex =", rowIndex, colIndex);
+        // console.log("SHIP IS SUNK! row, col =", row, col);
         return true;
     }
 
@@ -238,7 +239,7 @@
     }
 
 
-    function markCornersAsWater(rowIndex, colIndex, someBoard, boardId) {
+    function markCornersAsWater(row, col, someBoard, boardId) {
         // console.log("FUNCTION: markCornersAsWater");
         let r, c;
 
@@ -250,8 +251,8 @@
         ]
 
         corners.forEach(corner => {
-            r = rowIndex + corner.r;
-            c = colIndex + corner.c;
+            r = row + corner.r;
+            c = col + corner.c;
             if (isValidCell(r, c) && someBoard[r][c] === EMPTY) {
                 someBoard[r][c] = WATER;
             }
@@ -268,12 +269,12 @@
     }
 
 
-    function flashOnHit(rowIndex, colIndex, someBoard, boardId) {        
+    function flashOnHit(row, col, someBoard, boardId) {        
         // Adds flashing effect, which is applied to the hit cell        
         // console.log("FUNCTION: flashOnHit");
         let flashingDelay = 100;
 
-        flashing = {row: rowIndex, col: colIndex, boardId: boardId, class: 'hit-cell-1'};
+        flashing = {row: row, col: col, boardId: boardId, class: 'hit-cell-1'};
 
         makeReactive(boardId);
 
@@ -294,7 +295,7 @@
     }
 
 
-    function fireAtOppoBoard(rowIndex, colIndex) {
+    function fireAtOppoBoard(row, col) {
         // User fires at an opponent board cell
         // console.log("FUNCTION: fire;  isGameOn =", isGameOn);
 
@@ -304,37 +305,37 @@
 
         updateMousePosition();
 
-        let cell = oppoBoard[rowIndex][colIndex];
+        let cell = oppoBoard[row][col];
 
         if (cell === WATER || cell === HIT || cell === SUNK) {
-            showPopup(ui['no_use_firing_here'][language], rowIndex, colIndex);
+            showPopup(ui['no_use_firing_here'][language], row, col);
             return;
         }
 
         if (cell === EMPTY) {
-            oppoBoard[rowIndex][colIndex] = WATER;
+            oppoBoard[row][col] = WATER;
             info = 'oppo_ship_missed';
             makeReactive(OPPOBOARD);
         } else if (cell === SHIP) {      
-            oppoBoard[rowIndex][colIndex] = HIT;    
-            // hitCells.push([rowIndex, colIndex]);
-            if (isSunk(rowIndex, colIndex, oppoBoard, OPPOBOARD)) {
+            oppoBoard[row][col] = HIT;    
+            // hitCells.push([row, col]);
+            if (isSunk(row, col, oppoBoard, OPPOBOARD)) {
                 info = 'oppo_ship_sunk';
                 oppoShipCount--;
-                flashOnHit(rowIndex, colIndex, oppoBoard, OPPOBOARD);
+                flashOnHit(row, col, oppoBoard, OPPOBOARD);
             } else {                
                 info = 'oppo_ship_hit';                
-                markCornersAsWater(rowIndex, colIndex, oppoBoard, OPPOBOARD);      
-                // markAroundShip([{row: rowIndex, col: colIndex}], oppoBoard);
+                markCornersAsWater(row, col, oppoBoard, OPPOBOARD);      
+                // markAroundShip([{row: row, col: col}], oppoBoard);
                 // markWaterAroundHitCells();         
-                // markAroundHit(rowIndex, colIndex, oppoBoard);
-                flashOnHit(rowIndex, colIndex, oppoBoard, OPPOBOARD);             
+                // markAroundHit(row, col, oppoBoard);
+                flashOnHit(row, col, oppoBoard, OPPOBOARD);             
             }
         }
 
         // makeReactive(OPPOBOARD);
 
-        // console.log("oppoBoard[rowIndex][colIndex] =", oppoBoard[rowIndex][colIndex]);
+        // console.log("oppoBoard[row][col] =", oppoBoard[row][col]);
         // userMoveCount++;
         oppoTurn = true; // causes reaction!!!
 
@@ -384,15 +385,15 @@
     }
 
 
-    function isCellInvalidOrWater(rowIndex, colIndex, someBoard) {
-        if (!isValidCell(rowIndex, colIndex)) return true;
-        return (someBoard[rowIndex][colIndex] === WATER);
+    function isCellInvalidOrWater(row, col, someBoard) {
+        if (!isValidCell(row, col)) return true;
+        return (someBoard[row][col] === WATER);
     }
 
 
     function fireAtUserBoard() {
         let cellFlatPos;
-        let rowIndex = -1, colIndex = -1;
+        let row = -1, col = -1;
         let cell;        
         let r, c;
         let direction;
@@ -468,71 +469,71 @@
                 direction = checkIfShipOrEmptyAtCellSides(r, c, userBoard, dirList);
                 if (direction !== IRRELEVANT) {
                     if (direction === TOP) {
-                        rowIndex = r - 1;
-                        colIndex = c;
+                        row = r - 1;
+                        col = c;
                     } else if (direction === BOTTOM) {
-                        rowIndex = r + 1;
-                        colIndex = c;
+                        row = r + 1;
+                        col = c;
                     } else if (direction === LEFT) {
-                        colIndex = c - 1;
-                        rowIndex = r;
+                        col = c - 1;
+                        row = r;
                     } else if (direction === RIGHT) {
-                        colIndex = c + 1;
-                        rowIndex = r;
+                        col = c + 1;
+                        row = r;
                     }
                     break;
                 }
-            // cell = userBoard[rowIndex][colIndex];                     
+            // cell = userBoard[row][col];                     
             }               
             // }
         }
 
-        if (rowIndex === -1 || colIndex === -1) {
+        if (row === -1 || col === -1) {
             // Fire at a random cell
             while (true) {
                 cellFlatPos = randomInt(cellCount); // (0, 1, ... , 99)
-                rowIndex = Math.floor(cellFlatPos / dataHeight) + 1;
-                colIndex = cellFlatPos - (rowIndex - 1) * dataHeight + 1;           
-                cell = userBoard[rowIndex][colIndex];
+                row = Math.floor(cellFlatPos / dataHeight) + 1;
+                col = cellFlatPos - (row - 1) * dataHeight + 1;           
+                cell = userBoard[row][col];
                 if (cell === EMPTY || cell === SHIP) break;
             }
         } else {
-            cell = userBoard[rowIndex][colIndex];
+            cell = userBoard[row][col];
         }
             
         if (cell === EMPTY) {
-            userBoard[rowIndex][colIndex] = WATER;
+            userBoard[row][col] = WATER;
             info = 'user_ship_missed';
             makeReactive(USERBOARD);
         } else if (cell === SHIP) {        
-            userBoard[rowIndex][colIndex] = HIT; 
-            // hitCells.push([rowIndex, colIndex]);                             
-            // hitUserCells.push({ row: rowIndex, col: colIndex });
-            if (isSunk(rowIndex, colIndex, userBoard, USERBOARD)) {
+            userBoard[row][col] = HIT; 
+            // hitCells.push([row, col]);                             
+            // hitUserCells.push({ row: row, col: col });
+            if (isSunk(row, col, userBoard, USERBOARD)) {
                 info = 'user_ship_sunk';
                 userShipCount--;
                 hitUserCells = [];
                 hitUserShipOrient = null;
                 hitChecked = { head: false, tail: false };
                 // markAroundShip(hitUserCells, oppoBoard);
-                flashOnHit(rowIndex, colIndex, userBoard, USERBOARD);
+                flashOnHit(row, col, userBoard, USERBOARD);
             } else {                
-                hitUserCells.push({ row: rowIndex, col: colIndex });
+                hitUserCells.push({ row: row, col: col });
                 if (hitUserCells.length > 1) {
                     cells = getHeadAndTail(hitUserCells);
                     hitUserShipOrient = getOrient(cells);
                 } else {
-                    // markAroundShip([{row: rowIndex, col: colIndex}], userBoard);
+                    // markAroundShip([{row: row, col: col}], userBoard);
                 }
-                markCornersAsWater(rowIndex, colIndex, userBoard, USERBOARD);
-                flashOnHit(rowIndex, colIndex, userBoard, USERBOARD);
+                markCornersAsWater(row, col, userBoard, USERBOARD);
+                flashOnHit(row, col, userBoard, USERBOARD);
                 info = 'user_ship_hit';
             }
         }
 
         // userBoard = userBoard; // for reactivity
 
-        // console.log("userBoard[rowIndex][colIndex] =", userBoard[rowIndex][colIndex]);
+        // console.log("userBoard[row][col] =", userBoard[row][col]);
         oppoMoveCount++;
 
         if (userShipCount < 1) {
@@ -549,7 +550,7 @@
     }
 
 
-    function checkIfShipOrEmptyAtCellSides(rowIndex, colIndex, board, dirList) {          
+    function checkIfShipOrEmptyAtCellSides(row, col, board, dirList) {          
         let r, c;
         let direction;    
         let dirPos;
@@ -573,17 +574,17 @@
             dirList2.splice(dirPos, 1); // remove direction from list
 
             if (direction === TOP) {
-                r = rowIndex - 1;
-                c = colIndex;
+                r = row - 1;
+                c = col;
             } else if (direction === RIGHT) {
-                r = rowIndex;
-                c = colIndex + 1;
+                r = row;
+                c = col + 1;
             } else if (direction === BOTTOM) {
-                r = rowIndex + 1;
-                c = colIndex;
+                r = row + 1;
+                c = col;
             } else if (direction === LEFT) {
-                r = rowIndex;
-                c = colIndex - 1;
+                r = row;
+                c = col - 1;
             }
 
             if (isValidCell(r, c) && board[r][c] !== WATER) {          
@@ -616,6 +617,18 @@
 
     let userBoard, oppoBoard;
 
+
+    function uB(row, col) {
+        // console.log("uB:  ", (isValidCell(row, col) ? userBoard[row][col] : OUTSIDE));
+        return isValidCell(row, col) ? userBoard[row][col] : OUTSIDE;
+    }
+
+
+    function oB(row, col) {
+        return isValidCell(row, col) ? oppoBoard[row][col] : OUTSIDE;
+    }    
+
+
     function clearUserBoard() {
         userBoard = newEmptyBoard();
         userBoard = userBoard; // for reactivity
@@ -631,38 +644,38 @@
     }
 
 
-    function getCellClass(rowIndex, colIndex, someBoard, boardId) {      
+    function getCellClass(row, col, someBoard, boardId) {      
         let cellClass;
-        let isDataCell = (rowIndex > 0 && colIndex > 0);
-        let isFlashing = (flashing && rowIndex === flashing.row && colIndex === flashing.col);
+        let isDataCell = (row > 0 && col > 0);
+        let isFlashing = (flashing && row === flashing.row && col === flashing.col);
 
         cellClass = `
             board-cell unselectable
-            ${colIndex === 0 && rowIndex === 0 ? 'no-top-left-borders' : ''}
-            ${(colIndex === 0 || rowIndex === 0) && colIndex !== rowIndex ? 'top-and-left-headers' : ''}
-            ${(colIndex === 0 && colIndex === rowIndex) ? 'top-left-header-cell' : ''}
-            ${(isDataCell && someBoard[rowIndex][colIndex] === SUNK) ? 'sunk-cell' : ''}
-            ${(isDataCell && someBoard[rowIndex][colIndex] === WATER) ? 'water-cell' : ''}
-            ${(isDataCell && someBoard[rowIndex][colIndex] === HIT) ? 'hit-cell' : ''}
+            ${col === 0 && row === 0 ? 'no-top-left-borders' : ''}
+            ${(col === 0 || row === 0) && col !== row ? 'top-and-left-headers' : ''}
+            ${(col === 0 && col === row) ? 'top-left-header-cell' : ''}
+            ${(isDataCell && someBoard[row][col] === SUNK) ? 'sunk-cell' : ''}
+            ${(isDataCell && someBoard[row][col] === WATER) ? 'water-cell' : ''}
+            ${(isDataCell && someBoard[row][col] === HIT) ? 'hit-cell' : ''}
         `
 
         if (boardId === OPPOBOARD) { // opponent board
             cellClass += `
-            ${(isDataCell && someBoard[rowIndex][colIndex] === EMPTY) ? 'fog-cell' : ''}        
-            ${(isDataCell && someBoard[rowIndex][colIndex] === SHIP) ? 'fog-cell' : ''}
+            ${(isDataCell && someBoard[row][col] === EMPTY) ? 'fog-cell' : ''}        
+            ${(isDataCell && someBoard[row][col] === SHIP) ? 'fog-cell' : ''}
             ${(isDataCell && isGameOn && !oppoTurn) ? 'whose-turn' : ''}
             ${(isDataCell && isFlashing && flashing.boardId === boardId) ? flashing.class : ''}
             `;
         } else { // user board
             cellClass += `
-            ${(isDataCell && someBoard[rowIndex][colIndex] === EMPTY) ? 'board-data' : ''}        
-            ${(isDataCell && someBoard[rowIndex][colIndex] === SHIP) ? 'ship-cell' : ''}
+            ${(isDataCell && someBoard[row][col] === EMPTY) ? 'board-data' : ''}        
+            ${(isDataCell && someBoard[row][col] === SHIP) ? 'ship-cell' : ''}
             ${(isDataCell && !isGameOn) ? 'whose-turn' : ''}
             ${(isDataCell && isFlashing && flashing.boardId === boardId) ? flashing.class : ''}
             `;
         }
 
-        // console.log("rowIndex, colIndex, cellClass =", rowIndex, colIndex, cellClass);
+        // console.log("row, col, cellClass =", row, col, cellClass);
         return cellClass;
     }    
 
@@ -707,12 +720,12 @@
     let userShips = [];
 
 
-    function isValidSize(rowIndex, colIndex) {
+    function isValidSize(row, col) {
         // Used for userBoard only
         let shipSize = 1;
 
         sideSteps.forEach(step => {
-            for (let r = rowIndex + step.r, c = colIndex + step.c; ; r += step.r, c += step.c) {
+            for (let r = row + step.r, c = col + step.c; ; r += step.r, c += step.c) {
                 if (isValidCell(r, c)) {
                     if (userBoard[r][c] === SHIP) {
                         shipSize++;
@@ -730,71 +743,45 @@
     }    
 
 
-    function recountUserShips() {
-        // To be called each time the user marks/unmarks a cell on the user board
+    function recountUserShips(row, col) {
+        // Simplified and optimized function
 
-        initUserShips();
-        let curShipSize;
+        let shipSize;
+        let pos;
 
-        // Checking for vertical ships (but not for one-cell ships)
-        for (let c = 1; c < totalWidth; c++) {
-            curShipSize = 0;
-            for (let r = 1; r < totalHeight; r++) {
-                if (userBoard[r][c] === 1) { // ship cell
-                    if ((c === 1 || userBoard[r][c - 1] === 0) 
-                    && (c === dataWidth || userBoard[r][c + 1] === 0)) {
-                        curShipSize++;
-                        // console.log("VERTICAL: r, c, curShipSize", r, c, curShipSize);
-                    }
-                } 
-                
-                if (r === dataHeight || userBoard[r][c] === 0) {
-                    if (curShipSize) {
-                        if (curShipSize === 1) { // Skip one-cell ships
-                            curShipSize = 0;
-                            // return; 
-                        } else {
-                            for (let s = 0; s < totalClasses; s++) {
-                                if (userShips[s].size === curShipSize) {
-                                    userShips[s].toBePositioned--;                                    
-                                    break;
-                                }
-                            }    
-                            curShipSize = 0;           
-                        }         
-                    }
+        // head ship (if any), at top or left
+        // new ship-cell, which can become a multi-cell ship; or empty cell
+        // tail ship (if any), at left or right
+        let headMidTail = [0, -1, 0];
+
+        sideSteps.forEach(step => {
+            pos = step.r === -1 || step.c === -1 ? 0 : 2;
+            for (let r = row + step.r, c = col + step.c; ; r += step.r, c += step.c) {
+                if (uB(r, c) === SHIP) {
+                    headMidTail[pos]++; // add to head or tail ship
+                } else {
+                    break;
                 }
             }
+        })
+
+        if (userBoard[row][col] === SHIP) { // Was empty-cell, now ship-cell
+            headMidTail[1] = headMidTail[0] + headMidTail[2] + 1; // More ships of this size
+            headMidTail[0] = -headMidTail[0];   // Less ships of this size
+            headMidTail[2] = -headMidTail[2];   // Less ships of this size            
+        } else { // Was ship-cell, possibly inside a multi-cell ship; now empty-cell
+            headMidTail[1] = -(headMidTail[0] + headMidTail[2] + 1); // Less ships of this size
         }
 
-        curShipSize = 0;
-
-        // Checking for horizontal ships and one-cell ships
-        for (let r = 1; r < totalHeight; r++) {
-            curShipSize = 0;
-            for (let c = 1; c < totalWidth; c++) {
-                if (userBoard[r][c] === 1) { // ship cell
-                    if ((r === 1 || userBoard[r - 1][c] === 0) 
-                    && (r === dataHeight || userBoard[r + 1][c] === 0)) {
-                        curShipSize++;
-                        // console.log("HORIZONTAL: r, c, curShipSize", r, c, curShipSize);
+        for (let i = 0; i < 3; i++) { // head (if any), mid (new), tail (if any)
+            if (headMidTail[i] !== 0) {
+                shipSize = Math.abs(headMidTail[i]);
+                for (let s = 0; s < totalClasses; s++) {
+                    if (userShips[s].size === shipSize) {
+                        userShips[s].toBePositioned -= Math.sign(headMidTail[i]);                                
+                        break;
                     }
-                } 
-            
-            if (c === dataWidth || userBoard[r][c] === 0) {
-                    // console.log("HORIZONTAL: r, c =", r, c);
-                    if (curShipSize) {
-                        // Handle any ships, including one-cell ships 
-                        // console.log("HORIZONTAL (HANDLING): r, c =", r, c);
-                        for (let s = 0; s < totalClasses; s++) {
-                            if (userShips[s].size === curShipSize) {
-                                userShips[s].toBePositioned--;                                
-                                break;
-                            }
-                        }            
-                        curShipSize = 0;            
-                    }
-                }
+                }            
             }
         }
 
@@ -804,42 +791,36 @@
         }
 
         userShips = userShips;
-        // console.log("userShips =", userShips);
 
         globalToBePositioned = curToBePositioned;
-        // console.log("globalToBePositioned =", globalToBePositioned);
+
         if (globalToBePositioned === 0) {
-            // isUserReady = true;
             isUserBoardReady = true;
             if (whoBegins === null) {
                 info = "but_who_begins"
             } else {
                 info = 'can_start_now';
             }            
-            // console.log("info, infoText = ", info, infoText);
-            // console.log("isUserBoardReady, whoBegins =", isUserBoardReady, whoBegins);
-            // console.log("curGame, gameId =", curGame, gameId);
         } else {
-            // isUserReady = false;
             isUserBoardReady = false;
             info = 'position_ships';
         }
     }
 
 
-    function isValidCell(rowIndex, colIndex) {
-        return (rowIndex > 0 && rowIndex < totalHeight && colIndex > 0 && colIndex < totalWidth);
+    function isValidCell(row, col) {
+        return (row > 0 && row < totalHeight && col > 0 && col < totalWidth);
     }
 
 
-    function isUnsafeAtCorners(rowIndex, colIndex, someBoard) {      
-        // console.log("rowIndex, colIndex =", rowIndex, colIndex);
+    function isUnsafeAtCorners(row, col, someBoard) {      
+        // console.log("row, col =", row, col);
         let r, c;
 
         // Remember: it's not so easy to break a *forEach* loop, so use a *for* loop!!!
         for (let i = 0; i < 4; i++) {
-            r = rowIndex + corners[i].r;
-            c = colIndex + corners[i].c;
+            r = row + corners[i].r;
+            c = col + corners[i].c;
             // console.log("FUNCTION: isUnsafeAtCorners;  r, c =", r, c);
             if (isValidCell(r, c) && someBoard[r][c] === SHIP) {
                 // console.log("someBoard[r][c] =", someBoard[r][c]);
@@ -851,13 +832,13 @@
     }
     
 
-    function isUnsafeAtSides(rowIndex, colIndex, someBoard) {    
+    function isUnsafeAtSides(row, col, someBoard) {    
         let r, c;
 
         // Remember: it's not so easy to break a *forEach* loop, so use a *for* loop!!!
         for (let i = 0; i < 4; i++) {
-            r = rowIndex + sideSteps[i].r;
-            c = colIndex + sideSteps[i].c;
+            r = row + sideSteps[i].r;
+            c = col + sideSteps[i].c;
             // console.log("FUNCTION: isUnsafeAtCorners;  r, c =", r, c);
             if (isValidCell(r, c) && someBoard[r][c] === SHIP) {
                 // console.log("someBoard[r][c] =", someBoard[r][c]);
@@ -876,7 +857,7 @@
     // let popupWidth = 0;
     // let popupElement
 
-    function showPopup(textToShow, rowIndex, colIndex) {
+    function showPopup(textToShow, row, col) {
         popupText = textToShow;
         isPopupVisible = true;
         isCellClickBlocked = true;
@@ -886,11 +867,11 @@
         // Need to prevent popup from going to the right outside the board!
         popupX = mouseX;
         // console.log(document.getElementById('cell-popup').offsetWidth);
-        if (dataWidth - colIndex < 5) {
+        if (dataWidth - col < 5) {
             popupX -= (document.getElementById('cell-popup').offsetWidth + 10);
         } 
 
-        // console.log("rowIndex, colIndex =", rowIndex, colIndex);
+        // console.log("row, col =", row, col);
         // console.log("mouseX, mouseY, popupX, popupY =", mouseX, mouseY, popupX, popupY);
 
         setTimeout( () => {
@@ -900,34 +881,34 @@
     }
 
 
-    function placeShip(rowIndex, colIndex) {
+    function placeShip(row, col) {
         if (isGameOn) return;
 
-        if (rowIndex === 0 || colIndex === 0) return; // headers
+        if (row === 0 || col === 0) return; // headers
 
         updateMousePosition();
 
-        if (userBoard[rowIndex][colIndex] === EMPTY) {  
-            if (isUnsafeAtCorners(rowIndex, colIndex, userBoard)) {
+        if (userBoard[row][col] === EMPTY) {  
+            if (isUnsafeAtCorners(row, col, userBoard)) {
                 // updateMousePosition();
-                showPopup(ui['cannot_position_here'][language], rowIndex, colIndex);
+                showPopup(ui['cannot_position_here'][language], row, col);
                 return;
             }
 
-            if (!isValidSize(rowIndex, colIndex)) {
+            if (!isValidSize(row, col)) {
                 // updateMousePosition();
-                showPopup(ui['invalid_ship_size'][language], rowIndex, colIndex);
+                showPopup(ui['invalid_ship_size'][language], row, col);
                 return;
             }
 
-            userBoard[rowIndex][colIndex] = SHIP;          
-        } else if (userBoard[rowIndex][colIndex] === SHIP) { // ship-containing cell
-            userBoard[rowIndex][colIndex] = EMPTY;  
+            userBoard[row][col] = SHIP;          
+        } else if (userBoard[row][col] === SHIP) { // ship-containing cell
+            userBoard[row][col] = EMPTY;  
         }
 
         userBoard = userBoard;
 
-        recountUserShips();
+        recountUserShips(row, col);
     }    
 
 
@@ -994,7 +975,7 @@
     // This array begins with [1, 1] and ends with [10, 10] for a 10 x 10 board.
     // Note that board size is 11 x 11 (to include left header and top header).
     //
-    // flatPos = (rowIndex - 1) * dataHeight + (colIndex - 1)
+    // flatPos = (row - 1) * dataHeight + (col - 1)
 
     let cellCount = dataHeight * dataWidth; // cell count (e.g. 100)
     let cellCountAndDirections = cellCount * 4; // cell count multiplied by possible directions
@@ -1541,7 +1522,7 @@
 
 <!-- GAME NAME -->
 <!-- <h1 class="center">{ gameName[language] }</h1> -->
-<!-- class="{ () => getCellClass(rowIndex, colIndex) }"  -->
+<!-- class="{ () => getCellClass(row, col) }"  -->
 
 <div class="container">
     <div class="user">
@@ -1550,14 +1531,14 @@
         <!-- TABLE with USER's SHIPS -->
         <table class="board">
             <!-- Must use a key in #each loop -->
-            {#each userBoard as row, rowIndex (rowIndex)} 
+            {#each userBoard as rowContent, row (row)} 
                 <tr>
                     <!-- Must use a key in #each loop -->
-                    {#each row as cell, colIndex (colIndex * dataHeight + colIndex)}
-                        <td on:click={ () => placeShip(rowIndex, colIndex) }
-                            class="{ getCellClass(rowIndex, colIndex, userBoard, USERBOARD) }"                                                   
+                    {#each rowContent as cell, col (col * dataHeight + col)}
+                        <td on:click={ () => placeShip(row, col) }
+                            class="{ getCellClass(row, col, userBoard, USERBOARD) }"                                                   
                         >
-                            { @html rowIndex > 0 && colIndex > 0 ? num2char(cell) : cell }
+                            { @html row > 0 && col > 0 ? num2char(cell) : cell }
                         </td>
                     {/each}
                 </tr>
@@ -1611,14 +1592,14 @@
             <!-- TABLE with OPPONENT's SHIPS -->
             <table class="board">
                 <!-- Must use a key in #each loop -->
-                {#each oppoBoard as row, rowIndex (rowIndex)}
+                {#each oppoBoard as row, row (row)}
                     <tr>
                         <!-- Must use a key in #each loop -->
-                        {#each row as cell, colIndex (colIndex * dataHeight + colIndex)}
-                            <td on:click={ () => fireAtOppoBoard(rowIndex, colIndex) }
-                                class="{getCellClass(rowIndex, colIndex, oppoBoard, OPPOBOARD)}"                         
+                        {#each row as cell, col (col * dataHeight + col)}
+                            <td on:click={ () => fireAtOppoBoard(row, col) }
+                                class="{getCellClass(row, col, oppoBoard, OPPOBOARD)}"                         
                             >
-                                { @html rowIndex > 0 && colIndex > 0 ? num2char(cell) : cell }
+                                { @html row > 0 && col > 0 ? num2char(cell) : cell }
                             </td>
                         {/each}
                     </tr>
