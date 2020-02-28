@@ -405,9 +405,6 @@
         if (hitUserCells.length > 0) {
             // Try and finish off a hit user ship
             // console.log("hitUserCells =", hitUserCells); 
-
-            // directions = []
-
             if (hitUserCells.length > 1) {
                 cells = getHeadAndTail(hitUserCells); // either head.row < tail.row, or head.col < tail.col
                 head = cells[0];
@@ -744,8 +741,6 @@
 
 
     function recountUserShips(row, col) {
-        // Simplified and optimized function
-
         let shipSize;
         let pos;
 
@@ -817,7 +812,7 @@
         // console.log("row, col =", row, col);
         let r, c;
 
-        // Remember: it's not so easy to break a *forEach* loop, so use a *for* loop!!!
+        // Remember: it's not so easy to break out of a *forEach* loop, so use a *for* loop!!!
         for (let i = 0; i < 4; i++) {
             r = row + corners[i].r;
             c = col + corners[i].c;
@@ -1114,6 +1109,7 @@
 
 
     function testPositionUserShips() {
+        // Used for testing only
         userBoard = [
             [" ", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10"],
             ["A", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
