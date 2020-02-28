@@ -1588,10 +1588,10 @@
             <!-- TABLE with OPPONENT's SHIPS -->
             <table class="board">
                 <!-- Must use a key in #each loop -->
-                {#each oppoBoard as row, row (row)}
+                {#each oppoBoard as rowContent, row (row)}
                     <tr>
                         <!-- Must use a key in #each loop -->
-                        {#each row as cell, col (col * dataHeight + col)}
+                        {#each rowContent as cell, col (col * dataHeight + col)}
                             <td on:click={ () => fireAtOppoBoard(row, col) }
                                 class="{getCellClass(row, col, oppoBoard, OPPOBOARD)}"                         
                             >
