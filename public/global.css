@@ -14,6 +14,12 @@ body {
 	*/
 }
 
+.very-visible {
+	font-weight: bold;
+	font-size: 2em;
+	background-color: yellow;
+}
+
 /*
 a {
 	color: rgb(0,100,200);
