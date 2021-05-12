@@ -10,7 +10,7 @@
     let language;
 	const unsubscribe = globalLanguage.subscribe(value => {
         language = value;        
-		console.log("whoBegins:  language =", language);
+		// console.log("whoBegins:  language =", language);
     });     
 
 
@@ -19,7 +19,7 @@
     const dispatch = createEventDispatcher();
 
     function handleWhoBegins() {
-        console.log("FUNCTION: handleWhoBegins;  whoBegins =", whoBegins);
+        // console.log("FUNCTION: handleWhoBegins;  whoBegins =", whoBegins);
         dispatch('whoBegins', whoBegins);
     }
 </script>
@@ -28,11 +28,14 @@
 <style>
     .who-plays-first {
         border-width: 1px;
-        border-color: gray;
+        /* border-color: gray; */
+        border-color: transparent;
+        margin-left: 0;
+        padding: 0;
     }
 
     .limited-width {
-        width: 100%;
+        max-width: 100%;
     }
 
     .margin-after {
