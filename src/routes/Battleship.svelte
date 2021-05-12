@@ -1145,7 +1145,7 @@
     .ship-list-and-who-plays-first {
         display: block;        
         max-width: 25em;
-        float: right;
+        /* float: right; */
     }
 
     .who-plays-first {
@@ -1303,7 +1303,7 @@
         margin-right: 1rem;
         /* margin-right: 2em; */
         margin-top: 0;
-        float: left;
+        /* float: left; */
 
         position: relative;
     }
@@ -1311,7 +1311,7 @@
     .opponent {
         /* margin-left: .5rem; */
         margin-top: 0;
-        float: right;
+        /* float: right; */
 
         position: relative;
     }    
@@ -1387,12 +1387,16 @@
     }
 
     .user {
+      margin-right: 2rem;
+    }
+
+    /* .user {
         float: left;
     }
 
     .opponent {
         float: right;
-    }
+    } */
 
     /*
     .leftish {
@@ -1480,7 +1484,7 @@
       .container {
         padding-left: 1.5rem;
 
-        /* flex-direction: column; */
+        flex-direction: column;
       }
 
       .user-or-opponent {
