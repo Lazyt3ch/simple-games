@@ -32,11 +32,11 @@
 
     let language;
     
-    console.log("App:  $globalLanguage =", $globalLanguage);
+    // console.log("App:  $globalLanguage =", $globalLanguage);
 
 	const unsubscribe = globalLanguage.subscribe(value => {
         language = value;        
-		console.log("App:  language =", language);
+		// console.log("App:  language =", language);
 	});    
 
 
@@ -44,7 +44,7 @@
 
 	const unsubscribe2 = currentGame.subscribe(value => {
         curGame = value;        
-		console.log("App:  curGame =", curGame);
+		// console.log("App:  curGame =", curGame);
 	});    
 
 	const routes = { // Exact paths
@@ -62,19 +62,19 @@
 	let selectedLang;
 	// let language = languages[langIndex].short;
 	// let language = globLang;
-	console.log("language =", language);
+	// console.log("language =", language);
 	// const globalLanguage = writable(language);
 	
 	function updateGlobalLanguage() {
-		console.log("App:  trying to update globalLanguage...");
+		// console.log("App:  trying to update globalLanguage...");
 		globalLanguage.update(() => language);
-		console.log("App:  $globalLanguage =", $globalLanguage);
+		// console.log("App:  $globalLanguage =", $globalLanguage);
 	}
 
 	function updateCurrentGame() {
-		console.log("App:  trying to update currentGame...");
+		// console.log("App:  trying to update currentGame...");
 		currentGame.update(() => selectedGameId);
-		console.log("App:  $currentGame =", $currentGame);
+		// console.log("App:  $currentGame =", $currentGame);
 	}	
 
 	$: {
@@ -105,13 +105,13 @@
 
 	$: {
 		if (selectedGameId !== null) {
-			console.log("selectedGameId =", selectedGameId);
-			console.log(`/${selectedGameId}`);
+			// console.log("selectedGameId =", selectedGameId);
+			// console.log(`/${selectedGameId}`);
 			push(`/${selectedGameId}`);
 		}
 	}
 
-	console.log("games =", games);
+	// console.log("games =", games);
 
 	$: language = language;
 
