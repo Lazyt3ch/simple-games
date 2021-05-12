@@ -1321,6 +1321,7 @@
     .user {
         /* display: inline-block; */
         margin-left: .5rem;
+        margin-right: .5rem;
         /* margin-right: 2em; */
         margin-top: 0;
         float: left;
