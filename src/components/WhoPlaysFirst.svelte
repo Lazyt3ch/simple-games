@@ -1,7 +1,7 @@
 <script>
     import { createEventDispatcher } from 'svelte';
     import { fade } from 'svelte/transition';
-    import { uiStrings as ui } from '../ui/whoPlaysFirst.js';    
+    import { uiStrings as ui } from '../ui/WhoPlaysFirst.js';    
     import { globalLanguage } from '../stores.js';
     
     export let whoBegins;    
