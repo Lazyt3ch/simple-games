@@ -6,11 +6,11 @@
 
     let language;
     
-    console.log("Home:  $globalLanguage =", $globalLanguage);
+    // console.log("Home:  $globalLanguage =", $globalLanguage);
 
 	const unsubscribe = globalLanguage.subscribe(value => {
         language = value;        
-		console.log("Home:  language =", language);
+		// console.log("Home:  language =", language);
 	});    
 
 
