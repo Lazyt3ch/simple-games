@@ -633,12 +633,12 @@
 
         cellClass = `
             board-cell unselectable
-            ${col === 0 && row === 0 ? 'no-top-left-borders' : ''}
             ${(col === 0 || row === 0) && col !== row ? 'top-and-left-headers' : ''}
             ${(col === 0 && col === row) ? 'top-left-header-cell' : ''}
             ${(isDataCell && someBoard[row][col] === SUNK) ? 'sunk-cell' : ''}
             ${(isDataCell && someBoard[row][col] === WATER) ? 'water-cell' : ''}
             ${(isDataCell && someBoard[row][col] === HIT) ? 'hit-cell' : ''}
+            ${isDataCell ? 'border' : ''}
         `
 
         if (boardId === OPPOBOARD) { // opponent board
@@ -1218,8 +1218,10 @@
     }
 
     .whose-turn {
-        border-color: greenyellow;
-        border-width: 2px;
+        /* border-color: greenyellow;
+        border-width: 2px; */
+        outline-color: greenyellow;
+        outline-width: 2px;
     }
 
     .top-and-left-headers {
@@ -1275,12 +1277,13 @@
         transition: color 100ms linear 50ms;
     }
 
+    .border {
+      border-style: solid;
+      border-width: 1px;
+      border-color: black;
+    }
 
     .board-data, .ship-cell, .hit-cell, .sunk-cell, .fog-cell, .water-cell {
-        border-style: solid;
-        border-width: 1px;
-        border-color: black;
-
         padding: 0;
         margin: 0;
         vertical-align: center;
@@ -1298,10 +1301,7 @@
 
 
     .whose-turn:hover {
-        border-style: dotted;
-        border-width: 2px;
-        /* border-width: 1px; */
-        border-color: yellow;
+        outline: yellow solid 4px;
     }
 
     .user {
