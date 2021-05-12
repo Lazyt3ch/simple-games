@@ -1290,10 +1290,17 @@
         font-family: 'Lucida Console', 'Courier New', Courier, monospace;
     }
 
+    .board {
+      border-width: 2px;
+      border-color: transparent;
+      border-collapse: collapse;
+    }
+
 
     .whose-turn:hover {
         border-style: dotted;
         border-width: 2px;
+        /* border-width: 1px; */
         border-color: yellow;
     }
 
