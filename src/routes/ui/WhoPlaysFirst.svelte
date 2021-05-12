@@ -67,16 +67,20 @@
     <label class="unselectable"> { ui['who_plays_first'][language] } </label>
     
     <div>
-        <label for="user-begins" class="unselectable"> 
-            <input type='radio' bind:group={whoBegins} 
-                id='user-begins' name="who-begins" value='user'>
-            { ui['user_begins'][language] } 
-        </label>
+        <div>
+            <label for="user-begins" class="unselectable"> 
+                <input type='radio' bind:group={whoBegins} 
+                    id='user-begins' name="who-begins" value='user'>
+                { ui['user_begins'][language] } 
+            </label>
+        </div>
 
-        <label for="opponent-begins" class="left-margin unselectable">
-            <input type='radio' bind:group={whoBegins} 
-                id='opponent-begins' name="who-begins" value='opponent'>
-            { ui['opponent_begins'][language] } 
-        </label>
+        <div>
+            <label for="opponent-begins" class="unselectable">
+                <input type='radio' bind:group={whoBegins} 
+                    id='opponent-begins' name="who-begins" value='opponent'>
+                { ui['opponent_begins'][language] } 
+            </label>
+        </div>
     </div>
 </fieldset>
