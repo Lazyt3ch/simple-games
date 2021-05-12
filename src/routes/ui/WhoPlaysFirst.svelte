@@ -1,7 +1,7 @@
 <script>
     import { createEventDispatcher } from 'svelte';
     import { fade } from 'svelte/transition';
-    import { languages, uiStrings as ui } from './whoPlaysFirst.js';    
+    import { uiStrings as ui } from './whoPlaysFirst.js';    
     import { globalLanguage } from '../../stores.js';
     
     export let whoBegins;    
@@ -28,14 +28,10 @@
 <style>
     .who-plays-first {
         border-width: 1px;
-        border-color: black;
+        border-color: gray;
     }
 
     .limited-width {
-        /*
-        max-width: 20em;
-        min-width: 15em;
-        */
         width: 100%;
     }
 
@@ -55,6 +51,10 @@
         -o-user-select: none;
         user-select: none;
     }        
+
+    .left-margin {
+        margin-left: 1rem;
+    }
 </style>
 
 
