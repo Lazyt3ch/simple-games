@@ -794,16 +794,13 @@
 
 
     function isUnsafeAtCorners(row, col, someBoard) {      
-        // console.log("row, col =", row, col);
         let r, c;
 
         // Remember: it's not so easy to break out of a *forEach* loop, so use a *for* loop!!!
         for (let i = 0; i < 4; i++) {
             r = row + corners[i].r;
             c = col + corners[i].c;
-            // console.log("FUNCTION: isUnsafeAtCorners;  r, c =", r, c);
             if (isValidCell(r, c) && someBoard[r][c] === SHIP) {
-                // console.log("someBoard[r][c] =", someBoard[r][c]);
                 return true;
             }
         }
@@ -819,9 +816,7 @@
         for (let i = 0; i < 4; i++) {
             r = row + sideSteps[i].r;
             c = col + sideSteps[i].c;
-            // console.log("FUNCTION: isUnsafeAtCorners;  r, c =", r, c);
             if (isValidCell(r, c) && someBoard[r][c] === SHIP) {
-                // console.log("someBoard[r][c] =", someBoard[r][c]);
                 return true;
             }
         }
@@ -834,8 +829,6 @@
     let isPopupVisible = false;
     let isCellClickBlocked = false;
     let popupX = 0, popupY = 0;
-    // let popupWidth = 0;
-    // let popupElement
 
     function showPopup(textToShow, row, col) {
         popupText = textToShow;
@@ -846,13 +839,9 @@
 
         // Need to prevent popup from going to the right outside the board!
         popupX = mouseX;
-        // console.log(document.getElementById('cell-popup').offsetWidth);
         if (dataWidth - col < 5) {
             popupX -= (document.getElementById('cell-popup').offsetWidth + 10);
         } 
-
-        // console.log("row, col =", row, col);
-        // console.log("mouseX, mouseY, popupX, popupY =", mouseX, mouseY, popupX, popupY);
 
         setTimeout( () => {
             isPopupVisible = false;
@@ -870,13 +859,11 @@
 
         if (userBoard[row][col] === EMPTY) {  
             if (isUnsafeAtCorners(row, col, userBoard)) {
-                // updateMousePosition();
                 showPopup(ui['cannot_position_here'][language], row, col);
                 return;
             }
 
             if (!isValidSize(row, col)) {
-                // updateMousePosition();
                 showPopup(ui['invalid_ship_size'][language], row, col);
                 return;
             }
@@ -905,14 +892,12 @@
             }
 
             globalToBePositioned += ship.totalNumber;
-            // console.log("globalToBePositioned =", globalToBePositioned);
             userShips.push(userShip);
         })
 
         userShips.sort(function(a, b) {
             return b.size - a.size;
         });
-        // console.log("userShips =", userShips);
     }
 
 
@@ -923,7 +908,6 @@
         let oppoShips = [];
         ships.forEach( ship => {
             let oppoShip = {
-                // class: ship.class,
                 size: ship.size,
                 totalNumber: ship.totalNumber,
                 toBePositioned: ship.totalNumber,         
@@ -1017,8 +1001,6 @@
                         isMisfit = true; // Part of the ship is outside the data board 
                     }                    
                 }
-                // console.log("shipHeadRow, shipHeadCol =", shipHeadRow, shipHeadCol);
-                // console.log("shipTailRow, shipTailCol =", shipTailRow, shipTailCol);
 
                 // let isMisfit = false;
 
@@ -1049,7 +1031,6 @@
             }
         }
 
-        // console.log("oppoBoard =", oppoBoard);
         // isReadyToPlay = true;
         isOppoBoardReady = true;
     }
@@ -1121,7 +1102,6 @@
         if (!oppoTurn) {
             // userBoard = userBoard;
             oppoBoard = oppoBoard; // for reactivity!!! *** IMPORTANT ***
-            // console.log("oppoTurn =", oppoTurn);
         }
     }
 
@@ -1137,7 +1117,6 @@
         initOppoShips();
 
         info = 'game_on';
-        // console.log("oppoBoard =", oppoBoard);
 
         if (whoBegins === "opponent") {
             oppoTurn = true;
@@ -1451,8 +1430,6 @@
     }        
 
     .buttons {
-        /* margin-left: 2em; */
-        /* margin-right: auto; */
       display: flex;
       flex-direction: row;      
     }
@@ -1461,9 +1438,7 @@
         background-color: lightgray;
         color: navy;
         font-weight: 600;
-
-        /* margin-left: 1em;
-        margin-right: 1em; */
+        height: 2rem;
     }
 
     .cool-button:nth-child(2) {
