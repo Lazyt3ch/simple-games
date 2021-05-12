@@ -113,28 +113,24 @@
     let totalWidth = dataWidth + 1;
 
     // *********** cells *************
-    const OUTSIDE = -1;
-    const EMPTY = 0;
-    const SHIP = 1;    
-    const HIT = 2;
-    const SUNK = 3;
-    const WATER = 5;
-    const FOG = 6;
-    const HIT1 = 21;
-    const HIT2 = 22;
-    const HIT3 = 23;    
+    const OUTSIDE = 'OUTSIDE';
+    const EMPTY = 'EMPTY';
+    const SHIP = 'SHIP';    
+    const HIT = 'HIT';
+    const SUNK = 'SUNK';
+    const WATER = 'WATER';
 
-    const USERBOARD = 1;
-    const OPPOBOARD = 2;
+    const USERBOARD = 'USERBOARD';
+    const OPPOBOARD = 'OPPOBOARD';
 
-    const IRRELEVANT = 0;
-    const TOP = 1;
-    const RIGHT = 2;
-    const BOTTOM = 3;
-    const LEFT = 4;
+    const IRRELEVANT = 'IRRELEVANT';
+    const TOP = 'TOP';
+    const RIGHT = 'RIGHT';
+    const BOTTOM = 'BOTTOM';
+    const LEFT = 'LEFT';
 
-    const VERTICAL = 1;
-    const HORIZONTAL = 2;
+    const VERTICAL = 'VERTICAL';
+    const HORIZONTAL = 'HORIZONTAL';
     // const BAD_ORIENT = 0;
 
     // const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
