@@ -1320,17 +1320,21 @@
 
     .user {
         /* display: inline-block; */
-        margin-left: .5rem;
-        margin-right: .5rem;
+        /* margin-left: .5rem; */
+        margin-right: 1rem;
         /* margin-right: 2em; */
         margin-top: 0;
         float: left;
+
+        position: relative;
     }
 
     .opponent {
-        margin-left: .5rem;
+        /* margin-left: .5rem; */
         margin-top: 0;
         float: right;
+
+        position: relative;
     }    
 
 
@@ -1372,11 +1376,22 @@
         display: flex;
         flex-direction: row;
         flex-wrap: wrap;
+
+        padding-left: .5rem;
+
+        /* position: relative; */
+    }
+
+    .left-or-top {
+      position: relative;
     }
 
     .user-or-opponent {
         text-align: center;
         margin: 0;
+
+        font-weight: 600;
+        font-size: 1rem;
     }
 
     .user, .opponent {
@@ -1472,6 +1487,22 @@
         opacity: 0;
     }
 
+    @media (max-width: 640px) {
+      .container {
+        padding-left: 1.5rem;
+      }
+
+      .user-or-opponent {
+        position: absolute;
+
+        left: -0.8rem;
+        top: 50%;
+
+        transform-origin: left;
+        transform: rotate(-90deg) translateX(-50%);
+      }
+    }
+
 </style>
 
 
@@ -1480,9 +1511,10 @@
 <!-- class="{ () => getCellClass(row, col) }"  -->
 
 <div class="container">
-    <div class="left-or-top">
+    <div class="left-or-top">     
+
       <div class="user">
-        <h3 class="user-or-opponent">{ ui["user_ships"][language] }</h3>
+        <div class="user-or-opponent">{ ui["user_ships"][language] }</div>
 
         <!-- TABLE with USER's SHIPS -->
         <table class="board">
