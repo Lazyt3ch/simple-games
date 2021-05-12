@@ -147,6 +147,12 @@
 		margin: 0 auto;
 	}
 	*/
+
+	main {
+		width: 100%;
+		max-width: 1000px;
+		margin: 0 auto;
+	}
 	
 	/*
 	h1 {
@@ -158,9 +164,9 @@
 	*/
 
 	@media (min-width: 640px) {
-		main {
+		/* main {
 			max-width: none;
-		}
+		} */
 	}
 </style>
 
