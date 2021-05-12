@@ -1504,6 +1504,12 @@
 
       <!-- BUTTON(S) and INFO TEXT -->
       <div class="buttons-and-info">
+        <!-- INFO TEXT -->
+        <div class="info-text center unselectable margin-after"> 
+          <!-- Do not remove &nbsp; -->
+          { @html infoText } &nbsp;
+        </div>            
+
         <div class="buttons">
           <!-- BUTTON -->
           <button class="cool-button" on:click={startGame} 
@@ -1516,17 +1522,8 @@
           <button class="cool-button" on:click={restartGame}>
               { ui['restart_game'][language] }
           </button>            
-        </div>
-
-        <!-- INFO TEXT -->
-        <div class="info-text center unselectable margin-after"> 
-            <!-- Do not remove &nbsp; -->
-            { @html infoText } &nbsp;
-        </div>      
-      </div>      
-
-
-
+        </div>  
+      </div>            
     </div>
 
     <!-- HERE USER CAN CHECK USER SHIPS POSITIONED ON THE BOARD -->
