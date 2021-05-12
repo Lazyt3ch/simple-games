@@ -1378,6 +1378,7 @@
         flex-wrap: wrap;
 
         padding-left: .5rem;
+        padding-right: .5rem;
 
         /* position: relative; */
     }
@@ -1487,9 +1488,11 @@
         opacity: 0;
     }
 
-    @media (max-width: 640px) {
+    @media (max-width: 900px) {
       .container {
         padding-left: 1.5rem;
+
+        flex-direction: column;
       }
 
       .user-or-opponent {
