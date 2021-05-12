@@ -1388,7 +1388,10 @@
     }
 
     .right-or-bottom {
-      min-width: 25rem;
+      min-width: 26rem;
+
+      display: flex;
+      flex-direction: column;
     }
 
     .user-or-opponent {
@@ -1419,7 +1422,7 @@
     */
 
     .buttons-and-info {
-        /* display: flex; */
+        display: flex;
         /* width: 50%; */
         display: block;
         clear: both;
@@ -1448,17 +1451,23 @@
     }        
 
     .buttons {
-        margin-left: 2em;
-        margin-right: auto;
+        /* margin-left: 2em; */
+        /* margin-right: auto; */
+      display: flex;
+      flex-direction: row;      
     }
 
     .cool-button {
-        display: inline;        
-        background-color: aqua;
-        color: blue;
-        font-weight: bold;
-        margin-left: 1em;
-        margin-right: 1em;
+        background-color: lightgray;
+        color: navy;
+        font-weight: 600;
+
+        /* margin-left: 1em;
+        margin-right: 1em; */
+    }
+
+    .cool-button:nth-child(2) {
+      margin-left: 1rem;
     }
 
     .cool-button:disabled {
@@ -1496,7 +1505,7 @@
       .container {
         padding-left: 1.5rem;
 
-        flex-direction: column;
+        /* flex-direction: column; */
       }
 
       .user-or-opponent {
