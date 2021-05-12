@@ -1201,8 +1201,8 @@
     /* Board (table) */
     .board {
         border-collapse: collapse;  
-        margin-top: 1em;
-        margin-bottom: 1em;
+        margin-top: .5rem;
+        margin-bottom: .5em;
         background-color: inherit;     
         padding: 0;
     }    
@@ -1298,20 +1298,14 @@
     }
 
     .user {
-        /* display: inline-block; */
-        /* margin-left: .5rem; */
         margin-right: 1rem;
-        /* margin-right: 2em; */
         margin-top: 0;
-        /* float: left; */
 
         position: relative;
     }
 
     .opponent {
-        /* margin-left: .5rem; */
-        margin-top: 0;
-        /* float: right; */
+        margin-top: .5rem;
 
         position: relative;
     }    
@@ -1364,6 +1358,8 @@
 
     .left-or-top {
       position: relative;
+
+      margin-top: .5rem;
     }
 
     .right-or-bottom {
@@ -1404,15 +1400,14 @@
     }
     */
 
-    .buttons-and-info {
+    /* .buttons-and-info {
         display: flex;
-        /* width: 50%; */
         display: block;
         clear: both;
         min-width: 25em;
         max-width: 35em;
         margin-top: 2em;
-    }
+    } */
 
     .info-text {
         /* display: flex; */
@@ -1420,7 +1415,7 @@
         font-weight: normal;
         font-family: Arial, Helvetica, sans-serif;
         color: black;
-        margin-top: 1em;
+        margin-top: .5em;
         max-width: 25em;
         text-align: left;
     }
@@ -1482,9 +1477,15 @@
 
     @media (max-width: 900px) {
       .container {
+        margin-top: 0;
+
         padding-left: 1.5rem;
 
         flex-direction: column;
+      }
+
+      .left-or-top {
+        margin-top: 0;
       }
 
       .user-or-opponent {
@@ -1530,13 +1531,13 @@
       </div>
 
       <!-- BUTTON(S) and INFO TEXT -->
-      <div class="buttons-and-info">
+      <!-- <div class="buttons-and-info"> -->
         <!-- INFO TEXT -->
         <div class="info-text unselectable margin-after"> 
           <!-- Do not remove &nbsp; -->
           { @html infoText } &nbsp;
         </div>            
-      </div>            
+      <!-- </div>             -->
     </div>
 
     <div class="right-or-bottom">
@@ -1571,9 +1572,9 @@
               </div>
 
               <div class="who-plays-first">
-                  <!-- WHO PLAYS FIRST radio buttons etc -->
-                  <!-- The fade transition messes up with routing, so use currentGame as a bugfix!!! -->
-                  <WhoPlaysFirst on:whoBegins={handleWhoBegins} whoBegins="{whoBegins}" />
+                <!-- WHO PLAYS FIRST radio buttons etc -->
+                <!-- The fade transition messes up with routing, so use currentGame as a bugfix!!! -->
+                <WhoPlaysFirst on:whoBegins={handleWhoBegins} whoBegins="{whoBegins}" />
               </div>
 
             <!-- BUTTON(S) and INFO TEXT -->
