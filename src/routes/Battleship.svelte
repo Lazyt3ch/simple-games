@@ -1368,6 +1368,10 @@
         /* max-width: 60em; */
         margin-top: 0.5em;
         margin-bottom: 1em;
+
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
     }
 
     .user-or-opponent {
@@ -1476,25 +1480,53 @@
 <!-- class="{ () => getCellClass(row, col) }"  -->
 
 <div class="container">
-    <div class="user">
+    <div class="left-or-top">
+      <div class="user">
         <h3 class="user-or-opponent">{ ui["user_ships"][language] }</h3>
 
         <!-- TABLE with USER's SHIPS -->
         <table class="board">
-            <!-- Must use a key in #each loop -->
-            {#each userBoard as rowContent, row (row)} 
-                <tr>
-                    <!-- Must use a key in #each loop -->
-                    {#each rowContent as cell, col (col * dataHeight + col)}
-                        <td on:click={ () => placeShip(row, col) }
-                            class="{ getCellClass(row, col, userBoard, USERBOARD) }"                                                   
-                        >
-                            { @html row > 0 && col > 0 ? num2char(cell) : cell }
-                        </td>
-                    {/each}
-                </tr>
-            {/each}
+          <!-- Must use a key in #each loop -->
+          {#each userBoard as rowContent, row (row)} 
+            <tr>
+              <!-- Must use a key in #each loop -->
+              {#each rowContent as cell, col (col * dataHeight + col)}
+                <td on:click={ () => placeShip(row, col) }
+                    class="{ getCellClass(row, col, userBoard, USERBOARD) }"                                                   
+                >
+                    { @html row > 0 && col > 0 ? num2char(cell) : cell }
+                </td>
+              {/each}
+            </tr>
+          {/each}
         </table>
+      </div>
+
+      <!-- BUTTON(S) and INFO TEXT -->
+      <div class="buttons-and-info">
+        <div class="buttons">
+          <!-- BUTTON -->
+          <button class="cool-button" on:click={startGame} 
+                  disabled={!isUserBoardReady || whoBegins === null || isGameOn}
+          >
+              { ui['start_game'][language] }
+          </button>            
+
+          <!-- BUTTON -->
+          <button class="cool-button" on:click={restartGame}>
+              { ui['restart_game'][language] }
+          </button>            
+        </div>
+
+        <!-- INFO TEXT -->
+        <div class="info-text center unselectable margin-after"> 
+            <!-- Do not remove &nbsp; -->
+            { @html infoText } &nbsp;
+        </div>      
+      </div>      
+
+
+
     </div>
 
     <!-- HERE USER CAN CHECK USER SHIPS POSITIONED ON THE BOARD -->
@@ -1559,28 +1591,6 @@
         </div>
     {/if}
 
-    <!-- BUTTON(S) and INFO TEXT -->
-    <div class="buttons-and-info">
-        <div class="buttons">
-            <!-- BUTTON -->
-            <button class="cool-button" on:click={startGame} 
-                    disabled={!isUserBoardReady || whoBegins === null || isGameOn}
-            >
-                { ui['start_game'][language] }
-            </button>            
-
-            <!-- BUTTON -->
-            <button class="cool-button" on:click={restartGame}>
-                { ui['restart_game'][language] }
-            </button>            
-        </div>
-
-        <!-- INFO TEXT -->
-        <div class="info-text center unselectable margin-after"> 
-            <!-- Do not remove &nbsp; -->
-            { @html infoText } &nbsp;
-        </div>      
-    </div>      
 
     <p>&nbsp</p> <!-- dummy empty paragraph -->
 
