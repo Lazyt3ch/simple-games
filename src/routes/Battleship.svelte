@@ -1387,6 +1387,10 @@
       position: relative;
     }
 
+    .right-or-bottom {
+      position: relative; /* dummy */
+    }
+
     .user-or-opponent {
         text-align: center;
         margin: 0;
@@ -1540,96 +1544,97 @@
       <!-- BUTTON(S) and INFO TEXT -->
       <div class="buttons-and-info">
         <!-- INFO TEXT -->
-        <div class="info-text center unselectable margin-after"> 
+        <div class="info-text unselectable margin-after"> 
           <!-- Do not remove &nbsp; -->
           { @html infoText } &nbsp;
         </div>            
-
-        <div class="buttons">
-          <!-- BUTTON -->
-          <button class="cool-button" on:click={startGame} 
-                  disabled={!isUserBoardReady || whoBegins === null || isGameOn}
-          >
-              { ui['start_game'][language] }
-          </button>            
-
-          <!-- BUTTON -->
-          <button class="cool-button" on:click={restartGame}>
-              { ui['restart_game'][language] }
-          </button>            
-        </div>  
       </div>            
     </div>
 
-    <!-- HERE USER CAN CHECK USER SHIPS POSITIONED ON THE BOARD -->
-    {#if !isGameOn && curGame === gameId}
-        <div class="ship-list-and-who-plays-first">
-            <div class="ship-list">
-                <h4 class="small-header">{ ui['user_ships'][language] }</h4>
+    <div class="right-or-bottom">
+      <!-- HERE USER CAN CHECK USER SHIPS POSITIONED ON THE BOARD -->
+      {#if !isGameOn && curGame === gameId}
+          <div class="ship-list-and-who-plays-first">
+              <div class="ship-list">
+                  <h4 class="small-header">{ ui['user_ships'][language] }</h4>
 
-                <!-- TABLE TO DISPLAY HOW MANY USER SHIPS ARE AWAILABLE -->
-                <table class="ship-list-table">
-                    <tr class="content-leftish ship-list-headers">
-                        <th class="ship-list-data"> { ui['class'][language]} </th>
-                        <th class="ship-list-data"> { ui['size'][language]} </th>       
-                        <th class="ship-list-data"> { ui['total_number'][language]} </th>                             
-                        <th class="ship-list-data"> { ui['to_be_positioned'][language]} </th>                             
-                    </tr>
-                    <!-- Must use a key in #each loop -->
-                    {#each userShips as userShip, index (index)}
-                        <tr>
-                            <td class="ship-list-data content-leftish"> { ui[userShip.class][language] } </td>
-                            <td class="ship-list-data content-rightish"> { userShip.size } </td>
-                            <td class="ship-list-data content-rightish"> { userShip.totalNumber } </td>
-                            <td class="ship-list-data content-rightish 
-                                { getInfoClass(userShip.toBePositioned, userShip.totalNumber) }
-                                "> 
-                                { userShip.toBePositioned } 
-                            </td>
-                        </tr>
-                    {/each}        
-                </table>
-            </div>
+                  <!-- TABLE TO DISPLAY HOW MANY USER SHIPS ARE AWAILABLE -->
+                  <table class="ship-list-table">
+                      <tr class="content-leftish ship-list-headers">
+                          <th class="ship-list-data"> { ui['class'][language]} </th>
+                          <th class="ship-list-data"> { ui['size'][language]} </th>       
+                          <th class="ship-list-data"> { ui['total_number'][language]} </th>                             
+                          <th class="ship-list-data"> { ui['to_be_positioned'][language]} </th>                             
+                      </tr>
+                      <!-- Must use a key in #each loop -->
+                      {#each userShips as userShip, index (index)}
+                          <tr>
+                              <td class="ship-list-data content-leftish"> { ui[userShip.class][language] } </td>
+                              <td class="ship-list-data content-rightish"> { userShip.size } </td>
+                              <td class="ship-list-data content-rightish"> { userShip.totalNumber } </td>
+                              <td class="ship-list-data content-rightish 
+                                  { getInfoClass(userShip.toBePositioned, userShip.totalNumber) }
+                                  "> 
+                                  { userShip.toBePositioned } 
+                              </td>
+                          </tr>
+                      {/each}        
+                  </table>
+              </div>
 
-            <div class="who-plays-first">
-                <!-- WHO PLAYS FIRST radio buttons etc -->
-                <!-- The fade transition messes up with routing, so use currentGame as a bugfix!!! -->
-                <WhoPlaysFirst on:whoBegins={handleWhoBegins} whoBegins="{whoBegins}" />
-            </div>
-        </div>
-        <!-- <div>&nbsp;</div> -->
-    {/if}    
+              <div class="who-plays-first">
+                  <!-- WHO PLAYS FIRST radio buttons etc -->
+                  <!-- The fade transition messes up with routing, so use currentGame as a bugfix!!! -->
+                  <WhoPlaysFirst on:whoBegins={handleWhoBegins} whoBegins="{whoBegins}" />
+              </div>
+          </div>
+          <!-- <div>&nbsp;</div> -->
+      {/if}    
 
-    {#if isGameOn && curGame === gameId}
-        <div class="opponent" transition:fade="{ {delay: 100, duration: 500} }">
-            <h3 class="user-or-opponent">{ ui["opponent_ships"][language] }</h3>
+      {#if isGameOn && curGame === gameId}
+          <div class="opponent" transition:fade="{ {delay: 100, duration: 500} }">
+              <h3 class="user-or-opponent">{ ui["opponent_ships"][language] }</h3>
 
-            <!-- TABLE with OPPONENT's SHIPS -->
-            <table class="board">
-                <!-- Must use a key in #each loop -->
-                {#each oppoBoard as rowContent, row (row)}
-                    <tr>
-                        <!-- Must use a key in #each loop -->
-                        {#each rowContent as cell, col (col * dataHeight + col)}
-                            <td on:click={ () => fireAtOppoBoard(row, col) }
-                                class="{getCellClass(row, col, oppoBoard, OPPOBOARD)}"                         
-                            >
-                                { @html row > 0 && col > 0 ? num2char(cell) : cell }
-                            </td>
-                        {/each}
-                    </tr>
-                {/each}
-            </table>
-        </div>
-    {/if}
+              <!-- TABLE with OPPONENT's SHIPS -->
+              <table class="board">
+                  <!-- Must use a key in #each loop -->
+                  {#each oppoBoard as rowContent, row (row)}
+                      <tr>
+                          <!-- Must use a key in #each loop -->
+                          {#each rowContent as cell, col (col * dataHeight + col)}
+                              <td on:click={ () => fireAtOppoBoard(row, col) }
+                                  class="{getCellClass(row, col, oppoBoard, OPPOBOARD)}"                         
+                              >
+                                  { @html row > 0 && col > 0 ? num2char(cell) : cell }
+                              </td>
+                          {/each}
+                      </tr>
+                  {/each}
+              </table>
+          </div>
+      {/if}
 
+      <!-- BUTTON(S) and INFO TEXT -->
+      <div class="buttons">
+        <!-- BUTTON -->
+        <button class="cool-button" on:click={startGame} 
+                disabled={!isUserBoardReady || whoBegins === null || isGameOn}
+        >
+            { ui['start_game'][language] }
+        </button>            
 
-    <p>&nbsp</p> <!-- dummy empty paragraph -->
-
-    <div id="cell-popup" class="cell-popup popup-{isPopupVisible ? 'visible' : 'hidden'}"
-        style="left: {popupX}px; top: {popupY}px"
-    >
-        { popupText }
+        <!-- BUTTON -->
+        <button class="cool-button" on:click={restartGame}>
+            { ui['restart_game'][language] }
+        </button>            
+      </div>  
     </div>
-
 </div>    <!-- container end -->
+
+<p>&nbsp</p> <!-- dummy empty paragraph -->
+
+<div id="cell-popup" class="cell-popup popup-{isPopupVisible ? 'visible' : 'hidden'}"
+    style="left: {popupX}px; top: {popupY}px"
+>
+    { popupText }
+</div>
