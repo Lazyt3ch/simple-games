@@ -1,36 +1,20 @@
 <script>
-    import { beforeUpdate, tick } from 'svelte';
-
     import { fade } from 'svelte/transition';
     
-    import { languages, gameName, gameId, uiStrings as ui } from './ui/Battleship.js';
+    import { gameId, uiStrings as ui } from './ui/Battleship.js';
 
     // currentGame is a bugfix that disables transitions when routing
     import { globalLanguage, currentGame } from '../stores.js';
 
-    // import { onDestroy } from 'svelte';
-
     import WhoPlaysFirst from './ui/WhoPlaysFirst.svelte';
 
-    // import { randomInt, pxToNum } from '../lib.js';
-    // import { randomInt } from '../lib.js';
     import { randomInt, alphabet } from '../lib.js';
-
-    // document.addEventListener('click', updateMousePosition);    
-
-    // onDestroy(() => {
-    //     console.log('Battleship: The component is being destroyed');
-    //     // document.removeEventListener('click', updateMousePosition);
-    // });    
-
 
     // LANGUAGE HEAD ==============================>
     let language;    
-    // console.log("Battleship:  $globalLanguage =", $globalLanguage);
 
 	const unsubscribe = globalLanguage.subscribe(value => {
         language = value;        
-		// console.log("Battleship:  language =", language);
     });     
     // LANGUAGE TAIL ==============================<
 
@@ -39,7 +23,6 @@
     let curGame;
 	const unsubscribe2 = currentGame.subscribe(value => {
         curGame = value;        
-		// console.log("Battleship:  curGame, gameId =", curGame, " &", gameId);
     });        
 
 
