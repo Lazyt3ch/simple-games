@@ -1,0 +1,8 @@
+# https://github.com/sw-yx/svelte-zen-garden/blob/master/netlify.toml
+[build]
+  command = "npm run build"
+  functions="functions"
+
+[dev]  
+  command = "npm run start"
+  publish = "public"
