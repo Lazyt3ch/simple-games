@@ -120,10 +120,12 @@
 <style>
 	.game-select {
 		min-width: 12em;
+		font-size: 1rem;
 	}
 
 	.language-select {
 		min-width: 7em;
+		font-size: 1rem;
 	}
 
     .rightish {
