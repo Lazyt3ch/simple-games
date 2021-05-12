@@ -18,8 +18,8 @@
 	import Battleship from './routes/Battleship.svelte';
 	// let gamelinks = null;
 
-	import { gameId as gameId1, gameName as gameName1 } from './routes/ui/TicTacToe.js';
-	import { gameId as gameId2, gameName as gameName2 } from './routes/ui/Battleship.js';
+	import { gameId as gameId1, gameName as gameName1 } from './ui/TicTacToe.js';
+	import { gameId as gameId2, gameName as gameName2 } from './ui/Battleship.js';
 
 	/*
 	let globLang = null;

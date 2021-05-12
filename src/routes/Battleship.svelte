@@ -1320,14 +1320,14 @@
 
     .user {
         /* display: inline-block; */
-        margin-left: 1em;
-        margin-right: 2em;
+        margin-left: .5rem;
+        /* margin-right: 2em; */
         margin-top: 0;
         float: left;
     }
 
     .opponent {
-        margin-left: 1em;
+        margin-left: .5rem;
         margin-top: 0;
         float: right;
     }    

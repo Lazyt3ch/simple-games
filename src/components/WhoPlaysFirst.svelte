@@ -1,8 +1,8 @@
 <script>
     import { createEventDispatcher } from 'svelte';
     import { fade } from 'svelte/transition';
-    import { uiStrings as ui } from './whoPlaysFirst.js';    
-    import { globalLanguage } from '../../stores.js';
+    import { uiStrings as ui } from '../ui/whoPlaysFirst.js';    
+    import { globalLanguage } from '../stores.js';
     
     export let whoBegins;    
     // let whoBegins;
@@ -52,9 +52,9 @@
         user-select: none;
     }        
 
-    .left-margin {
+    /* .left-margin {
         margin-left: 1rem;
-    }
+    } */
 </style>
 
 
