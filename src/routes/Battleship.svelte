@@ -96,12 +96,18 @@
     let totalWidth = dataWidth + 1;
 
     // *********** cells *************
-    const OUTSIDE = 'OUTSIDE';
-    const EMPTY = 'EMPTY';
-    const SHIP = 'SHIP';    
-    const HIT = 'HIT';
-    const SUNK = 'SUNK';
-    const WATER = 'WATER';
+    // const OUTSIDE = 'OUTSIDE';
+    // const EMPTY = 'EMPTY';
+    // const SHIP = 'SHIP';    
+    // const HIT = 'HIT';
+    // const SUNK = 'SUNK';
+    // const WATER = 'WATER';
+    const OUTSIDE = -1;
+    const EMPTY = 0;
+    const SHIP = 1;    
+    const HIT = 2;
+    const SUNK = 3;
+    const WATER = 5;    
 
     const USERBOARD = 'USERBOARD';
     const OPPOBOARD = 'OPPOBOARD';
