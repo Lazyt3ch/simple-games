@@ -1395,7 +1395,7 @@
 
     .container {
         width: 100%;
-        max-width: 60em;
+        /* max-width: 60em; */
         margin-top: 0.5em;
         margin-bottom: 1em;
     }
@@ -1589,35 +1589,35 @@
         </div>
     {/if}
 
-</div>    
+    <!-- BUTTON(S) and INFO TEXT -->
+    <div class="buttons-and-info">
+        <div class="buttons">
+            <!-- BUTTON -->
+            <button class="cool-button" on:click={startGame} 
+                    disabled={!isUserBoardReady || whoBegins === null || isGameOn}
+            >
+                { ui['start_game'][language] }
+            </button>            
 
-<!-- BUTTON(S) and INFO TEXT -->
-<div class="buttons-and-info">
-    <div class="buttons">
-        <!-- BUTTON -->
-        <button class="cool-button" on:click={startGame} 
-                disabled={!isUserBoardReady || whoBegins === null || isGameOn}
-        >
-            { ui['start_game'][language] }
-        </button>            
+            <!-- BUTTON -->
+            <button class="cool-button" on:click={restartGame}>
+                { ui['restart_game'][language] }
+            </button>            
+        </div>
 
-        <!-- BUTTON -->
-        <button class="cool-button" on:click={restartGame}>
-            { ui['restart_game'][language] }
-        </button>            
+        <!-- INFO TEXT -->
+        <div class="info-text center unselectable margin-after"> 
+            <!-- Do not remove &nbsp; -->
+            { @html infoText } &nbsp;
+        </div>      
+    </div>      
+
+    <p>&nbsp</p> <!-- dummy empty paragraph -->
+
+    <div id="cell-popup" class="cell-popup popup-{isPopupVisible ? 'visible' : 'hidden'}"
+        style="left: {popupX}px; top: {popupY}px"
+    >
+        { popupText }
     </div>
 
-    <!-- INFO TEXT -->
-    <div class="info-text center unselectable margin-after"> 
-        <!-- Do not remove &nbsp; -->
-        { @html infoText } &nbsp;
-    </div>      
-</div>      
-
-<p>&nbsp</p> <!-- dummy empty paragraph -->
-
-<div id="cell-popup" class="cell-popup popup-{isPopupVisible ? 'visible' : 'hidden'}"
-    style="left: {popupX}px; top: {popupY}px"
->
-    { popupText }
-</div>
+</div>    <!-- container end -->
