@@ -1172,9 +1172,7 @@
     .who-plays-first {
         display: block;
         margin-top: 2em;
-        /* min-width: 20em; */
         width: 90%;
-        /* margin-right: 1em; */
     }
 
     .ship-list {
@@ -1189,7 +1187,6 @@
         margin-bottom: 1em;
         border-collapse: collapse;      
         font-size: 1em;
-        /* min-width: 10em; */
     }
 
     .ship-list-data {
@@ -1200,7 +1197,6 @@
         border-color: gray;   
 
         padding: 0.2em;
-        /* text-align: left; */
 
         word-wrap: normal;
     }
@@ -1233,20 +1229,12 @@
     }    
 
     .board-cell { /* any cells, including header cells */
-        /*
-        width: 2em;
-        height: 2em;
-        */
         width: 35px;
         height: 35px;
         text-align: center;
     }
    
     .board-data {
-        /* font-weight: 100; */
-        /* font-weight: bolder; */
-        /* font-family: Arial, Helvetica, sans-serif; */
-
         background-color: lightskyblue;
     }
 
@@ -1254,25 +1242,6 @@
         border-color: greenyellow;
         border-width: 2px;
     }
-
-    /*
-    .thick-bottom-border {
-        border-bottom-color: black;
-        border-bottom-width: 3px;
-    }
-
-    .thick-right-border {
-        border-right-color: black;
-        border-right-width: 3px;
-    }    
-    */
-
-    /*
-    .no-top-left-borders {
-        border-top-style: none;
-        border-left-style: none;
-    }
-    */
 
     .top-and-left-headers {
         background-color: lightsteelblue;
