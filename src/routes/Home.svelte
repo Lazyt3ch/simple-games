@@ -1,5 +1,5 @@
 <script>
-    import { languages, uiStrings as ui } from './ui/Home.js';    
+    import { languages, uiStrings as ui } from '../ui/Home.js';    
     import { globalLanguage } from '../stores.js';
 
     /* $: language = globalLanguage; */

@@ -1,7 +1,7 @@
 <script>
     import { fade } from 'svelte/transition';
     
-    import { gameId, uiStrings as ui } from './ui/Battleship.js';
+    import { gameId, uiStrings as ui } from '../ui/Battleship.js';
 
     // currentGame is a bugfix that disables transitions when routing
     import { globalLanguage, currentGame } from '../stores.js';

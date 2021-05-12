@@ -1,7 +1,7 @@
 <script>    
     import { fade } from 'svelte/transition';
     
-    import { languages, gameName, gameId, uiStrings as ui } from './ui/TicTacToe.js';
+    import { languages, gameName, gameId, uiStrings as ui } from '../ui/TicTacToe.js';
 
     // currentGame is a bugfix that disables transitions when routing
     import { globalLanguage, currentGame } from '../stores.js';
