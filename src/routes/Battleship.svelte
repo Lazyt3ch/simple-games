@@ -6,7 +6,7 @@
     // currentGame is a bugfix that disables transitions when routing
     import { globalLanguage, currentGame } from '../stores.js';
 
-    import WhoPlaysFirst from './ui/WhoPlaysFirst.svelte';
+    import WhoPlaysFirst from '../components/WhoPlaysFirst.svelte';
 
     import { randomInt, alphabet } from '../lib.js';
 
