@@ -1388,7 +1388,7 @@
     }
 
     .right-or-bottom {
-      position: relative; /* dummy */
+      min-width: 25rem;
     }
 
     .user-or-opponent {
@@ -1587,6 +1587,21 @@
                   <!-- The fade transition messes up with routing, so use currentGame as a bugfix!!! -->
                   <WhoPlaysFirst on:whoBegins={handleWhoBegins} whoBegins="{whoBegins}" />
               </div>
+
+            <!-- BUTTON(S) and INFO TEXT -->
+            <div class="buttons">
+              <!-- BUTTON -->
+              <button class="cool-button" on:click={startGame} 
+                      disabled={!isUserBoardReady || whoBegins === null || isGameOn}
+              >
+                  { ui['start_game'][language] }
+              </button>            
+
+              <!-- BUTTON -->
+              <button class="cool-button" on:click={restartGame}>
+                  { ui['restart_game'][language] }
+              </button>            
+            </div>                
           </div>
           <!-- <div>&nbsp;</div> -->
       {/if}    
@@ -1611,23 +1626,13 @@
                       </tr>
                   {/each}
               </table>
+
+            <!-- BUTTON -->
+            <button class="cool-button" on:click={restartGame}>
+              { ui['restart_game'][language] }
+            </button>     
           </div>
       {/if}
-
-      <!-- BUTTON(S) and INFO TEXT -->
-      <div class="buttons">
-        <!-- BUTTON -->
-        <button class="cool-button" on:click={startGame} 
-                disabled={!isUserBoardReady || whoBegins === null || isGameOn}
-        >
-            { ui['start_game'][language] }
-        </button>            
-
-        <!-- BUTTON -->
-        <button class="cool-button" on:click={restartGame}>
-            { ui['restart_game'][language] }
-        </button>            
-      </div>  
     </div>
 </div>    <!-- container end -->
 
