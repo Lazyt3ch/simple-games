@@ -2,6 +2,8 @@ html, body {
 	position: relative;
 	width: 100%;
 	height: 100%;
+
+	font-size: 16px;
 }
 
 body {
@@ -16,9 +18,18 @@ body {
 }
 
 .very-visible {
-	font-weight: bold;
-	font-size: 2em;
-	background-color: yellow;
+	max-width: 800px;
+	margin: 0 auto;
+	transform: translateY(20vh);
+
+	font-weight: 400;
+	font-size: 1.2rem;
+}
+
+@media (max-width: 900px) {
+	.very-visible {
+		font-size: 1rem;
+	}
 }
 
 /*
