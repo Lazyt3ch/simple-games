@@ -1449,15 +1449,15 @@
         transform: rotate(-90deg) translateX(-50%);
       }
 
-      .user, .opponent {
+      /* .user, .opponent {
         display: block;
         min-width: 350px;
-      }      
+      }       */
 
-      .board-cell { /* any cells, including header cells */
+      /* .board-cell { 
         width: 30px;
         height: 30px;
-      }            
+      }             */
 
       .info-text {
         font-size: .9rem;
@@ -1472,7 +1472,7 @@
       }
     }
 
-    /* @media (max-width: 450px) {
+    @media (max-width: 450px) {
       .user, .opponent {
         display: block;
         min-width: 350px;
@@ -1482,7 +1482,7 @@
         width: 30px;
         height: 30px;
       }      
-    } */
+    }
 
 </style>
 
