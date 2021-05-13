@@ -1342,35 +1342,7 @@
         min-width: 400px;
     }
 
-    /* .user {
-      margin-right: 2rem;
-    } */
-
-    /* .user {
-        float: left;
-    }
-
-    .opponent {
-        float: right;
-    } */
-
-    /*
-    .leftish {
-        float: left;
-    }
-    */
-
-    /* .buttons-and-info {
-        display: flex;
-        display: block;
-        clear: both;
-        min-width: 25em;
-        max-width: 35em;
-        margin-top: 2em;
-    } */
-
     .info-text {
-        /* display: flex; */
         font-size: 1em;
         font-weight: normal;
         font-family: Arial, Helvetica, sans-serif;
@@ -1454,9 +1426,6 @@
         margin-top: 0;
 
         padding-left: 1.5rem;
-
-        /* flex-direction: column;
-        flex-wrap: wrap-reverse; */
       }
 
       .left-or-top {
