@@ -1502,14 +1502,12 @@
         </table>
       </div>
 
-      <!-- BUTTON(S) and INFO TEXT -->
-      <!-- <div class="buttons-and-info"> -->
-        <!-- INFO TEXT -->
-        <div class="info-text unselectable margin-after"> 
-          <!-- Do not remove &nbsp; -->
-          { @html infoText } &nbsp;
-        </div>            
-      <!-- </div>             -->
+      {#if isGameOn && curGame === gameId}
+        <!-- BUTTON -->
+        <button class="cool-button" on:click={restartGame}>
+          { ui['restart_game'][language] }
+        </button>     
+      {/if}
     </div>
 
     <div class="right-or-bottom">
@@ -1588,10 +1586,11 @@
                   {/each}
               </table>
 
-            <!-- BUTTON -->
-            <button class="cool-button" on:click={restartGame}>
-              { ui['restart_game'][language] }
-            </button>     
+            <!-- INFO TEXT -->
+            <div class="info-text unselectable margin-after"> 
+              <!-- Do not remove &nbsp; -->
+              { @html infoText } &nbsp;
+            </div>            
           </div>
       {/if}
     </div>
