@@ -1392,6 +1392,20 @@
       flex-direction: row;      
     }
 
+    .flex {
+      width: 100%;
+
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .limited-width {
+      margin: .5rem auto;
+      max-width: 20rem;
+    }
+
     .cool-button {
         background-color: lightgray;
         color: navy;
@@ -1504,9 +1518,11 @@
 
       {#if isGameOn && curGame === gameId}
         <!-- BUTTON -->
-        <button class="cool-button" on:click={restartGame}>
-          { ui['restart_game'][language] }
-        </button>     
+        <div class="limited-width flex">
+          <button class="cool-button" on:click={restartGame}>
+            { ui['restart_game'][language] }
+          </button>     
+        </div>
       {/if}
     </div>
 
