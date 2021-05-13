@@ -27,13 +27,14 @@
         width: 100%;
     }
 
-    .colorful {
+    /* .colorful {
         background-color: aquamarine;
-    }
+    } */
 </style>
 
-<div class="centered colorful">
+<div class="centered">
     <h1>{ ui["welcome"][language] }</h1>
+    <p>{ ui["offer_to_play"][language] }</p>
     <!-- <h1>PLACEHOLDER</h1> -->
     <!-- <p> { $globalLanguageIndex } </p> -->
 </div>

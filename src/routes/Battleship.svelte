@@ -1304,6 +1304,10 @@
         outline: yellow solid 4px;
     }
 
+    .onclick {
+        outline: yellow solid 4px;
+    }    
+
     .user {
         margin-right: 1rem;
         margin-top: 0;
