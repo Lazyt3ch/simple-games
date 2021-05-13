@@ -1254,6 +1254,7 @@
 
     .opponent {
         margin-top: .5rem;
+        margin-right: 1rem;
 
         position: relative;
     }    
@@ -1312,6 +1313,8 @@
 
       display: flex;
       flex-direction: column;      
+      /* justify-content: flex-start;
+      align-items: flex-end; */
 
       /* margin-top: .5rem; */
     }
@@ -1321,6 +1324,8 @@
 
       display: flex;
       flex-direction: column;
+      /* justify-content: flex-start;
+      align-items: flex-end; */
     }
 
     .user-or-opponent {
@@ -1336,9 +1341,9 @@
         min-width: 400px;
     }
 
-    .user {
+    /* .user {
       margin-right: 2rem;
-    }
+    } */
 
     /* .user {
         float: left;
