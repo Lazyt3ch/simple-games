@@ -35,6 +35,7 @@
 <div class="centered">
     <h1>{ ui["welcome"][language] }</h1>
     <p>{ ui["offer_to_play"][language] }</p>
+    <p>{ ui["offer_to_select_game"][language] }</p>
     <!-- <h1>PLACEHOLDER</h1> -->
     <!-- <p> { $globalLanguageIndex } </p> -->
 </div>

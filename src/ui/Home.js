@@ -6,8 +6,6 @@ export const languages = [
 export const uiStrings = {
     'welcome':
     {
-        // en: "Welcome to our website!",
-        // ru: "Добро пожаловать на наш сайт!",
         en: "Welcome!",
         ru: "Добро пожаловать!",
     },
@@ -18,7 +16,7 @@ export const uiStrings = {
     },
     'offer_to_select_game':
     {
-        en: "Select a game using the drop-down list (see the top-left corner).",
+        en: "Select a game in the drop-down list (see the top-left corner).",
         ru: "Выберите игру в выпадающем списке (в левом верхнем углу экрана).",
     },
     
