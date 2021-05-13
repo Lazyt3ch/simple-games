@@ -1087,7 +1087,7 @@
 
     .who-plays-first {
         display: block;
-        margin-top: 2em;
+        margin-top: 1em;
         width: 90%;
     }
 
@@ -1290,7 +1290,8 @@
     }
 
     .container {
-        width: 100%;
+        /* width: 100%; */
+        width: 97%;
         /* max-width: 60em; */
         margin-top: 0.5em;
         margin-bottom: 1em;
