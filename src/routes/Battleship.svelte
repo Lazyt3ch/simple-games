@@ -1298,6 +1298,8 @@
         flex-direction: row;
         /* flex-wrap: wrap;         */
         flex-wrap: wrap-reverse;
+        justify-content: center;
+        align-items: flex-end;
 
         padding-left: .5rem;
         padding-right: .5rem;
@@ -1308,11 +1310,14 @@
     .left-or-top {
       position: relative;
 
-      margin-top: .5rem;
+      display: flex;
+      flex-direction: column;      
+
+      /* margin-top: .5rem; */
     }
 
     .right-or-bottom {
-      min-width: 26rem;
+      /* min-width: 26rem; */
 
       display: flex;
       flex-direction: column;
@@ -1328,7 +1333,7 @@
 
     .user, .opponent {
         display: block;
-        min-width: 25em;
+        min-width: 400px;
     }
 
     .user {
@@ -1450,6 +1455,11 @@
     }
 
     @media (max-width: 450px) {
+      .user, .opponent {
+        display: block;
+        min-width: 350px;
+      }      
+
       .board-cell { /* any cells, including header cells */
         width: 30px;
         height: 30px;
