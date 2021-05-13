@@ -1495,12 +1495,21 @@
           </button>     
         </div>
       {/if}
+
+      {#if !isGameOn && curGame === gameId}
+        <!-- INFO TEXT -->
+        <div class="info-text unselectable margin-after"> 
+          <!-- Do not remove &nbsp; -->
+          { @html infoText } &nbsp;
+        </div>        
+      {/if}   
+
     </div>
 
     <div class="right-or-bottom">
       <!-- HERE USER CAN CHECK USER SHIPS POSITIONED ON THE BOARD -->
       {#if !isGameOn && curGame === gameId}
-          <div class="ship-list-and-who-plays-first">
+        <div class="ship-list-and-who-plays-first">
               <div class="ship-list">
                   <h4 class="small-header">{ ui['user_ships'][language] }</h4>
 
@@ -1574,12 +1583,6 @@
               </table>
           </div>
       {/if}
-
-      <!-- INFO TEXT -->
-      <div class="info-text unselectable margin-after"> 
-        <!-- Do not remove &nbsp; -->
-        { @html infoText } &nbsp;
-      </div>            
 
     </div>
 </div>    <!-- container end -->
