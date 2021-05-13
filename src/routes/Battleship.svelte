@@ -1428,6 +1428,10 @@
         margin-top: 0;
 
         padding-left: 1.5rem;
+
+        display: flex;
+        flex-direction: column;
+        flex-wrap: wrap-reverse;        
       }
 
       .left-or-top {
