@@ -1449,6 +1449,13 @@
       }
     }
 
+    @media (max-width: 450px) {
+      .board-cell { /* any cells, including header cells */
+        width: 30px;
+        height: 30px;
+      }      
+    }
+
 </style>
 
 
