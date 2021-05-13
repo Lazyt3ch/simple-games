@@ -17,25 +17,38 @@
 </script>
 
 <style>
-    .centered {
-        /* width: 80%;
-        display: inline-block;
-        width: 100%;
-        margin: 0 auto; */
-        text-align: center;
-        height: 100%;
-        width: 100%;
+  .centered {
+    text-align: center;
+    height: 100%;
+    width: 100%;      
+  }
+
+  h1 {
+    font-size: 2rem;
+    font-weight: 600;
+  }
+
+  p {
+    font-size: 1.2rem;
+    font-weight: 400;
+  }
+
+  @media (max-width: 500px) {
+    h1 {
+      font-size: 1.6rem;
     }
 
-    /* .colorful {
-        background-color: aquamarine;
-    } */
+    p {
+      font-size: 1rem;
+    }    
+  }
+
 </style>
 
 <div class="centered">
-    <h1>{ ui["welcome"][language] }</h1>
-    <p>{ ui["offer_to_play"][language] }</p>
-    <p>{ ui["offer_to_select_game"][language] }</p>
-    <!-- <h1>PLACEHOLDER</h1> -->
-    <!-- <p> { $globalLanguageIndex } </p> -->
+  <h1>{ ui["welcome"][language] }</h1>
+  <p>{ ui["offer_to_play"][language] }</p>
+  <p>{ ui["offer_to_select_game"][language] }</p>
+  <!-- <h1>PLACEHOLDER</h1> -->
+  <!-- <p> { $globalLanguageIndex } </p> -->
 </div>
