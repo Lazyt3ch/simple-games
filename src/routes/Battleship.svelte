@@ -1296,7 +1296,8 @@
 
         display: flex;
         flex-direction: row;
-        flex-wrap: wrap;
+        /* flex-wrap: wrap;         */
+        flex-wrap: wrap-reverse;
 
         padding-left: .5rem;
         padding-right: .5rem;
@@ -1429,7 +1430,8 @@
 
         padding-left: 1.5rem;
 
-        flex-direction: column;
+        /* flex-direction: column;
+        flex-wrap: wrap-reverse; */
       }
 
       .left-or-top {
