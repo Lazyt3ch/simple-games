@@ -1431,8 +1431,8 @@
 
         display: flex;
         flex-direction: column;
-        /* flex-wrap: wrap-reverse;         */
-        flex-wrap: wrap;
+        flex-wrap: wrap-reverse;        
+        /* flex-wrap: wrap; */
       }
 
       .left-or-top {
