@@ -1081,28 +1081,28 @@
 <style>
     .ship-list-and-who-plays-first {
         display: block;        
-        max-width: 25em;
+        max-width: 25rem;
         /* float: right; */
     }
 
     .who-plays-first {
         display: block;
-        margin-top: 1em;
+        margin-top: 1rem;
         width: 90%;
     }
 
     .ship-list {
         display: block;
         width: 100%;
-        margin-top: .5em;
-        margin-bottom: 1em;
+        margin-top: .5rem;
+        margin-bottom: 1rem;
     }
 
     .ship-list-table {        
-        margin-top: .5em;
-        margin-bottom: 1em;
+        margin-top: .5rem;
+        margin-bottom: 1rem;
         border-collapse: collapse;      
-        font-size: 1em;
+        font-size: 1rem;
     }
 
     .ship-list-data {
@@ -1112,7 +1112,7 @@
         border-width: 1px;
         border-color: gray;   
 
-        padding: 0.2em;
+        padding: 0.2rem;
 
         word-wrap: normal;
     }
@@ -1126,12 +1126,12 @@
     }    
 
     .ship-list-headers {
-        font-size: .8em;
+        font-size: .8rem;
     }
 
     .small-header {
-        margin-block-start: .5em;
-        margin-block-end: .5em;
+        margin-block-start: .5rem;
+        margin-block-end: .5rem;
     }
 
 
@@ -1323,6 +1323,7 @@
 
     .right-or-bottom {
       /* min-width: 26rem; */
+      /* min-width: 400px; */
 
       display: flex;
       flex-direction: column;
@@ -1344,12 +1345,12 @@
     }
 
     .info-text {
-        font-size: 1em;
+        font-size: 1rem;
         font-weight: normal;
         font-family: Arial, Helvetica, sans-serif;
         color: black;
-        margin-top: .5em;
-        max-width: 25em;
+        margin-top: .5rem;
+        max-width: 25rem;
         text-align: left;
     }
 
@@ -1434,6 +1435,10 @@
         margin-right: 0;
       }
 
+      /* .right-or-bottom {
+        min-width: 350px;      
+      } */
+
       .user-or-opponent {
         position: absolute;
 
@@ -1443,9 +1448,7 @@
         transform-origin: left;
         transform: rotate(-90deg) translateX(-50%);
       }
-    }
 
-    @media (max-width: 450px) {
       .user, .opponent {
         display: block;
         min-width: 350px;
@@ -1454,8 +1457,32 @@
       .board-cell { /* any cells, including header cells */
         width: 30px;
         height: 30px;
-      }      
+      }            
+
+      .info-text {
+        font-size: .9rem;
+      }
+
+      .who-plays-first {
+        font-size: .9rem;
+      }
+
+      .ship-list-table {        
+        font-size: .9rem;
+      }
     }
+
+    /* @media (max-width: 450px) {
+      .user, .opponent {
+        display: block;
+        min-width: 350px;
+      }      
+
+      .board-cell { 
+        width: 30px;
+        height: 30px;
+      }      
+    } */
 
 </style>
 
