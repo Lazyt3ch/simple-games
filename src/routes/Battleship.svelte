@@ -1572,14 +1572,15 @@
                       </tr>
                   {/each}
               </table>
-
-            <!-- INFO TEXT -->
-            <div class="info-text unselectable margin-after"> 
-              <!-- Do not remove &nbsp; -->
-              { @html infoText } &nbsp;
-            </div>            
           </div>
       {/if}
+
+      <!-- INFO TEXT -->
+      <div class="info-text unselectable margin-after"> 
+        <!-- Do not remove &nbsp; -->
+        { @html infoText } &nbsp;
+      </div>            
+
     </div>
 </div>    <!-- container end -->
 
