@@ -1478,6 +1478,11 @@
     }
 
     @media (max-height: 520px) {
+      .container {
+        display: flex;
+        flex-direction: row;
+      }
+      
       .user, .opponent {
         display: block;
         /* min-width: 350px; */
@@ -1494,7 +1499,7 @@
       .info-text {
         font-size: .8rem;
         /* font-size: 4vh; */
-      }
+      }      
     }    
 
     /* @media (max-width: 450px) {
