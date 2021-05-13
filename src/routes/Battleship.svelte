@@ -1317,6 +1317,7 @@
       align-items: flex-end; */
 
       /* margin-top: .5rem; */
+      margin-right: 1rem;
     }
 
     .right-or-bottom {
@@ -1460,6 +1461,7 @@
 
       .left-or-top {
         margin-top: 0;
+        margin-right: 0;
       }
 
       .user-or-opponent {
