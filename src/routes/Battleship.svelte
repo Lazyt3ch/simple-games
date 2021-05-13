@@ -1490,6 +1490,11 @@
         width: 6vh;
         height: 6vh;
       }      
+
+      .info-text {
+        font-size: .8rem;
+        /* font-size: 4vh; */
+      }
     }    
 
     /* @media (max-width: 450px) {
