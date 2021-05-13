@@ -1431,7 +1431,8 @@
 
         display: flex;
         flex-direction: column;
-        flex-wrap: wrap-reverse;        
+        /* flex-wrap: wrap-reverse;         */
+        flex-wrap: wrap;
       }
 
       .left-or-top {
@@ -1453,16 +1454,6 @@
         transform: rotate(-90deg) translateX(-50%);
       }
 
-      /* .user, .opponent {
-        display: block;
-        min-width: 350px;
-      }       */
-
-      /* .board-cell { 
-        width: 30px;
-        height: 30px;
-      }             */
-
       .info-text {
         font-size: .9rem;
       }
@@ -1474,9 +1465,19 @@
       .ship-list-table {        
         font-size: .9rem;
       }
+
+      .user, .opponent {
+        display: block;
+        min-width: 300px;
+      }      
+
+      .board-cell { 
+        width: 25px;
+        height: 25px;
+      }         
     }
 
-    @media (max-width: 450px) {
+    /* @media (max-width: 450px) {
       .user, .opponent {
         display: block;
         min-width: 350px;
@@ -1486,7 +1487,7 @@
         width: 30px;
         height: 30px;
       }      
-    }
+    } */
 
 </style>
 
