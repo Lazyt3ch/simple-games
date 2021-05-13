@@ -1247,13 +1247,13 @@
 
     .user {
         margin-right: 1rem;
-        margin-top: 0;
+        /* margin-top: 0; */
 
         position: relative;
     }
 
     .opponent {
-        margin-top: .5rem;
+        /* margin-top: .5rem; */
         margin-right: 1rem;
 
         position: relative;
