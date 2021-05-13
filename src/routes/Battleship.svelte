@@ -1589,7 +1589,7 @@
           <!-- <div>&nbsp;</div> -->
       {/if}    
 
-      {#if isGameOn && curGame === gameId}
+      {#if isGameOn && curGame === gameId}              
           <div class="opponent" transition:fade="{ {delay: 100, duration: 500} }">
               <h3 class="user-or-opponent">{ ui["opponent_ships"][language] }</h3>
 
@@ -1610,6 +1610,12 @@
                   {/each}
               </table>
           </div>
+
+          <!-- INFO TEXT -->
+          <div class="info-text unselectable"> 
+            <!-- Do not remove &nbsp; -->
+            { @html infoText } &nbsp;
+          </div>    
       {/if}
 
     </div>
