@@ -525,23 +525,24 @@
 
 
 <style>
-    table, tr, td {
-        border: 1px solid black;
-        border-collapse: collapse;        
-        font-family: Arial, Helvetica, sans-serif;
+    table {
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 2rem;
+      font-weight: bolder;
+
+      margin-top: 1em;
+      background-color: aquamarine;
     }
 
-    table {
-        margin-top: 1em;
-        background-color: aquamarine;
+    table, tr, td {
+      border: 1px solid black;
+      border-collapse: collapse;        
     }
 
     td {
-        height: 2em;
-        width: 2em;
+        height: 5rem;
+        width: 5rem;
         vertical-align: center;
-        font-size: 3em;
-        font-weight: bolder;
     }
 
     .winner {
@@ -557,14 +558,6 @@
         text-align: center;
     }
 
-    /*
-    .rightish {
-        margin-left: 70%;
-        margin-right: auto;
-        text-align: left;
-    }
-    */
-
     .margin-after {
         margin-bottom: 1em;
     }
@@ -572,14 +565,6 @@
     .limited-width {
         max-width: 20em;
     }
-
-    /* button.cool-button {
-        background-color: aqua;
-        color: blue;
-        font-weight: bold;
-        margin-left: 1em;
-        margin-right: 1em;
-    } */
 
     .cool-button {
         background-color: lightgray;
@@ -595,23 +580,10 @@
         color: gray;
     }        
 
-    /*
-    .highlighted {
-        background: yellow;
-        color: blue;
-    }
-    */
-
     button:disabled {
         background-color: #cccccc;
         color: #666666;        
     }
-
-    /*
-    .left-margin {
-        margin-left: 5%;
-    }
-    */
 
     .unselectable {
         -moz-user-select: -moz-none;
@@ -628,6 +600,7 @@
         margin-left: auto;
         margin-right: auto;
     }    
+    
 </style>
 
 
