@@ -531,6 +531,23 @@
     display: flex;
     flex-direction: row;
     flex-wrap: wrap;
+    justify-content: center;
+    align-items: flex-start;
+
+    padding-top: 1rem;
+  }
+
+  .top-or-left {
+    margin: 0 1rem;
+  }
+
+  .bottom-or-right {
+    margin-left: 1rem;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
   }
 
     table {
@@ -538,7 +555,7 @@
       font-size: 2rem;
       font-weight: bolder;
 
-      margin-top: 1em;
+      /* margin-top: 1em; */
       background-color: aquamarine;
     }
 
@@ -548,39 +565,35 @@
     }
 
     td {
-        /* height: calc(min(20vh, 20vw));
-        width: calc(min(20vh, 20vw)); */
-        /* max-height: 5rem;
-        max-width: 5rem; */
-        height: 5rem;
-        width: 5rem;
-        vertical-align: center;
+      height: 5rem;
+      width: 5rem;
+      vertical-align: center;
     }
 
     .winner {
-        font-weight: 200;
-        background-color: yellow;
-        color: blue;
-        font-weight: bolder;
+      font-weight: 200;
+      background-color: yellow;
+      color: blue;
+      font-weight: bolder;
     }
 
     .info-text {
+      width: 100%;
+
       font-weight: 400;
       font-size: 1.2rem;
     }
 
     .center {
-        margin-left: auto;
-        margin-right: auto;
-        text-align: center;
+      text-align: center;
     }
 
     .margin-after {
-        margin-bottom: 1em;
+      margin-bottom: 1rem;
     }
 
     .limited-width {
-        max-width: 20em;
+      max-width: 30rem;
     }
 
     .cool-button {
@@ -588,9 +601,13 @@
         color: navy;
         font-weight: 600;
         height: 2rem;
-        margin-left: 1em;
-        margin-right: 1em;        
+        /* margin-left: 1rem;
+        margin-right: 1rem;         */
     }    
+
+    .cool-button:nth-child(2) {
+      margin-left: 1rem;
+    }
 
     .cool-button:disabled {
         background-color: lightgray;
@@ -612,8 +629,8 @@
 
     .who-plays-first {
         display: block;
-        margin-top: 2em;
-        width: 60%;
+        margin-top: 1.5rem;
+        width: 100%;
         margin-left: auto;
         margin-right: auto;
     }    
@@ -639,7 +656,7 @@
 <!-- <h1 class="center">{ gameName[language] }</h1> -->
 
 <div class="container">
-  <div class="top-of-left">
+  <div class="top-or-left">
     <!-- TABLE -->
     <table class="center margin-after">
         {#each board as row, rowIndex}
@@ -669,10 +686,10 @@
     </div>
 
     <!-- INFO TEXT -->
-    <h2 class="info-text center unselectable"> 
+    <div class="info-text unselectable"> 
         <!-- Do not remove &nbsp; -->
         { infoText } &nbsp;
-    </h2>
+    </div>
 
     <div class="who-plays-first limited-width">
         {#if whoBegins === null && curGame === gameId} 

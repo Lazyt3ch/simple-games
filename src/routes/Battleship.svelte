@@ -1382,19 +1382,19 @@
     }
 
     .cool-button {
-        background-color: lightgray;
-        color: navy;
-        font-weight: 600;
-        height: 2rem;
+      background-color: lightgray;
+      color: navy;
+      font-weight: 600;
+      height: 2rem;
     }
 
     .cool-button:nth-child(2) {
-      margin-left: 1rem;
+      margin-left: .5rem;
     }
 
     .cool-button:disabled {
-        background-color: lightgray;
-        color: gray;
+      background-color: lightgray;
+      color: gray;
     }    
 
     /* used by who-plays-first */
