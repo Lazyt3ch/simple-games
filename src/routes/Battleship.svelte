@@ -1494,7 +1494,7 @@
       }
     }
 
-    @media (max-height: 450px) {
+    /* @media (max-height: 800px) {
       .container {
         display: flex;
         flex-direction: row;
@@ -1502,22 +1502,18 @@
       
       .user, .opponent {
         display: block;
-        /* min-width: 350px; */
         min-width: 75vh;
       }      
 
       .board-cell { 
-        /* width: 30px;
-        height: 30px; */
-        width: 6vh;
-        height: 6vh;
+        width: 4vh;
+        height: 4vh;
       }      
 
       .info-text {
         font-size: .8rem;
-        /* font-size: 4vh; */
       }      
-    }    
+    }     */
 
     /* @media (max-width: 450px) {
       .user, .opponent {
