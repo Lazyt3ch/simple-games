@@ -573,15 +573,24 @@
         max-width: 20em;
     }
 
-    button.cool-button {
+    /* button.cool-button {
         background-color: aqua;
         color: blue;
         font-weight: bold;
         margin-left: 1em;
         margin-right: 1em;
-    }
+    } */
 
-    button.cool-button:disabled {
+    .cool-button {
+        background-color: lightgray;
+        color: navy;
+        font-weight: 600;
+        height: 2rem;
+        margin-left: 1em;
+        margin-right: 1em;        
+    }    
+
+    .cool-button:disabled {
         background-color: lightgray;
         color: gray;
     }        
