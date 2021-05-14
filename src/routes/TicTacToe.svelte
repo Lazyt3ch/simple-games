@@ -525,6 +525,14 @@
 
 
 <style>
+  .container {
+    width: 100%;
+
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+
     table {
       font-family: Arial, Helvetica, sans-serif;
       font-size: 2rem;
@@ -540,10 +548,12 @@
     }
 
     td {
-        height: calc(min(20vh, 20vw));
-        width: calc(min(20vh, 20vw));
+        /* height: calc(min(20vh, 20vw));
+        width: calc(min(20vh, 20vw)); */
         /* max-height: 5rem;
         max-width: 5rem; */
+        height: 5rem;
+        width: 5rem;
         vertical-align: center;
     }
 
@@ -608,7 +618,7 @@
         margin-right: auto;
     }    
 
-    @media (min-width: 100px) {
+    /* @media (min-width: 100px) {
       td {
         width: 5rem;
         height: 5rem;
@@ -620,7 +630,7 @@
         width: 5rem;
         height: 5rem;
       }
-    }    
+    }     */
 
 </style>
 
@@ -628,42 +638,48 @@
 <!-- GAME NAME -->
 <!-- <h1 class="center">{ gameName[language] }</h1> -->
 
-<!-- TABLE -->
-<table class="center margin-after">
-    {#each board as row, rowIndex}
-        <tr>
-            {#each row as cell, colIndex}
-                <td on:click={ () => userMove(rowIndex, colIndex) }
-                    class="{cell === 2 || cell === -2 ? 'winner' : ''} unselectable"                            
-                >
-                    { @html num2char(cell) }
-                </td>
-            {/each}
-        </tr>
-    {/each}
-</table>
+<div class="container">
+  <div class="top-of-left">
+    <!-- TABLE -->
+    <table class="center margin-after">
+        {#each board as row, rowIndex}
+            <tr>
+                {#each row as cell, colIndex}
+                    <td on:click={ () => userMove(rowIndex, colIndex) }
+                        class="{cell === 2 || cell === -2 ? 'winner' : ''} unselectable"                            
+                    >
+                        { @html num2char(cell) }
+                    </td>
+                {/each}
+            </tr>
+        {/each}
+    </table>
+  </div>
 
-<!-- BUTTONS -->
-<div class="center margin-after">
-    <button class="cool-button" on:click={startGame} disabled={whoBegins === null}>
-        { ui['start_game'][language] }
-    </button>
+  <div class="bottom-or-right">
+    <!-- BUTTONS -->
+    <div class="center margin-after">
+        <button class="cool-button" on:click={startGame} disabled={whoBegins === null}>
+            { ui['start_game'][language] }
+        </button>
 
-    <button class="cool-button" on:click={restartGame} disabled={whoBegins === null}>
-        { ui['restart_game'][language] }
-    </button>
-</div>
+        <button class="cool-button" on:click={restartGame} disabled={whoBegins === null}>
+            { ui['restart_game'][language] }
+        </button>
+    </div>
 
-<!-- INFO TEXT -->
-<h2 class="info-text center unselectable"> 
-    <!-- Do not remove &nbsp; -->
-    { infoText } &nbsp;
-</h2>
+    <!-- INFO TEXT -->
+    <h2 class="info-text center unselectable"> 
+        <!-- Do not remove &nbsp; -->
+        { infoText } &nbsp;
+    </h2>
 
-<div class="who-plays-first limited-width">
-    {#if whoBegins === null && curGame === gameId} 
-        <!-- WHO PLAYS FIRST radio buttons etc -->
-        <!-- The fade transition messes up with routing, so use currentGame as a bugfix!!! -->
-        <WhoPlaysFirst on:whoBegins={handleWhoBegins} whoBegins="{whoBegins}" />
-    {/if}
-</div>
+    <div class="who-plays-first limited-width">
+        {#if whoBegins === null && curGame === gameId} 
+            <!-- WHO PLAYS FIRST radio buttons etc -->
+            <!-- The fade transition messes up with routing, so use currentGame as a bugfix!!! -->
+            <WhoPlaysFirst on:whoBegins={handleWhoBegins} whoBegins="{whoBegins}" />
+        {/if}
+    </div>
+  </div>
+</div>  
