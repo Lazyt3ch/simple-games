@@ -22,6 +22,10 @@
 
 
 <style>
+    .user-begins-container {
+        margin: .8rem 0;
+    }
+
     .who-plays-first {
         border-width: 1px;
         border-color: transparent;
@@ -60,7 +64,7 @@
     <label class="unselectable"> { ui['who_plays_first'][language] } </label>
     
     <div>
-        <div>
+        <div class="user-begins-container">
             <label for="user-begins" class="unselectable"> 
                 <input type='radio' bind:group={whoBegins} 
                     id='user-begins' name="who-begins" value='user'>
