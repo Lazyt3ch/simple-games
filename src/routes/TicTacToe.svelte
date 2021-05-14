@@ -540,8 +540,10 @@
     }
 
     td {
-        height: 5rem;
-        width: 5rem;
+        height: calc(min(20vh, 20vw));
+        width: calc(min(20vh, 20vw));
+        /* max-height: 5rem;
+        max-width: 5rem; */
         vertical-align: center;
     }
 
@@ -600,7 +602,21 @@
         margin-left: auto;
         margin-right: auto;
     }    
-    
+
+    @media (min-width: 100px) {
+      td {
+        width: 5rem;
+        height: 5rem;
+      }
+    }
+
+    @media (min-height: 100px) {
+      td {
+        width: 5rem;
+        height: 5rem;
+      }
+    }    
+
 </style>
 
 
