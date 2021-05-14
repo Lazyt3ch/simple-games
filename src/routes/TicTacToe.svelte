@@ -534,7 +534,7 @@
   }
 
   .bottom-or-right {
-    margin-left: 1rem;
+    margin: 0 1rem;
 
     display: flex;
     flex-direction: column;
