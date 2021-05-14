@@ -12,18 +12,14 @@
 
     let language;
     
-    // console.log("TicTacToe:  $globalLanguage =", $globalLanguage);
-
 	const unsubscribe = globalLanguage.subscribe(value => {
-        language = value;        
-		// console.log("TicTacToe:  language =", language);
+      language = value;        
     });    
     
     // currentGame is a bugfix that disables transitions when routing
     let curGame;
 	const unsubscribe2 = currentGame.subscribe(value => {
         curGame = value;        
-		// console.log("TicTacToe:  curGame, gameId =", curGame, " &", gameId);
 	});    
 
     let moveCount = 0;
@@ -32,7 +28,6 @@
 
     let oppoTurn = false;
 
-    // let info = 'lets_play';
     let info;
     let infoText;
 
@@ -61,9 +56,6 @@
 
     function handleWhoBegins(event) {
         whoBegins = event.detail;
-        // console.log("TicTacToe;  FUNCTION: handleWhoBegins;  event =", event);
-        // console.log("TicTacToe;  FUNCTION: handleWhoBegins;  whoBegins =", whoBegins);
-        // isUserReady = true;
     }    
 
     let board = null;
@@ -601,8 +593,6 @@
         color: navy;
         font-weight: 600;
         height: 2rem;
-        /* margin-left: 1rem;
-        margin-right: 1rem;         */
     }    
 
     .cool-button:nth-child(2) {
@@ -634,20 +624,6 @@
         margin-left: auto;
         margin-right: auto;
     }    
-
-    /* @media (min-width: 100px) {
-      td {
-        width: 5rem;
-        height: 5rem;
-      }
-    }
-
-    @media (min-height: 100px) {
-      td {
-        width: 5rem;
-        height: 5rem;
-      }
-    }     */
 
 </style>
 
