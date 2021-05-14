@@ -1464,28 +1464,38 @@
         justify-content: center;
       }
 
-      .user {
+      .user, .opponent {
         margin: 0 auto;
         display: flex;
         /* flex-direction: column; */
         flex-direction: row;
         align-items: center;     
-        justify-content: center;   
+        justify-content: flex-start;   
 
         /* width: 50vw; */
       }
 
+      .rotated-text-container {
+        width: 1.2rem;
+        height: 10rem;
+
+        position: relative;
+      }
+
       .user-or-opponent {
-        /* position: absolute; */
+        position: absolute;
         /* position: relative; */
 
         /* left: -0.8rem;
         top: 50%; */
         /* width: 100%; */
         /* width: 80%; */
+        top: 50%;
 
         transform-origin: left;
         transform: rotate(-90deg) translateX(-50%);
+
+        width: 10rem;
       }      
     }    
 
@@ -1622,7 +1632,9 @@
     <div class="left-or-top">     
 
       <div class="user">
-        <div class="user-or-opponent">{ ui["user_ships"][language] }</div>
+        <div class="rotated-text-container">
+          <div class="user-or-opponent">{ ui["user_ships"][language] }</div>
+        </div>
 
         <!-- TABLE with USER's SHIPS -->
         <table class="board">
@@ -1718,7 +1730,9 @@
 
       {#if isGameOn && curGame === gameId}              
           <div class="opponent" transition:fade="{ {delay: 100, duration: 500} }">
-              <h3 class="user-or-opponent">{ ui["opponent_ships"][language] }</h3>
+            <div class="rotated-text-container">
+              <div class="user-or-opponent">{ ui["opponent_ships"][language] }</div>
+            </div>
 
               <!-- TABLE with OPPONENT's SHIPS -->
               <table class="board">
