@@ -1304,7 +1304,7 @@
         /* flex-wrap: wrap;         */
         /* flex-wrap: wrap-reverse; */
         justify-content: center;
-        align-items: flex-end;
+        align-items: flex-start;
 
         padding-left: .5rem;
         padding-right: .5rem;
@@ -1429,14 +1429,93 @@
         opacity: 0;
     }
 
+    @media (orientation: landscape) and (max-width: 900px) {
+      .board-cell { 
+        width: 4vh;
+        height: 4vh;
+      }          
+    }
+
     @media (orientation: portrait) {
       .container {
         display: flex;
         flex-direction: column;
+        /* justify-content: flex-start;
+        align-items: center; */
         justify-content: flex-start;
+        align-items: center;      
+      }
+
+      .left-or-top {
+        width: 100%;
+        margin-left: 1.5rem;
+
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
         align-items: center;
       }
+
+      .right-or-bottom {
+        width: 100%;
+
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+      }
+
+      .user {
+        margin: 0 auto;
+        display: flex;
+        /* flex-direction: column; */
+        flex-direction: row;
+        align-items: center;     
+        justify-content: center;   
+
+        /* width: 50vw; */
+      }
+
+      .user-or-opponent {
+        /* position: absolute; */
+        /* position: relative; */
+
+        /* left: -0.8rem;
+        top: 50%; */
+        /* width: 100%; */
+        /* width: 80%; */
+
+        transform-origin: left;
+        transform: rotate(-90deg) translateX(-50%);
+      }      
+    }    
+
+    @media (orientation: portrait) and (max-width: 730px) {
+      .board-cell { 
+        width: 4.5vw;
+        height: 4.5vw;
+      }          
+
+      .info-text {
+        font-size: .8rem;
+      }
+
+      .who-plays-first {
+        font-size: .9rem;
+      }
+
+      .ship-list-table {        
+        font-size: .8rem;
+      }      
     }
+
+    @media (orientation: portrait) and (max-width: 500px) {
+      .board-cell { 
+        width: 6.5vw;
+        height: 6.5vw;
+      }          
+    }    
+
+
 
     /* @media (max-width: 950px) {
       .container {
