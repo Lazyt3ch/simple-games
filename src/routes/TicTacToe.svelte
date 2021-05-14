@@ -554,6 +554,11 @@
         font-weight: bolder;
     }
 
+    .info-text {
+      font-weight: 400;
+      font-size: 1.2rem;
+    }
+
     .center {
         margin-left: auto;
         margin-right: auto;
@@ -650,7 +655,7 @@
 </div>
 
 <!-- INFO TEXT -->
-<h2 class="center unselectable"> 
+<h2 class="info-text center unselectable"> 
     <!-- Do not remove &nbsp; -->
     { infoText } &nbsp;
 </h2>
