@@ -1139,7 +1139,8 @@
     .board {
         border-collapse: collapse;  
         margin-top: .5rem;
-        margin-bottom: .5em;
+        margin-bottom: .5rem;
+        /* margin-left: 1rem; */
         background-color: inherit;     
         padding: 0;
     }    
@@ -1319,6 +1320,7 @@
 
       /* margin-top: .5rem; */
       margin-right: 1rem;
+      margin-left: 1rem;
     }
 
     .right-or-bottom {
@@ -1329,6 +1331,8 @@
       flex-direction: column;
       /* justify-content: flex-start;
       align-items: flex-end; */
+
+      margin-left: 1rem;
     }
 
     .user-or-opponent {
@@ -1423,14 +1427,14 @@
         opacity: 0;
     }
 
-    @media (max-width: 900px) {
+    @media (max-width: 950px) {
       .container {
         margin-top: 0;
 
         padding-left: 1.5rem;
 
         display: flex;
-        flex-direction: column;
+        flex-direction: row;
         flex-wrap: wrap-reverse;        
         /* flex-wrap: wrap; */
       }
@@ -1477,7 +1481,20 @@
       }         
     }
 
-    @media (max-height: 520px) {
+    @media (max-width: 600px) {
+      .container {
+        margin-top: 0;
+
+        padding-left: 1rem;
+
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap-reverse;        
+        /* flex-wrap: wrap; */
+      }
+    }
+
+    @media (max-height: 450px) {
       .container {
         display: flex;
         flex-direction: row;
