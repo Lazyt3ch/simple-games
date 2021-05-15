@@ -1,7 +1,13 @@
+<svelte:head>
+    <title>
+        {`Simple Games | ${gameName[language]}`}
+    </title>
+</svelte:head>
+
 <script>    
     import { fade } from 'svelte/transition';
     
-    import { gameId, uiStrings as ui } from '../ui/TicTacToe.js';
+    import { gameId, gameName, uiStrings as ui } from '../ui/TicTacToe.js';
 
     // currentGame is a bugfix that disables transitions when routing
     import { globalLanguage, currentGame } from '../stores.js';
