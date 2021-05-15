@@ -1,3 +1,7 @@
+<svelte:head>
+	<html lang={language || 'en'} />
+</svelte:head>
+
 <script>
 	import Router from 'svelte-spa-router';
 	import {push} from 'svelte-spa-router'	
@@ -20,6 +24,7 @@
 
 	const unsubscribe = globalLanguage.subscribe(value => {
 		language = value;        
+		console.log("SUB: language =", language);
 	});    
 
 	let curGame;
@@ -40,6 +45,7 @@
 	
 	function updateGlobalLanguage() {
 		globalLanguage.update(() => language);
+		console.log('language =', language);
 	}
 
 	function updateCurrentGame() {
