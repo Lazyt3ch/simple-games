@@ -1,6 +1,6 @@
 <script>
 	import Router from 'svelte-spa-router';
-	import {push, pop, replace} from 'svelte-spa-router'	
+	import {push} from 'svelte-spa-router'	
 
 	import { languages, uiStrings as ui } from './ui/App.js';
 	import { uiStrings as homeUi } from './ui/Home.js';
@@ -15,7 +15,6 @@
 
 	import { gameId as gameId1, gameName as gameName1 } from './ui/TicTacToe.js';
 	import { gameId as gameId2, gameName as gameName2 } from './ui/Battleship.js';
-
 
   let language;
 
@@ -55,9 +54,6 @@
 	$: {
 		if (selectedGameId !== null) updateCurrentGame();
 	}
-
-	// let gameIndex = null;
-	// let game = null;
 
 	let games = [
 		{ id: 'home', name: ui['select_game'] },
