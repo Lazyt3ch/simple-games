@@ -1,6 +1,6 @@
 <svelte:head>
     <title>
-        {`Simple Games | ${gameName[language]}`}
+        {`${appUi['site_name'][language]} | ${gameName[language]}`}
     </title>
 </svelte:head>
 
@@ -8,6 +8,7 @@
     import { fade } from 'svelte/transition';
     
     import { gameId, gameName, uiStrings as ui } from '../ui/TicTacToe.js';
+    import { uiStrings as appUi } from '../ui/App.js';
 
     // currentGame is a bugfix that disables transitions when routing
     import { globalLanguage, currentGame } from '../stores.js';

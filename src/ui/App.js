@@ -12,4 +12,9 @@ export const uiStrings = {
         en: 'Select a game...',
         ru: 'Выберите игру...',
     },
+    'site_name':
+    {
+        en: 'Simple Games',
+        ru: 'Простые игры',
+    }
 }
