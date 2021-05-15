@@ -547,6 +547,8 @@
     flex-direction: column;
     justify-content: center;
     align-items: center;
+
+    /* width: 30rem; */
   }
 
     table {
@@ -577,10 +579,12 @@
     }
 
     .info-text {
-      width: 100%;
+      width: 20rem;
 
       font-weight: 400;
       font-size: 1.2rem;
+
+      word-wrap: normal;
     }
 
     .center {
@@ -631,6 +635,13 @@
         margin-left: auto;
         margin-right: auto;
     }    
+
+    @media (orientation: portrait) {
+        .bottom-or-right {
+            width: 100%;
+            max-width: 24rem;
+        }
+    }
 
 </style>
 
