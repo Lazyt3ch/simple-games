@@ -12,10 +12,10 @@
     "livereload": "^0.9.3",
     "rollup": "^1.20.0",
     "rollup-plugin-livereload": "^1.0.0",
+    "rollup-plugin-svelte": "^7.1.0",
     "rollup-plugin-terser": "^5.1.2"
   },
   "dependencies": {
-    "rollup-plugin-svelte": "^7.1.0",
     "sirv-cli": "^1.0.11",
     "svelte": "^3.38.2",
     "svelte-spa-router": "^2.0.0"
