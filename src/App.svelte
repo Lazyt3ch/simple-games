@@ -22,7 +22,6 @@
 		language = value;        
 	});    
 
-
 	let curGame;
 
 	const unsubscribe2 = currentGame.subscribe(value => {
@@ -144,7 +143,9 @@
 			bind:value={selectedLang} on:change={() => language = selectedLang}
 		>
 			{#each languages as lang}
-				<option value="{lang.short}"> { lang.full } </option>
+				<option value="{lang.short}"> 
+					{ lang.full } 
+				</option>
 			{/each}
 		</select>
 	</label>
