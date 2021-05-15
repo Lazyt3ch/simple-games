@@ -1,6 +1,6 @@
 <svelte:head>
     <title>
-        {`${appUi['site_name'][language]} | ${ui['home_page'][language]}`}
+        {`${ui['home_page'][language]} | ${appUi['site_name'][language]}`}
     </title>
 </svelte:head>
 
