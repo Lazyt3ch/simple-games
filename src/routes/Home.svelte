@@ -1,5 +1,12 @@
+<svelte:head>
+    <title>
+        {`${appUi['site_name'][language]} | ${ui['home_page'][language]}`}
+    </title>
+</svelte:head>
+
 <script>
     import { languages, uiStrings as ui } from '../ui/Home.js';    
+    import { uiStrings as appUi } from '../ui/App.js';
     import { globalLanguage } from '../stores.js';
 
     /* $: language = globalLanguage; */

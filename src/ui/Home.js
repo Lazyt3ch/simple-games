@@ -19,6 +19,11 @@ export const uiStrings = {
         en: "Select a game in the drop-down list (see the top-left corner).",
         ru: "Выберите игру в выпадающем списке (в левом верхнем углу экрана).",
     },
+    'home_page':
+    {
+        en: 'Home Page',
+        ru: 'Главная страница',
+    }
     
 
 
