@@ -1307,8 +1307,8 @@
     }
 
     .container {
-        /* width: 100%; */
-        width: 97%;
+        width: 100%;
+        /* width: 97%; */
         /* max-width: 60em; */
         margin-top: 0.5rem;
         margin-bottom: 1rem;
@@ -1518,10 +1518,12 @@
         transform: rotate(-90deg) translateX(-50%);
 
         width: 10rem;
+        left: 20px;
       }      
     }    
 
-    @media (orientation: portrait) and (max-width: 730px) {
+    /* @media (orientation: portrait) and (max-width: 730px) { */
+    @media (orientation: portrait) and (max-width: 800px) {
       .board-cell { 
         width: 3.5vh;
         height: 3.5vh;
