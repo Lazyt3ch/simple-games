@@ -1153,7 +1153,8 @@
         background-color: inherit;     
         padding: 0;
 
-        margin: .5rem auto .5rem auto;
+        /* margin: .5rem auto .5rem auto; */
+        margin: .5rem;
     }    
 
     .board-cell { /* any cells, including header cells */
@@ -1362,7 +1363,8 @@
     .user, .opponent {
     /* .opponent { */
         display: block;
-        min-width: 400px;
+        /* min-width: 400px; */
+        min-width: 320px;
     }
 
     .info-text {
@@ -1501,24 +1503,31 @@
         width: 1.2rem;
         height: 10rem;
 
-        position: relative;
+        /* position: relative; */
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
       }
 
       .user-or-opponent {
-        position: absolute;
+        /* position: absolute; */
         /* position: relative; */
 
         /* left: -0.8rem;
         top: 50%; */
         /* width: 100%; */
         /* width: 80%; */
-        top: 50%;
+        /* top: 50%; */
 
         transform-origin: left;
-        transform: rotate(-90deg) translateX(-50%);
+        transform: rotate(-90deg) translateX(-50%) translateY(400%);
+        /* transform: rotate(-90deg); */
 
         width: 10rem;
-        left: 20px;
+        /* left: 20px; */
+        /* left: 5vw; */
+        /* left: 0; */
       }      
     }    
 
@@ -1544,6 +1553,28 @@
         font-size: .8rem;
       }      
     }
+
+    @media (orientation: portrait) and (max-height: 900px) {
+      .board-cell { 
+        /* width: 3.5vh;
+        height: 3.5vh; */
+        width: 2.8vh;
+        height: 2.8vh;
+      }          
+
+      .info-text {
+        /* font-size: .8rem; */
+        font-size: .8rem;
+      }
+
+      .who-plays-first {
+        font-size: .9rem;
+      }
+
+      .ship-list-table {        
+        font-size: .8rem;
+      }      
+    }    
 
     /* @media (orientation: portrait) and (max-width: 500px) {
       .board-cell { 
