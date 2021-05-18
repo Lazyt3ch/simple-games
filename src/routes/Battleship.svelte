@@ -1525,12 +1525,15 @@
     /* @media (orientation: portrait) and (max-width: 730px) { */
     @media (orientation: portrait) and (max-width: 800px) {
       .board-cell { 
-        width: 3.5vh;
-        height: 3.5vh;
+        /* width: 3.5vh;
+        height: 3.5vh; */
+        width: 3.3vh;
+        height: 3.3vh;
       }          
 
       .info-text {
-        font-size: .8rem;
+        /* font-size: .8rem; */
+        font-size: 1rem;
       }
 
       .who-plays-first {
