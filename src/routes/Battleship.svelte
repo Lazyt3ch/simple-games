@@ -92,18 +92,14 @@
     let totalWidth = dataWidth + 1;
 
     // *********** cells *************
-    // const OUTSIDE = 'OUTSIDE';
-    // const EMPTY = 'EMPTY';
-    // const SHIP = 'SHIP';    
-    // const HIT = 'HIT';
-    // const SUNK = 'SUNK';
-    // const WATER = 'WATER';
+    // NOTE: Do not replace these numbers with strings!!!
     const OUTSIDE = -1;
     const EMPTY = 0;
     const SHIP = 1;    
     const HIT = 2;
     const SUNK = 3;
     const WATER = 5;    
+    // NOTE: Do not replace these numbers with strings!!!
 
     const USERBOARD = 'USERBOARD';
     const OPPOBOARD = 'OPPOBOARD';
@@ -288,7 +284,6 @@
             makeReactive(OPPOBOARD);
         } else if (cell === SHIP) {      
             oppoBoard[row][col] = HIT;    
-            // hitCells.push([row, col]);
             if (isSunk(row, col, oppoBoard, OPPOBOARD)) {
                 info = 'oppo_ship_sunk';
                 oppoShipCount--;
@@ -691,10 +686,10 @@
 
         if (userBoard[row][col] === SHIP) { // Was empty-cell, now ship-cell
             headMidTail[1] = headMidTail[0] + headMidTail[2] + 1; // More ships of this size
-            headMidTail[0] = -headMidTail[0];   // Less ships of this size
-            headMidTail[2] = -headMidTail[2];   // Less ships of this size            
+            headMidTail[0] = -headMidTail[0];   // Fewer ships of this size
+            headMidTail[2] = -headMidTail[2];   // Fewer ships of this size            
         } else { // Was ship-cell, possibly inside a multi-cell ship; now empty-cell
-            headMidTail[1] = -(headMidTail[0] + headMidTail[2] + 1); // Less ships of this size
+            headMidTail[1] = -(headMidTail[0] + headMidTail[2] + 1); // Fewer ships of this size
         }
 
         for (let i = 0; i < 3; i++) { // head (if any), mid (new), tail (if any)
@@ -946,8 +941,6 @@
                     }                    
                 }
 
-                // let isMisfit = false;
-
                 if (!isMisfit) {
                     // Supposedly, the ship is competely within the board.
                     // Now we need to check if it touches or intersects with any other ship.
@@ -975,7 +968,6 @@
             }
         }
 
-        // isReadyToPlay = true;
         isOppoBoardReady = true;
     }
 
@@ -993,8 +985,6 @@
 
         let oppoTurn = true;
 
-        // let userMoveCount, oppoMoveCount;
-
         highlighted = false;        
 
         flashing = null;
@@ -1010,9 +1000,6 @@
         isGameOn = false;
 
         info = 'position_ships';
-
-        // userShips = [];
-        // globalToBePositioned = 0;
 
         // testPositionUserShips(); // for test purposes only
     }
@@ -1091,7 +1078,6 @@
     .ship-list-and-who-plays-first {
         display: block;        
         max-width: 25rem;
-        /* float: right; */
     }
 
     .who-plays-first {
@@ -1147,17 +1133,14 @@
     /* Board (table) */
     .board {
         border-collapse: collapse;  
-        /* margin-top: .5rem;
-        margin-bottom: .5rem; */
-        /* margin-left: 1rem; */
         background-color: inherit;     
-        padding: 0;
 
-        /* margin: .5rem auto .5rem auto; */
+        padding: 0;
         margin: .5rem;
     }    
-
-    .board-cell { /* any cells, including header cells */
+    
+    /* any cells, including header cells */
+    .board-cell { 
         width: 35px;
         height: 35px;
         text-align: center;
@@ -1168,8 +1151,6 @@
     }
 
     .whose-turn {
-        /* border-color: greenyellow;
-        border-width: 2px; */
         outline-color: greenyellow;
         outline-width: 2px;
     }
@@ -1201,7 +1182,6 @@
         background-color: blue;
         transition: color 800ms linear 50ms;
     }
-
 
     .sunk-cell {
         background-color: brown;
@@ -1254,31 +1234,7 @@
         outline: yellow solid 4px;
     }
 
-    /* .onclick {
-        outline: yellow solid 4px;
-    }     */
-
-    .user {
-        /* margin-right: 1rem; */
-        /* margin-top: 0; */
-
-        position: relative;
-
-        /* display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center; */
-    }
-
-    .opponent {
-        /* margin-top: .5rem; */
-        margin-right: 1rem;
-
-        position: relative;
-    }    
-
-
-
+    /* Ships counting table */
     .ships-ready {
         background-color: lightgreen;
         color: blue;
@@ -1297,6 +1253,7 @@
         font-weight: bold;
     }    
 
+
     .center {
         margin-left: auto;
         margin-right: auto;
@@ -1310,94 +1267,68 @@
     .container {
         width: 100%;
         /* width: 97%; */
-        /* max-width: 60em; */
         margin-top: 0.5rem;
         margin-bottom: 1rem;
-
-        display: flex;
-        flex-direction: row;
-        /* flex-wrap: wrap;         */
-        /* flex-wrap: wrap-reverse; */
-        justify-content: center;
-        align-items: flex-start;
 
         padding-left: .5rem;
         padding-right: .5rem;
 
-        /* position: relative; */
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        align-items: flex-start;
     }
 
     .left-or-top {
-      position: relative;
+      margin-left: 1rem;
+      margin-right: 1rem;
 
       display: flex;
       flex-direction: column;      
-      /* justify-content: flex-start;
-      align-items: flex-end; */
-
-      /* margin-top: .5rem; */
-      margin-right: 1rem;
-      margin-left: 1rem;
     }
 
     .right-or-bottom {
-      /* min-width: 26rem; */
-      /* min-width: 400px; */
+      margin-left: 1rem;
 
       display: flex;
       flex-direction: column;
-      /* justify-content: flex-start;
-      align-items: flex-end; */
-
-      margin-left: 1rem;
     }
 
-    .user-or-opponent {
-        text-align: center;
-        margin: 0;
+    .whose-ships {
+      text-align: center;
+      margin: 0;
 
-        font-weight: 600;
-        font-size: 1rem;
+      font-weight: 600;
+      font-size: 1rem;
     }
 
     .user, .opponent {
-    /* .opponent { */
-        display: block;
-        /* min-width: 400px; */
-        min-width: 320px;
+      display: block;
+      min-width: 320px;
     }
 
     .info-text {
-        font-size: 1rem;
-        font-weight: normal;
-        font-family: Arial, Helvetica, sans-serif;
-        color: black;
-        margin-top: .5rem;
-        max-width: 25rem;
-        text-align: left;
+      font-size: 1rem;
+      font-weight: normal;
+      font-family: Arial, Helvetica, sans-serif;
+      color: black;
+      margin-top: .5rem;
+      max-width: 25rem;
+      text-align: left;
     }
 
     .unselectable {
-        -moz-user-select: -moz-none;
-        -khtml-user-select: none;
-        -webkit-user-select: none;
-        -o-user-select: none;
-        user-select: none;
+      -moz-user-select: none;
+      -khtml-user-select: none;
+      -webkit-user-select: none;
+      -o-user-select: none;
+      user-select: none;
     }        
 
     .buttons {
       display: flex;
       flex-direction: row;      
     }
-
-    /* .flex {
-      width: 100%;
-
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-    } */
 
     .limited-width {
       margin: .5rem auto;
@@ -1408,7 +1339,8 @@
       background-color: lightgray;
       color: navy;
       font-weight: 600;
-      height: 2rem;
+
+      min-height: 2rem;
     }
 
     .cool-button:nth-child(2) {
@@ -1447,13 +1379,7 @@
     }
 
     @media (orientation: landscape) and (max-width: 900px) {
-      /* .user {
-        margin-left: 1rem;
-      } */
-
       .board-cell { 
-        /* width: 4vh;
-        height: 4vh; */
         width: 3.5vw;
         height: 3.5vw;
       }          
@@ -1463,8 +1389,6 @@
       .container {
         display: flex;
         flex-direction: column;
-        /* justify-content: flex-start;
-        align-items: center; */
         justify-content: flex-start;
         align-items: center;      
       }
@@ -1491,57 +1415,36 @@
       .user, .opponent {
         margin: 0 auto;
         display: flex;
-        /* flex-direction: column; */
         flex-direction: row;
         align-items: center;     
         justify-content: flex-start;   
-
-        /* width: 50vw; */
       }
 
       .rotated-text-container {
         width: 1.2rem;
         height: 10rem;
 
-        /* position: relative; */
         display: flex;
         flex-direction: column;
         justify-content: center;
         align-items: center;
       }
 
-      .user-or-opponent {
-        /* position: absolute; */
-        /* position: relative; */
-
-        /* left: -0.8rem;
-        top: 50%; */
-        /* width: 100%; */
-        /* width: 80%; */
-        /* top: 50%; */
-
+      .whose-ships {
         transform-origin: left;
         transform: rotate(-90deg) translateX(-50%) translateY(400%);
-        /* transform: rotate(-90deg); */
 
         width: 10rem;
-        /* left: 20px; */
-        /* left: 5vw; */
-        /* left: 0; */
       }      
     }    
 
-    /* @media (orientation: portrait) and (max-width: 730px) { */
     @media (orientation: portrait) and (max-width: 800px) {
       .board-cell { 
-        /* width: 3.5vh;
-        height: 3.5vh; */
         width: 3.3vh;
         height: 3.3vh;
       }          
 
       .info-text {
-        /* font-size: .8rem; */
         font-size: 1rem;
       }
 
@@ -1556,14 +1459,11 @@
 
     @media (orientation: portrait) and (max-height: 900px) {
       .board-cell { 
-        /* width: 3.5vh;
-        height: 3.5vh; */
         width: 2.8vh;
         height: 2.8vh;
       }          
 
       .info-text {
-        /* font-size: .8rem; */
         font-size: .8rem;
       }
 
@@ -1576,108 +1476,12 @@
       }      
     }    
 
-    /* @media (orientation: portrait) and (max-width: 500px) {
+    /* @media (orientation: portrait) and (max-height: 500px) {
       .board-cell { 
         width: 6.5vw;
         height: 6.5vw;
       }          
     }     */
-
-
-
-    /* @media (max-width: 950px) {
-      .container {
-        margin-top: 0;
-
-        padding-left: 1.5rem;
-
-        display: flex;
-        flex-direction: row;
-        flex-wrap: wrap-reverse;        
-      }
-
-      .left-or-top {
-        margin-top: 0;
-        margin-right: 0;
-      }
-
-      .user-or-opponent {
-        position: absolute;
-
-        left: -0.8rem;
-        top: 50%;
-
-        transform-origin: left;
-        transform: rotate(-90deg) translateX(-50%);
-      }
-
-      .info-text {
-        font-size: .9rem;
-      }
-
-      .who-plays-first {
-        font-size: .9rem;
-      }
-
-      .ship-list-table {        
-        font-size: .9rem;
-      }
-
-      .user, .opponent {
-        display: block;
-        min-width: 300px;
-      }      
-
-      .board-cell { 
-        width: 25px;
-        height: 25px;
-      }         
-    } */
-
-    /* @media (max-width: 600px) {
-      .container {
-        margin-top: 0;
-
-        padding-left: 1rem;
-
-        display: flex;
-        flex-direction: row;
-        flex-wrap: wrap-reverse;        
-      }
-    } */
-
-    /* @media (max-height: 800px) {
-      .container {
-        display: flex;
-        flex-direction: row;
-      }
-      
-      .user, .opponent {
-        display: block;
-        min-width: 75vh;
-      }      
-
-      .board-cell { 
-        width: 4vh;
-        height: 4vh;
-      }      
-
-      .info-text {
-        font-size: .8rem;
-      }      
-    }     */
-
-    /* @media (max-width: 450px) {
-      .user, .opponent {
-        display: block;
-        min-width: 350px;
-      }      
-
-      .board-cell { 
-        width: 30px;
-        height: 30px;
-      }      
-    } */
 
 </style>
 
@@ -1691,7 +1495,7 @@
 
       <div class="user">
         <div class="rotated-text-container">
-          <div class="user-or-opponent">{ ui["user_ships"][language] }</div>
+          <div class="whose-ships">{ ui["user_ships"][language] }</div>
         </div>
 
         <!-- TABLE with USER's SHIPS -->
@@ -1714,7 +1518,7 @@
 
       {#if isGameOn && curGame === gameId}
         <!-- BUTTON -->
-        <div class="limited-width flex">
+        <div class="limited-width">
           <button class="cool-button" on:click={restartGame}>
             { ui['restart_game'][language] }
           </button>     
@@ -1789,7 +1593,7 @@
       {#if isGameOn && curGame === gameId}              
           <div class="opponent" transition:fade="{ {delay: 100, duration: 500} }">
             <div class="rotated-text-container">
-              <div class="user-or-opponent">{ ui["opponent_ships"][language] }</div>
+              <div class="whose-ships">{ ui["opponent_ships"][language] }</div>
             </div>
 
               <!-- TABLE with OPPONENT's SHIPS -->
