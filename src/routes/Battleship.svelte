@@ -1476,12 +1476,16 @@
       }      
     }    
 
-    /* @media (orientation: portrait) and (max-height: 500px) {
+    @media (orientation: landscape) and (max-height: 500px) {
       .board-cell { 
-        width: 6.5vw;
-        height: 6.5vw;
+        width: 6vh;
+        height: 6vh;
       }          
-    }     */
+
+      .info-text {
+        font-size: .8rem;
+      }
+    }    
 
 </style>
 
